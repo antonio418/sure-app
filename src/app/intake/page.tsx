@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu } from 'lucide-react';
+import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key } from 'lucide-react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import dynamic from 'next/dynamic';
@@ -62,6 +62,7 @@ export default function IntakePortal() {
   const [reportLanguage, setReportLanguage] = useState(uiLanguage || 'es');
   const [files, setFiles] = useState<File[]>([]);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [vipToken, setVipToken] = useState('');
   
   const [status, setStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -110,6 +111,23 @@ export default function IntakePortal() {
     try {
       setStatus('uploading');
       setErrorMessage('');
+
+      // 0. Validar Cupón VIP
+      if (!vipToken.trim()) {
+        throw new Error("Se requiere un código de acceso VIP válido.");
+      }
+      
+      addLog("Validando credenciales VIP...");
+      const tokenRes = await fetch('/api/validate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: vipToken, email: email })
+      });
+      const tokenData = await tokenRes.json();
+      if (!tokenRes.ok) {
+        throw new Error(tokenData.error || "Código de acceso VIP inválido.");
+      }
+      addLog(`Acceso concedido para: ${tokenData.company}`);
 
       const safeEmail = email.replace(/[^a-zA-Z0-9]/g, '_');
       const safePhone = phone.replace(/[^a-zA-Z0-9+]/g, '');
@@ -297,6 +315,19 @@ export default function IntakePortal() {
         <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
           
           <div className="space-y-4">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl mb-6 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <label className="block text-sm font-bold text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-2">
+                <Key className="w-4 h-4" /> VIP Access Token
+              </label>
+              <input 
+                type="text" 
+                required
+                value={vipToken}
+                onChange={(e) => setVipToken(e.target.value.toUpperCase())}
+                placeholder="Ingresa tu código único de invitación..."
+                className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white font-mono font-bold tracking-widest uppercase focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all shadow-inner"
+              />
+            </div>
             <div>
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_email')}</label>
               <input 
@@ -437,8 +468,8 @@ export default function IntakePortal() {
           <div className="pt-4 border-t border-slate-800">
              <button 
                type="submit"
-               disabled={status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms}
-               className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
+               disabled={status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
+               className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
              >
                {status === 'uploading' ? (
                  <><Loader2 className="w-5 h-5 animate-spin" /> {t('ui.intake_btn_processing')}</>
