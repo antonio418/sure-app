@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SURE Tutorial - Slide 13</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&amp;family=Open+Sans:wght@400;600;700;italic&amp;display=swap" rel="stylesheet"/>
+<style>
+    .btn { padding: 15px 50px; background-color: #10b981; color: #000; border: none; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 40px; text-transform: uppercase;}
+    .btn:hover { transform: translateY(-2px); background-color: #059669; }
+    .survey-q { font-family: 'Open Sans', sans-serif; font-size: 20px; color: #cbd5e1; margin-bottom: 10px; font-style: italic; }
+    .survey-input { width: 100%; background-color: #0f172a; border: 1px solid #334155; color: #fff; padding: 15px; border-radius: 8px; font-size: 18px; margin-bottom: 30px; box-sizing: border-box;}
+</style>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background-color: #000000;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box;">
+
+    <div style="background-color: #1e293b; padding: 50px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); width: 800px;">
+        
+        <p class="survey-q">"On a scale of 1 to 10, how easy was it to follow Alfredo's instructions?"</p>
+        <input type="text" class="survey-input" placeholder="Your score (1-10)..." />
+
+        <p class="survey-q">"Do you feel complete confidence that your company's emails are now fully protected against SPAM and identity spoofing? (Yes/No)"</p>
+        <input type="text" class="survey-input" placeholder="Yes / No" />
+
+        <p class="survey-q">"Would you recommend this service to colleagues and friends? (Yes/No)"</p>
+        <input type="text" class="survey-input" placeholder="Yes / No" style="margin-bottom: 10px;"/>
+
+        <div style="text-align: right;">
+            <button class="btn" onclick="window.close();">END</button>
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft') { window.location.href='12.html'; }
+    });
+</script>
+</body>
+</html>

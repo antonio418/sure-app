@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-sure-bg: #050a15;
+  --color-sure-card: #0a1128;
+  --color-sure-accent: #00e5ff;
+  --color-sure-text: #cbd5e1;
+  --color-sure-subtext: #94a3b8;
+  --font-montserrat: var(--font-montserrat);
+  --font-open-sans: var(--font-open-sans);
+
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sure-accent);
+}
+
+body {
+  background-color: var(--color-sure-bg);
+  color: var(--color-sure-text);
+  font-family: var(--font-open-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), sans-serif;
+  color: #ffffff;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 229, 255, 0.1);
+}
+
+/* Animations */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); }
+}
+
+.glow-effect {
+  animation: glow 3s infinite;
+}
+
+/* Force Markdown Spacing for Screen and Print */
+.prose p {
+  margin-bottom: 1.5rem !important;
+  line-height: 1.8 !important;
+}
+.prose li {
+  margin-bottom: 0.75rem !important;
+}
+.prose h1, .prose h2, .prose h3 {
+  margin-top: 2.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+@media print {
+  .prose p {
+    margin-bottom: 1.5rem !important;
+    line-height: 1.6 !important;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+@media print {
+  @page {
+    margin: 2cm;
+    size: A4 portrait;
+  }
+  
+  html, body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Force absolute black and clear spacing on Prose */
+  .prose * {
+    color: black !important;
+  }
+  .prose strong {
+    color: black !important;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    color: black !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    page-break-after: avoid;
+  }
+  .prose p, .prose li {
+    margin-bottom: 1rem !important;
+    line-height: 1.5 !important;
+    color: black !important;
+  }
+  .prose ul, .prose ol {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Prevent cutting images or tables */
+  img, table, pre, blockquote {
+    page-break-inside: avoid;
+  }
+}

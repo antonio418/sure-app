@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SURE Tutorial - Slide 8</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&amp;family=Open+Sans:wght@400;600;700;italic&amp;display=swap" rel="stylesheet"/>
+<style>
+    .btn { padding: 15px 50px; background-color: #10b981; color: #000; border: none; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 30px; text-transform: uppercase;}
+    .btn:hover { transform: translateY(-2px); background-color: #059669; }
+</style>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background-color: #000000;" onclick="event.stopPropagation(); window.location.href='9.html'">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background-color: #0f172a; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box;">
+
+    <!-- Left Side: Instructions -->
+    <div style="flex: 1; padding-right: 40px;">
+        <div style="background-color: #1e293b; padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 22px; font-style: italic; color: #cbd5e1; line-height: 1.6; margin-top: 0;">
+                "PLEASE LOG IN TO YOUR [PROVIDER] ACCOUNT AND PRESS THE REQUIRED FIELD.<br/><br/>
+                NEXT: TAKE A PRINTSCREEN AND PASTE (CTRL V) AND PRESS CONTINUE."
+            </p>
+            
+            <div style="background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; margin-top: 30px; border-radius: 0 8px 8px 0;">
+                <p style="font-family: 'Open Sans', sans-serif; font-size: 18px; font-style: italic; font-weight: 600; color: #93c5fd; margin: 0; line-height: 1.5;">
+                    "NOTE: IF AT ANY TIME YOU HAVE A DOUBT OR FEEL INSECURE, PRESS 'CONTINUE', TAKE A PRINTSCREEN WHEREVER YOU ARE AND SEND TO US, WE WILL HELP YOU TO FIND WHAT TO DO."
+                </p>
+            </div>
+
+            <button class="btn" onclick="event.stopPropagation(); window.location.href='9.html'">CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- Right Side: Image -->
+    <div style="flex: 1; display: flex; justify-content: center;">
+        <img src="./provider_dashboard.png" alt="Provider Dashboard" style="max-width: 100%; max-height: 600px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 2px solid #334155;"/>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowRight') { window.location.href='9.html'; }
+        if (event.key === 'ArrowLeft') { window.location.href='7.html'; }
+    });
+</script>
+</body>
+</html>

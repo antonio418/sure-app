@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SURE Ecosystem - Autonomous B2B Sales</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; overflow: hidden; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .slide-container { width: 1280px; height: 720px; position: relative; overflow: hidden; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); transform-origin: center center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+    .grid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; }
+    .floating-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+    .particle { position: absolute; width: 4px; height: 4px; background: rgba(59, 130, 246, 0.4); border-radius: 50%; animation: float 15s infinite linear; }
+    @keyframes float { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) translateX(100px); opacity: 0; } }
+    .main-content { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 60px 80px; }
+    .logo-container { display: flex; align-items: center; gap: 16px; margin-bottom: 40px; }
+    .logo-icon { width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3); }
+    .logo-text { font-size: 32px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .hero-section { display: flex; align-items: flex-start; justify-content: space-between; flex: 1; }
+    .left-content { flex: 1; max-width: 580px; }
+    .title { font-size: 64px; font-weight: 800; color: white; line-height: 1.05; margin-bottom: 24px; letter-spacing: -1.5px; }
+    .title .highlight { color: #3b82f6; }
+    .subtitle { font-size: 19px; color: #94a3b8; margin-bottom: 32px; line-height: 1.6; }
+    .features { display: flex; gap: 12px; margin-bottom: 32px; }
+    .feature-item { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; color: #e2e8f0; font-size: 14px; font-weight: 600; width: 130px; }
+    .feature-icon { color: #3b82f6; font-size: 16px; }
+    .cta-button { display: inline-flex; align-items: center; gap: 12px; padding: 16px 32px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border: none; border-radius: 12px; color: white; font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); margin-bottom: 40px; }
+    .right-visual { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: -20px; }
+    .robot-container { position: relative; width: 440px; height: 440px; }
+    .robot-avatar { width: 100%; height: 100%; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0) 70%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .robot-face { font-size: 200px; color: #3b82f6; filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6)); }
+    .control-panel { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 320px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 16px; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); z-index: 25; }
+    .panel-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .panel-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    .panel-value { font-size: 16px; font-weight: 800; color: #3b82f6; }
+    .status-indicator { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
+    .floating-icons { position: absolute; top: 60px; right: 10px; display: flex; flex-direction: column; gap: 16px; }
+    .floating-icon { width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .bottom-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); }
+    .stats-bar { display: flex; gap: 64px; padding-top: 32px; border-top: 1px solid rgba(59, 130, 246, 0.2); width: 100%; margin-top: auto; }
+    .stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .stat-value { font-size: 32px; font-weight: 800; color: white; }
+    .stat-label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; }
+</style>
+</head>
+<body>
+<div class="slide-container" id="slide-container">
+<div class="grid-bg"></div>
+<div class="floating-particles" id="particles"></div>
+<div class="main-content">
+<div class="logo-container">
+<div class="logo-icon"><i class="fas fa-robot"></i></div>
+<div class="logo-text">SURE</div>
+</div>
+<div class="hero-section">
+<div class="left-content">
+<h1 class="title">SURE <span class="highlight">Ecosystem</span>:<br/>Autonomous B2B Sales</h1>
+<p class="subtitle">How to capture, educate, and convert corporate clients on autopilot. Our AI-powered system finds prospects, communicates with them, and resolves DNS issues without human intervention.</p>
+<div class="features">
+<div class="feature-item"><i class="fas fa-check-circle feature-icon"></i><span>100% Autonomous</span></div>
+<div class="feature-item"><i class="fas fa-bolt feature-icon"></i><span>Zero Manual Effort</span></div>
+<div class="feature-item"><i class="fas fa-infinity feature-icon"></i><span>Infinite Scale</span></div>
+</div>
+<button class="cta-button"><span>Explore the Ecosystem</span><i class="fas fa-arrow-right"></i></button>
+<div class="stats-bar">
+<div class="stat-item"><div class="stat-value">$0</div><div class="stat-label">Operating Cost</div></div>
+<div class="stat-item"><div class="stat-value">24/7</div><div class="stat-label">AI Monitoring</div></div>
+<div class="stat-item"><div class="stat-value">100%</div><div class="stat-label">Automation</div></div>
+</div>
+</div>
+<div class="right-visual">
+<div class="robot-container">
+<div class="robot-avatar"><div class="robot-face"><i class="fas fa-robot"></i></div></div>
+<div class="control-panel">
+<div class="panel-item"><div class="panel-label">Status</div><div class="panel-value" style="display: flex; align-items: center; gap: 8px;"><div class="status-indicator"></div><span>Active</span></div></div>
+<div class="panel-item"><div class="panel-label">Leads</div><div class="panel-value">2,847</div></div>
+<div class="panel-item"><div class="panel-label">Conv. Rate</div><div class="panel-value">18%</div></div>
+</div>
+<div class="floating-icons">
+<div class="floating-icon"><i class="fas fa-envelope"></i></div>
+<div class="floating-icon"><i class="fas fa-globe"></i></div>
+<div class="floating-icon"><i class="fas fa-shield-alt"></i></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bottom-bar"></div>
+</div>
+<script>
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 40; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+    }
+</script>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide-container');
+        if (!slide) return;
+        const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+        slide.style.transform = 'scale(' + scale + ')';
+    }
+    window.addEventListener('resize', resizeSlide);
+    resizeSlide();
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' && '2.html' !== null) window.location.href = '2.html';
+        if (e.key === 'ArrowLeft' && null !== null) window.location.href = null;
+    });
+</script>
+<div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; gap: 10px;">
+    <button onclick="window.location.href='2.html'" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">Siguiente <i class="fas fa-arrow-right"></i></button>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What happens if my electricity or internet goes down during the audit?",
+    "answer": "Don't worry. If your connection drops during the audit or payment process, your session is securely saved. You can simply return to the site and the system will detect your pending session and allow you to resume exactly where you left off without charging you again."
+  },
+  {
+    "question": "I paid but didn't receive an invoice.",
+    "answer": "All invoices are automatically generated via our Stripe Billing Portal. You can access your invoice at any time by clicking the 'Billing Portal' link in the top right corner of the dashboard, or contact our support directly to have it manually emailed to you."
+  },
+  {
+    "question": "What exactly does the SURE DNS Audit do?",
+    "answer": "The SURE DNS Audit is a forensic process that analyzes your corporate domain's MX, SPF, DKIM, and DMARC records to detect vulnerabilities that allow cybercriminals to spoof your email or cause your legitimate emails to land in clients' spam folders."
+  },
+  {
+    "question": "How long does the audit take?",
+    "answer": "The initial automated scan takes less than 10 seconds. The complete guided remediation process, where our AI visually guides you through fixing the records in your domain provider, usually takes under 5 minutes."
+  },
+  {
+    "question": "Is my data secure?",
+    "answer": "Absolutely. SURE operates on a Zero-Knowledge architecture. We do not store your passwords or intercept your email traffic. We only analyze public DNS topologies and the interface screenshots you manually provide during the session."
+  }
+]
