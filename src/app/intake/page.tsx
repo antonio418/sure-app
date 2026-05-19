@@ -125,10 +125,20 @@ export default function IntakePortal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: vipToken, email: email })
       });
-      const tokenData = await tokenRes.json();
+      
       if (!tokenRes.ok) {
-        throw new Error(tokenData.error || "Código de acceso VIP inválido.");
+        const errData = await tokenRes.json();
+        
+        let errorMsg = errData.error || t('ui.intake_err_validation');
+        if (errData.error === 'Cupón VIP inválido o no existe.') {
+          errorMsg = t('ui.intake_err_invalid_token');
+        } else if (errData.error === 'Este Cupón VIP ya ha sido utilizado o está expirado.') {
+          errorMsg = t('ui.intake_err_used_token');
+        }
+        
+        throw new Error(errorMsg);
       }
+      const tokenData = await tokenRes.json();
       addLog(`Acceso concedido para: ${tokenData.company}`);
 
       const safeEmail = email.replace(/[^a-zA-Z0-9]/g, '_');
