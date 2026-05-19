@@ -37,19 +37,9 @@ export default function AIWidget() {
         console.error(err);
       }
 
-      const greeting = fetchedName ? `Hola ${fetchedName}, ` : 'Hola, ';
-
-      let initialMessage = t('support') ? t('support.initial_msg') : `${greeting}I am the SURE Support AI. How can I help you today?`;
-      
-      if (pathname.includes('/auditoria-dns')) {
-        initialMessage = `${greeting}veo que estás revisando la seguridad de tus dominios. ¿Tienes alguna duda sobre cómo funciona la remediación o puedo ayudarte en algo más?`;
-      } else if (pathname.includes('/rma') || pathname.includes('/intake')) {
-        initialMessage = `${greeting}estoy aquí para guiarte en el proceso forense. ¿Tienes problemas cargando los documentos o necesitas entender algún resultado?`;
-      } else if (pathname.includes('/admin') || pathname.includes('/alfredo')) {
-        initialMessage = `${greeting}¿tienes alguna duda sobre los resultados de tu campaña o los reportes activos? ¿Cómo puedo ayudarte hoy?`;
-      } else {
-        initialMessage = `${greeting}¿tienes alguna duda? ¿Cómo puedo ayudarte?`;
-      }
+      const translatedGreeting = fetchedName ? `${t('support.initial_msg').split('!')[0]} ${fetchedName}! ` : '';
+      const baseMsg = t('support.initial_msg').split('!').slice(1).join('!').trim();
+      let initialMessage = translatedGreeting + (baseMsg || t('support.initial_msg'));
 
       // Keep chat history unless it's empty, in which case initialize
       if (messages.length === 0) {
@@ -213,7 +203,7 @@ export default function AIWidget() {
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="w-10 h-10 bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center hover:bg-slate-600 transition-colors shrink-0"
-              title="Adjuntar captura"
+              title="Attach Image"
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -223,7 +213,7 @@ export default function AIWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               onPaste={handlePaste}
-              placeholder={attachedImage ? "Añade un comentario..." : t('support') ? t('support.placeholder') : 'Escribe o pega una imagen...'}
+              placeholder={attachedImage ? "Add comment..." : t('support.placeholder')}
               className="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-3 h-10 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
             />
             <button 
