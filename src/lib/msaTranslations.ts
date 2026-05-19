@@ -64,7 +64,7 @@ export const msaTranslations: Record<string, any> = {
     p5: "5. Lei Aplicável: Este Acordo será regido pelas leis e jurisdição da República da Lituânia."
   },
   fr: {
-    title: "ACCORD CADRE DE SERVICES MÉDICO-LÉGAUX (Conditions de Contrat)",
+    title: "ACCORD CADRE DE SERVICES FORENSIQUES (Conditions de Contrat)",
     parties: "• CLIENT : {{CLIENT}}\n• PRESTATAIRE : MB PROCDI",
     p1: "1. Portée des Services : MB Procdi s'engage à fournir une analyse d'intelligence autonome multi-agents (RMA) sur les documents soumis par le Client via sa plateforme SURE Forensics. Le résultat de ce service est un « Certificat de Risque B2B » détaillant les anomalies potentielles, les asymétries contractuelles et les incohérences techniques.",
     p2: "2. Limitation de Responsabilité et Clause de « Bonne Foi » :\nCLAUSE CRITIQUE : Le Certificat de Risque B2B est généré de manière autonome et de « Bonne Foi » par des algorithmes d'intelligence artificielle, basés sur le croisement de données réseau, l'analyse sémantique et des matrices de probabilité.\nMB Procdi (entité opérationnelle de la plateforme SURE Forensics) est un Fournisseur d'Intelligence Opérationnelle, et non un conseiller financier enregistré, un cabinet d'avocats ou une entité réglementaire.",

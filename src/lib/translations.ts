@@ -265,7 +265,7 @@ export const translations = {
     },
     support: {
       title: "Support SURE",
-      initial_msg: "Bonjour! Je suis l'IA de support SURE. Avez-vous des questions concernant votre session, les tarifs ou le processus médico-légal?",
+      initial_msg: "Bonjour! Je suis l'IA de support SURE. Avez-vous des questions concernant votre session, les tarifs ou le processus forensique?",
       placeholder: "Tapez votre question..."
     },
     dns_results: {
@@ -286,9 +286,9 @@ export const translations = {
       alert_badge: "Alerte de Risque sur la Chaîne d'Approvisionnement",
       hero_title_1: "Sur le point d'effectuer une opération commerciale avec un",
       hero_title_2: "Fournisseur ou Client inconnu?",
-      hero_subtitle: "Un faux reçu d'entrepôt ou un document intercepté peut vous ruiner. Nous auditons votre fournisseur ou client avec l'IA Médicolégale en 10 minutes en extrayant des renseignements du Deep Web.",
+      hero_subtitle: "Un faux reçu d'entrepôt ou un document intercepté peut vous ruiner. Nous auditons votre fournisseur ou client avec l'IA Forensique en 10 minutes en extrayant des renseignements du Deep Web.",
       cta_audit_now: "Auditer Maintenant",
-      roi_title_1: "L'Écosystème Médicolégal",
+      roi_title_1: "L'Écosystème Forensique",
       roi_title_2: "SURE",
       roi_subtitle: "Ne risquez pas votre entreprise pour économiser 50$. Si votre conteneur coûte 40 000$, notre analyse représente 0,12% du total. Mieux vaut ne pas opérer à l'aveugle.",
       trad_title: "Le Modèle Traditionnel",
