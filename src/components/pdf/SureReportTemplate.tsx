@@ -19,6 +19,30 @@ Font.register({
   ]
 });
 
+// Register Cyrillic font
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: '/fonts/Roboto-Regular.ttf', fontWeight: 'normal' }
+  ]
+});
+
+// Register Devanagari font
+Font.register({
+  family: 'NotoSansDevanagari',
+  fonts: [
+    { src: '/fonts/NotoSansDevanagari-Regular.ttf', fontWeight: 'normal' }
+  ]
+});
+
+// Register CJK font
+Font.register({
+  family: 'NotoSansSC',
+  fonts: [
+    { src: '/fonts/NotoSansSC-Regular.otf', fontWeight: 'normal' }
+  ]
+});
+
 const styles = StyleSheet.create({
   // COVER PAGE STYLES
   coverPage: {
@@ -779,8 +803,16 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
     }))
   };
 
-  // If the language is Arabic, we apply the Cairo font and set the text direction
-  const pageStyleOverrides = isArabic ? { fontFamily: 'Cairo', textAlign: 'right' as const } : {};
+  let pageStyleOverrides: any = {};
+  if (isArabic) {
+    pageStyleOverrides = { fontFamily: 'Cairo', textAlign: 'right' };
+  } else if (isRussian) {
+    pageStyleOverrides = { fontFamily: 'Roboto' };
+  } else if (isChinese) {
+    pageStyleOverrides = { fontFamily: 'NotoSansSC' };
+  } else if (isHindi) {
+    pageStyleOverrides = { fontFamily: 'NotoSansDevanagari' };
+  }
 
   return (
     <Document title={`Reporte SURE - ${safeData.companyName}`} author="SURE Forensics AI" creator="Antigravity">
