@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, X, Send, MinusCircle } from 'lucide-react';
+import { MessageSquare, X, Send, MinusCircle, Paperclip, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  imageBase64?: string;
 }
 
 export default function AIWidget() {
@@ -16,23 +18,46 @@ export default function AIWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Set initial localized message on mount or when pathname changes
   useEffect(() => {
-    let initialMessage = t('support') ? t('support.initial_msg') : 'Hello! I am the SURE Support AI. Do you have any questions about your session, pricing, or the forensic process?';
-    
-    if (pathname.includes('/auditoria-dns')) {
-      initialMessage = 'Hola! Veo que estás revisando los registros DMARC/SPF. ¿Tienes dudas sobre cómo instalar el código TXT en tu proveedor de DNS o cómo funciona la remediación de 10 minutos?';
-    } else if (pathname.includes('/rma') || pathname.includes('/intake')) {
-      initialMessage = 'Estoy aquí para ayudarte con el Intake Forense. ¿Tienes problemas cargando los documentos de tu proveedor o necesitas entender los resultados?';
-    } else if (pathname.includes('/admin') || pathname.includes('/alfredo')) {
-      initialMessage = 'Panel de Administración Activo. ¿Necesitas ayuda gestionando los leads de la campaña, ajustando plantillas o pausando el Agente Alfredo?';
-    }
+    const fetchUser = async () => {
+      let fetchedName = '';
+      try {
+        const { data } = await supabase.auth.getSession();
+        const user = data.session?.user;
+        if (user && user.user_metadata?.name) {
+          fetchedName = user.user_metadata.name.split(' ')[0];
+          setUserName(fetchedName);
+        }
+      } catch (err) {
+        console.error(err);
+      }
 
-    // Keep chat history unless it's empty, in which case initialize
-    if (messages.length === 0) {
-      setMessages([{ role: 'assistant', content: initialMessage }]);
-    }
+      const greeting = fetchedName ? `Hola ${fetchedName}, ` : 'Hola, ';
+
+      let initialMessage = t('support') ? t('support.initial_msg') : `${greeting}I am the SURE Support AI. How can I help you today?`;
+      
+      if (pathname.includes('/auditoria-dns')) {
+        initialMessage = `${greeting}veo que estás revisando la seguridad de tus dominios. ¿Tienes alguna duda sobre cómo funciona la remediación o puedo ayudarte en algo más?`;
+      } else if (pathname.includes('/rma') || pathname.includes('/intake')) {
+        initialMessage = `${greeting}estoy aquí para guiarte en el proceso forense. ¿Tienes problemas cargando los documentos o necesitas entender algún resultado?`;
+      } else if (pathname.includes('/admin') || pathname.includes('/alfredo')) {
+        initialMessage = `${greeting}¿tienes alguna duda sobre los resultados de tu campaña o los reportes activos? ¿Cómo puedo ayudarte hoy?`;
+      } else {
+        initialMessage = `${greeting}¿tienes alguna duda? ¿Cómo puedo ayudarte?`;
+      }
+
+      // Keep chat history unless it's empty, in which case initialize
+      if (messages.length === 0) {
+        setMessages([{ role: 'assistant', content: initialMessage }]);
+      }
+    };
+    
+    fetchUser();
   }, [t, pathname, messages.length]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,12 +70,40 @@ export default function AIWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAttachedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const newMsg: Message = { role: 'user', content: input };
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setAttachedImage(event.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+  };
+
+  const handleSend = async () => {
+    if ((!input.trim() && !attachedImage) || isLoading) return;
+
+    const newMsg: Message = { role: 'user', content: input, imageBase64: attachedImage || undefined };
     setMessages(prev => [...prev, newMsg]);
     setInput('');
+    setAttachedImage(null);
     setIsLoading(true);
 
     try {
@@ -80,9 +133,12 @@ export default function AIWidget() {
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+        className={`fixed bottom-6 right-6 h-14 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center px-5 gap-3 transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}
       >
-        <MessageSquare className="w-6 h-6" />
+        <MessageSquare className="w-6 h-6 shrink-0" />
+        <span className="font-bold text-sm pr-1 truncate max-w-[250px]">
+          {userName ? `Hola ${userName}, ` : 'Hola, '}¿tienes alguna duda?
+        </span>
       </button>
 
       {/* Chat Window */}
@@ -109,6 +165,11 @@ export default function AIWidget() {
                   ? 'bg-emerald-500 text-black rounded-br-none' 
                   : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
               }`}>
+                {msg.imageBase64 && (
+                  <div className="mb-2 rounded-lg overflow-hidden border border-emerald-400/30">
+                    <img src={msg.imageBase64} alt="Attached" className="max-w-[200px] max-h-[200px] object-cover" />
+                  </div>
+                )}
                 {msg.content}
               </div>
             </div>
@@ -126,22 +187,53 @@ export default function AIWidget() {
         </div>
 
         {/* Input */}
-        <div className="p-3 bg-slate-800 border-t border-slate-700 rounded-b-2xl flex gap-2">
-          <input 
-            type="text" 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={t('support') ? t('support.placeholder') : 'Type your question...'}
-            className="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
-          />
-          <button 
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="w-10 h-10 bg-emerald-500 text-black rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-400 transition-colors"
-          >
-            <Send className="w-4 h-4 ml-0.5" />
-          </button>
+        <div className="p-3 bg-slate-800 border-t border-slate-700 rounded-b-2xl flex flex-col gap-2 relative">
+          
+          {/* Image Preview */}
+          {attachedImage && (
+            <div className="relative inline-block self-start mb-1 bg-slate-900 border border-slate-700 rounded-lg p-1">
+              <img src={attachedImage} alt="Preview" className="h-16 w-auto object-contain rounded" />
+              <button 
+                onClick={() => setAttachedImage(null)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-400"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-2 items-end">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-10 h-10 bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center hover:bg-slate-600 transition-colors shrink-0"
+              title="Adjuntar captura"
+            >
+              <Paperclip className="w-5 h-5" />
+            </button>
+            <input 
+              type="text" 
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              onPaste={handlePaste}
+              placeholder={attachedImage ? "Añade un comentario..." : t('support') ? t('support.placeholder') : 'Escribe o pega una imagen...'}
+              className="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-3 h-10 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
+            />
+            <button 
+              onClick={handleSend}
+              disabled={(!input.trim() && !attachedImage) || isLoading}
+              className="w-10 h-10 bg-emerald-500 text-black rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-400 transition-colors shrink-0"
+            >
+              <Send className="w-4 h-4 ml-0.5" />
+            </button>
+          </div>
         </div>
       </div>
     </>

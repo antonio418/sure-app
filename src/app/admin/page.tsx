@@ -5,6 +5,7 @@ import { Target, ShieldAlert, Cpu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 
 export default function AdminHubPage() {
   const [loading, setLoading] = useState(true);
@@ -46,6 +47,11 @@ export default function AdminHubPage() {
     <div className="min-h-screen bg-[#050a14] text-white font-sans flex flex-col items-center justify-center p-8 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[rgba(0,229,255,0.02)] to-transparent pointer-events-none" />
+      
+      {/* Language Selector */}
+      <div className="absolute top-8 right-8 z-50">
+        <LanguageSelector />
+      </div>
       
       <div className="z-10 text-center mb-16">
         <div className="flex justify-center mb-6">

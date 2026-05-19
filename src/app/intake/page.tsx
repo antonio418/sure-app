@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import dynamic from 'next/dynamic';
 import { msaTranslations } from '@/lib/msaTranslations';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 
 const RMAPdfGenerator = dynamic(
   () => import('@/components/pdf/RMAPdfGenerator'),
@@ -59,7 +60,8 @@ export default function IntakePortal() {
   const [emailConfirm, setEmailConfirm] = useState('');
   const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
-  const [reportLanguage, setReportLanguage] = useState(uiLanguage || 'es');
+  const [reportLanguage, setReportLanguage] = useState(uiLanguage || 'en');
+  const [userContext, setUserContext] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [vipToken, setVipToken] = useState('');
@@ -154,6 +156,9 @@ export default function IntakePortal() {
         uploadedPaths.forEach(path => formData.append('filePath', path));
         formData.append('agent', agent);
         formData.append('targetLanguage', reportLanguage);
+        if (userContext.trim()) {
+           formData.append('userContext', userContext.trim());
+        }
         
         const response = await fetch('/api/analyze', { method: 'POST', body: formData });
         const data = await response.json();
@@ -180,6 +185,9 @@ export default function IntakePortal() {
       consolidatorFormData.append('agent', 'consolidator');
       consolidatorFormData.append('targetLanguage', reportLanguage);
       consolidatorFormData.append('previousReports', subordinateReports.join('\n'));
+      if (userContext.trim()) {
+         consolidatorFormData.append('userContext', userContext.trim());
+      }
       consolidatorFormData.append('email', email); // Sends copy to client via Resend
       
       const consolidatorResponse = await fetch('/api/analyze', { method: 'POST', body: consolidatorFormData });
@@ -285,8 +293,12 @@ export default function IntakePortal() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center py-20 px-6 font-open-sans">
+    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center py-20 px-6 font-open-sans relative">
       
+      <div className="absolute top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
+
       <div className="mb-12 text-center">
         <div className="flex items-center justify-center gap-3 mb-6">
           <Image src="/logo-sure.png" alt="SURE Logo" width={40} height={40} className="object-contain" />
@@ -324,7 +336,7 @@ export default function IntakePortal() {
                 required
                 value={vipToken}
                 onChange={(e) => setVipToken(e.target.value.toUpperCase())}
-                placeholder="Ingresa tu código único de invitación..."
+                placeholder="Enter your unique access code..."
                 className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white font-mono font-bold tracking-widest uppercase focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all shadow-inner"
               />
             </div>
@@ -367,7 +379,7 @@ export default function IntakePortal() {
                 type="text" 
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="John Doe o Empresa (Opcional)"
+                placeholder="John Doe or Company (Optional)"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -417,6 +429,17 @@ export default function IntakePortal() {
                  ))}
                </div>
              )}
+          </div>
+
+          <div className="pt-2">
+            <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">Specific Instructions or Context (Optional)</label>
+            <p className="text-xs text-slate-500 mb-3">If you uploaded screenshots or blurry documents, tell the AI what to look for specifically (e.g., "Pay attention to the seal in the bottom corner", "The main document is from Atyrau", etc.)</p>
+            <textarea
+              value={userContext}
+              onChange={(e) => setUserContext(e.target.value)}
+              placeholder="Type your instructions here..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors h-28 resize-none shadow-inner"
+            ></textarea>
           </div>
 
           {errorMessage && (

@@ -64,10 +64,33 @@ DYNAMIC CONTEXT BASED ON USER'S CURRENT PAGE:
 ${dynamicPersona}
     `;
 
-    const contents = messages.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    const contents = messages.map(msg => {
+      const parts: any[] = [];
+      if (msg.content) {
+        parts.push({ text: msg.content });
+      }
+      if (msg.imageBase64) {
+        const base64Data = msg.imageBase64.split(',')[1] || msg.imageBase64;
+        const mimeMatch = msg.imageBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        
+        parts.push({
+          inlineData: {
+            data: base64Data,
+            mimeType: mimeType
+          }
+        });
+      }
+      // Gemini requires at least one part
+      if (parts.length === 0) {
+        parts.push({ text: "." });
+      }
+
+      return {
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: parts
+      };
+    });
 
     const fullContents = [
       { role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${FINAL_PROMPT}` }] },
