@@ -127,7 +127,10 @@ export default function AIWidget() {
       >
         <MessageSquare className="w-6 h-6 shrink-0" />
         <span className="font-bold text-sm pr-1 truncate max-w-[250px]">
-          {userName ? `Hola ${userName}, ` : 'Hola, '}¿tienes alguna duda?
+          {userName 
+            ? `${t('support.initial_msg')?.split('!')[0] || 'Hello'} ${userName}!` 
+            : t('support.title') || 'SURE Support'
+          }
         </span>
       </button>
 
