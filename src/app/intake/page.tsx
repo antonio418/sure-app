@@ -432,12 +432,12 @@ export default function IntakePortal() {
           </div>
 
           <div className="pt-2">
-            <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">Specific Instructions or Context (Optional)</label>
-            <p className="text-xs text-slate-500 mb-3">If you uploaded screenshots or blurry documents, tell the AI what to look for specifically (e.g., "Pay attention to the seal in the bottom corner", "The main document is from Atyrau", etc.)</p>
+            <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_context_title')}</label>
+            <p className="text-xs text-slate-500 mb-3">{t('ui.intake_context_sub')}</p>
             <textarea
               value={userContext}
               onChange={(e) => setUserContext(e.target.value)}
-              placeholder="Type your instructions here..."
+              placeholder={t('ui.intake_context_placeholder')}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors h-28 resize-none shadow-inner"
             ></textarea>
           </div>
