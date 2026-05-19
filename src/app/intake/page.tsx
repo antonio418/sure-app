@@ -347,6 +347,7 @@ export default function IntakePortal() {
                 value={vipToken}
                 onChange={(e) => setVipToken(e.target.value.toUpperCase())}
                 placeholder="Enter your unique access code..."
+                autoComplete="off"
                 className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white font-mono font-bold tracking-widest uppercase focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all shadow-inner"
               />
             </div>
@@ -358,6 +359,7 @@ export default function IntakePortal() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john.doe@company.com"
+                autoComplete="off"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -369,6 +371,7 @@ export default function IntakePortal() {
                 value={emailConfirm}
                 onChange={(e) => setEmailConfirm(e.target.value)}
                 placeholder="Confirm your corporate email"
+                autoComplete="off"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -380,6 +383,7 @@ export default function IntakePortal() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 123 4567"
+                autoComplete="off"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -390,6 +394,7 @@ export default function IntakePortal() {
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="John Doe or Company (Optional)"
+                autoComplete="off"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
