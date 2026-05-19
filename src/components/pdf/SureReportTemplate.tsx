@@ -744,16 +744,29 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
   // Ensure fallback to english if language is not explicitly defined in our dictionary
   const t = pdfTranslations[language] || pdfTranslations["en"];
   const isArabic = language === 'ar';
+  const isRussian = language === 'ru';
+  const isChinese = language === 'zh';
+  const isHindi = language === 'hi';
 
-  // Helper function to strip RTL characters (Arabic, Hebrew) that break react-pdf layout engine
+  // Helper function to strip unsupported characters (Arabic, Cyrillic, CJK, Devanagari) that break react-pdf layout engine
   const sanitizeText = (text: string) => {
     if (!text) return text;
-    if (isArabic) return text; // DO NOT strip Arabic characters if the requested report is in Arabic!
-    // Strip Arabic and Hebrew blocks, then clean up any empty parentheses left behind like "()"
-    return text.replace(/[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, '')
-               .replace(/\(\s*\)/g, '')
-               .replace(/\s{2,}/g, ' ')
-               .trim();
+    let sanitized = text;
+
+    if (!isArabic) {
+      sanitized = sanitized.replace(/[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, '');
+    }
+    if (!isRussian) {
+      sanitized = sanitized.replace(/[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F]/g, '');
+    }
+    if (!isChinese) {
+      sanitized = sanitized.replace(/[\u4E00-\u9FFF\u3400-\u4DBF\u20000-\u2A6DF]/g, '');
+    }
+    if (!isHindi) {
+      sanitized = sanitized.replace(/[\u0900-\u097F]/g, '');
+    }
+
+    return sanitized.replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim();
   };
 
   const safeData = {
