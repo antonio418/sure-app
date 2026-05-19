@@ -343,11 +343,12 @@ export default function IntakePortal() {
               </label>
               <input 
                 type="text" 
+                name="client_vip_token_secure"
                 required
                 value={vipToken}
                 onChange={(e) => setVipToken(e.target.value.toUpperCase())}
                 placeholder="Enter your unique access code..."
-                autoComplete="off"
+                autoComplete="new-password"
                 className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white font-mono font-bold tracking-widest uppercase focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all shadow-inner"
               />
             </div>
@@ -355,11 +356,12 @@ export default function IntakePortal() {
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_email')}</label>
               <input 
                 type="email" 
+                name="client_contact_email_secure"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john.doe@company.com"
-                autoComplete="off"
+                autoComplete="new-password"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -367,11 +369,12 @@ export default function IntakePortal() {
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_email_confirm')}</label>
               <input 
                 type="email" 
+                name="client_contact_email_confirm_secure"
                 required
                 value={emailConfirm}
                 onChange={(e) => setEmailConfirm(e.target.value)}
                 placeholder="Confirm your corporate email"
-                autoComplete="off"
+                autoComplete="new-password"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -379,11 +382,12 @@ export default function IntakePortal() {
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_phone')}</label>
               <input 
                 type="tel" 
+                name="client_contact_phone_secure"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 123 4567"
-                autoComplete="off"
+                autoComplete="new-password"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -391,10 +395,11 @@ export default function IntakePortal() {
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_company')}</label>
               <input 
                 type="text" 
+                name="client_contact_company_secure"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="John Doe or Company (Optional)"
-                autoComplete="off"
+                autoComplete="new-password"
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
