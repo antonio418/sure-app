@@ -1,6 +1,7 @@
 export const uiTranslations: any = {
   en: {
     ui: {
+      intake_overage_warn: "You have exceeded your subscription base limit. Additional reports will be processed without interruption and billed at your discounted unit rate at the end of the billing cycle.",
       dns_audit_title: "DNS Infrastructure Audit",
       dns_audit_sub: "Discover if someone can send fake invoices from your corporate domain. In 30 seconds. No installations.",
       dns_audit_placeholder: "ex: company.com",
@@ -195,6 +196,7 @@ export const uiTranslations: any = {
   },
   es: {
     ui: {
+      intake_overage_warn: "Ha superado el límite base de su suscripción. Los reportes adicionales se procesarán sin interrupción y se facturarán a su tarifa unitaria con descuento al finalizar el ciclo.",
       dns_audit_title: "Auditoría de Infraestructura DNS",
       dns_audit_sub: "Descubre si alguien puede enviar facturas falsas desde tu dominio corporativo. En 30 segundos. Sin instalaciones.",
       dns_audit_placeholder: "ej: empresa.com",
@@ -389,6 +391,7 @@ export const uiTranslations: any = {
   },
   fr: {
     ui: {
+      intake_overage_warn: "Vous avez dépassé la limite de base de votre abonnement. Les rapports supplémentaires seront traités sans interruption et facturés à votre tarif unitaire préférentiel à la fin du cycle de facturation.",
       dns_audit_title: "Audit de l'Infrastructure DNS",
       dns_audit_sub: "Découvrez si quelqu'un peut envoyer de fausses factures depuis votre domaine. En 30 secondes. Sans installation.",
       dns_audit_placeholder: "ex: entreprise.com",
@@ -583,6 +586,7 @@ export const uiTranslations: any = {
   },
   de: {
     ui: {
+      intake_overage_warn: "Sie haben das Basislimit Ihres Abonnements überschritten. Zusätzliche Berichte werden ohne Unterbrechung bearbeitet und am Ende des Abrechnungszyklus zu Ihrem ermäßigten Einheitspreis in Rechnung gestellt.",
       dns_audit_title: "DNS-Infrastruktur-Audit",
       dns_audit_sub: "Finden Sie in 30 Sekunden heraus, ob jemand gefälschte Rechnungen über Ihre Domain senden kann. Keine Installationen.",
       dns_audit_placeholder: "z.B.: unternehmen.com",
@@ -777,6 +781,7 @@ export const uiTranslations: any = {
   },
   pt: {
     ui: {
+      intake_overage_warn: "Você ultrapassou o limite base de sua assinatura. Relatórios adicionais serão processados sem interrupção e faturados com sua taxa unitária com desconto no final do ciclo de faturamento.",
       dns_audit_title: "Auditoria de Infraestrutura DNS",
       dns_audit_sub: "Descubra se alguém pode enviar faturas falsas do seu domínio corporativo. Em 30 segundos. Sem instalações.",
       dns_audit_placeholder: "ex: empresa.com",
@@ -971,6 +976,7 @@ export const uiTranslations: any = {
   },
   zh: {
     ui: {
+      intake_overage_warn: "您已超过订阅的基本限制。其他报告将不间断地处理，并在结算周期结束时以您的折扣单价计费。",
       dns_audit_title: "DNS 基础设施审计",
       dns_audit_sub: "在 30 秒内发现是否有人可以从您的企业域名发送虚假发票。无需安装。",
       dns_audit_placeholder: "例如: company.com",
@@ -1165,6 +1171,7 @@ export const uiTranslations: any = {
   },
   ru: {
     ui: {
+      intake_overage_warn: "Вы превысили базовый лимит своей подписки. Дополнительные отчеты будут обрабатываться без перерывов и оплачиваться по вашей льготной цене за единицу в конце расчетного цикла.",
       dns_audit_title: "Аудит инфраструктуры DNS",
       dns_audit_sub: "Узнайте, может ли кто-то отправлять поддельные счета с вашего корпоративного домена. За 30 секунд. Без установок.",
       dns_audit_placeholder: "например: company.com",
@@ -1359,6 +1366,7 @@ export const uiTranslations: any = {
   },
   ar: {
     ui: {
+      intake_overage_warn: "لقد تجاوزت الحد الأساسي لاشتراكك. ستتم معالجة التقارير الإضافية دون انقطاع وسيتم فوترتها بسعر الوحدة المخفض في نهاية دورة الفوترة.",
       dns_audit_title: "تدقيق البنية التحتية لنظام DNS",
       dns_audit_sub: "اكتشف ما إذا كان بإمكان شخص ما إرسال فواتير مزيفة من نطاق شركتك. في 30 ثانية. بدون تثبيت.",
       dns_audit_placeholder: "مثال: company.com",
@@ -1553,6 +1561,7 @@ export const uiTranslations: any = {
   },
   hi: {
     ui: {
+      intake_overage_warn: "आपने अपनी सदस्यता की मूल सीमा पार कर ली है। अतिरिक्त रिपोर्टों को बिना किसी रुकावट के संसाधित किया जाएगा और बिलिंग चक्र के अंत में आपकी रियायती इकाई दर पर बिल किया जाएगा।",
       dns_audit_title: "DNS इंफ्रास्ट्रक्चर ऑडिट",
       dns_audit_sub: "पता लगाएं कि क्या कोई आपके कॉर्पोरेट डोमेन से नकली चालान भेज सकता है। 30 सेकंड में। कोई स्थापना नहीं।",
       dns_audit_placeholder: "उदाहरण: company.com",

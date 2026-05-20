@@ -15,6 +15,29 @@ import KaizenFeedback from '@/components/ui/KaizenFeedback';
 export default function RMAPage() {
   const { t, language } = useLanguage();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState<string | null>(null);
+
+  const handleBuy = async (priceId: string | null) => {
+    try {
+      setLoadingPrice(priceId || 'payg');
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to secure payment gateway.');
+    } finally {
+      setLoadingPrice(null);
+    }
+  };
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -349,9 +372,29 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$50.00</td>
                     <td className="p-6 font-mono">$50.00</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/8x2cMZgdO3K3f732mb9fW00?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy(null)} 
+                        disabled={loadingPrice === 'payg'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'payg' ? '...' : t('ui.btn_buy')}
+                      </button>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="p-6 font-bold text-white">Tier 1x5</td>
+                    <td className="p-6">Up to 5</td>
+                    <td className="p-6 font-mono text-emerald-400 font-bold">$245.00</td>
+                    <td className="p-6 font-mono">$49.00</td>
+                    <td className="p-6 font-mono">$49.00</td>
+                    <td className="p-6">
+                      <button 
+                        onClick={() => handleBuy('price_1TZ5Nu8oubYEwHxxoO7Fz58r')} 
+                        disabled={loadingPrice === 'price_1TZ5Nu8oubYEwHxxoO7Fz58r'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ5Nu8oubYEwHxxoO7Fz58r' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -359,11 +402,15 @@ export default function RMAPage() {
                     <td className="p-6">{t('ui.plan_up25')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold">$1,210.00</td>
                     <td className="p-6 font-mono">$48.40</td>
-                    <td className="p-6 font-mono">$50.00</td>
+                    <td className="p-6 font-mono">$48.40</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/dRm9ANe5G3K3f732mb9fW01?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ5tY8oubYEwHxxBdcKo5S1')} 
+                        disabled={loadingPrice === 'price_1TZ5tY8oubYEwHxxBdcKo5S1'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ5tY8oubYEwHxxBdcKo5S1' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -371,11 +418,15 @@ export default function RMAPage() {
                     <td className="p-6">{t('ui.plan_up50')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold">$2,375.00</td>
                     <td className="p-6 font-mono">$47.50</td>
-                    <td className="p-6 font-mono">$50.00</td>
+                    <td className="p-6 font-mono">$47.50</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/14A28ld1Ca8r2kh3qf9fW02?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ5zo8oubYEwHxx5yXBkBks')} 
+                        disabled={loadingPrice === 'price_1TZ5zo8oubYEwHxx5yXBkBks'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ5zo8oubYEwHxx5yXBkBks' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-emerald-500/30 hover:bg-emerald-500/5 transition-colors bg-emerald-500/10">
@@ -388,11 +439,15 @@ export default function RMAPage() {
                     <td className="p-6 text-white font-medium">{t('ui.plan_up75')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold text-lg">$3,375.00</td>
                     <td className="p-6 font-mono text-white font-bold">$45.00</td>
-                    <td className="p-6 font-mono text-white font-bold">$50.00</td>
+                    <td className="p-6 font-mono text-white font-bold">$45.00</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/28E8wJ0eQeoH0c90e39fW03?locale=${language}`} className="inline-block bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)]">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ62e8oubYEwHxxbZe59akn')} 
+                        disabled={loadingPrice === 'price_1TZ62e8oubYEwHxxbZe59akn'}
+                        className="inline-block bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ62e8oubYEwHxxbZe59akn' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -400,11 +455,15 @@ export default function RMAPage() {
                     <td className="p-6">{t('ui.plan_up100')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold">$4,250.00</td>
                     <td className="p-6 font-mono">$42.50</td>
-                    <td className="p-6 font-mono">$50.00</td>
+                    <td className="p-6 font-mono">$42.50</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/3cI7sF1iU94nbUR9OD9fW04?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ64p8oubYEwHxxKhXRM9E7')} 
+                        disabled={loadingPrice === 'price_1TZ64p8oubYEwHxxKhXRM9E7'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ64p8oubYEwHxxKhXRM9E7' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -412,11 +471,15 @@ export default function RMAPage() {
                     <td className="p-6">{t('ui.plan_up150')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold">$6,000.00</td>
                     <td className="p-6 font-mono">$40.00</td>
-                    <td className="p-6 font-mono">$50.00</td>
+                    <td className="p-6 font-mono">$40.00</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/eVqeV77Hi4O73ol1i79fW05?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ66p8oubYEwHxxHp0XPQuE')} 
+                        disabled={loadingPrice === 'price_1TZ66p8oubYEwHxxHp0XPQuE'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ66p8oubYEwHxxHp0XPQuE' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -424,11 +487,15 @@ export default function RMAPage() {
                     <td className="p-6">{t('ui.plan_up200')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold">$7,500.00</td>
                     <td className="p-6 font-mono">$37.50</td>
-                    <td className="p-6 font-mono">$50.00</td>
+                    <td className="p-6 font-mono">$37.50</td>
                     <td className="p-6">
-                      <Link href={`https://buy.stripe.com/8x2cMZf9K2FZ2kh9OD9fW06?locale=${language}`} className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
-                        {t('ui.btn_buy')}
-                      </Link>
+                      <button 
+                        onClick={() => handleBuy('price_1TZ68r8oubYEwHxxrwNikdbj')} 
+                        disabled={loadingPrice === 'price_1TZ68r8oubYEwHxxrwNikdbj'}
+                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                      >
+                        {loadingPrice === 'price_1TZ68r8oubYEwHxxrwNikdbj' ? '...' : t('ui.btn_buy')}
+                      </button>
                     </td>
                   </tr>
                 </tbody>

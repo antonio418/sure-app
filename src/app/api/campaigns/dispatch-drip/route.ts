@@ -4,7 +4,15 @@ import { Resend } from 'resend';
 
 export const maxDuration = 60; 
 
+export async function GET(req: NextRequest) {
+  return handleDispatch(req);
+}
+
 export async function POST(req: NextRequest) {
+  return handleDispatch(req);
+}
+
+async function handleDispatch(req: NextRequest) {
   try {
     const resendKey = process.env.RESEND_API_KEY;
 

@@ -509,6 +509,16 @@ export default function IntakePortal() {
           </div>
 
           <div className="pt-4 border-t border-slate-800">
+             {/* SOFT LIMIT WARNING - Mocked state, connect to actual Stripe usage backend when ready */}
+             {true && (
+               <div className="mb-6 bg-amber-500/10 border border-amber-500/50 text-amber-400 p-4 rounded-xl flex items-start gap-3 text-sm shadow-inner">
+                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                 <p className="leading-relaxed font-medium">
+                   {t('ui.intake_overage_warn')}
+                 </p>
+               </div>
+             )}
+
              <button 
                type="submit"
                disabled={status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
