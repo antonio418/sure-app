@@ -389,11 +389,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$49.00</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ5Nu8oubYEwHxxoO7Fz58r')} 
-                        disabled={loadingPrice === 'price_1TZ5Nu8oubYEwHxxoO7Fz58r'}
+                        onClick={() => handleBuy('price_1TZ8z28oubYEwHxx4DnD8gdk')} 
+                        disabled={loadingPrice === 'price_1TZ8z28oubYEwHxx4DnD8gdk'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ5Nu8oubYEwHxxoO7Fz58r' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8z28oubYEwHxx4DnD8gdk' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -405,11 +405,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$48.40</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ5tY8oubYEwHxxBdcKo5S1')} 
-                        disabled={loadingPrice === 'price_1TZ5tY8oubYEwHxxBdcKo5S1'}
+                        onClick={() => handleBuy('price_1TZ8Ms8oubYEwHxxrCK6grr2')} 
+                        disabled={loadingPrice === 'price_1TZ8Ms8oubYEwHxxrCK6grr2'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ5tY8oubYEwHxxBdcKo5S1' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8Ms8oubYEwHxxrCK6grr2' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -421,11 +421,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$47.50</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ5zo8oubYEwHxx5yXBkBks')} 
-                        disabled={loadingPrice === 'price_1TZ5zo8oubYEwHxx5yXBkBks'}
+                        onClick={() => handleBuy('price_1TZ8ZO8oubYEwHxxo6I8cAc6')} 
+                        disabled={loadingPrice === 'price_1TZ8ZO8oubYEwHxxo6I8cAc6'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ5zo8oubYEwHxx5yXBkBks' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8ZO8oubYEwHxxo6I8cAc6' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -442,11 +442,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono text-white font-bold">$45.00</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ62e8oubYEwHxxbZe59akn')} 
-                        disabled={loadingPrice === 'price_1TZ62e8oubYEwHxxbZe59akn'}
+                        onClick={() => handleBuy('price_1TZ8nD8oubYEwHxxGnaEY9Di')} 
+                        disabled={loadingPrice === 'price_1TZ8nD8oubYEwHxxGnaEY9Di'}
                         className="inline-block bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ62e8oubYEwHxxbZe59akn' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8nD8oubYEwHxxGnaEY9Di' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -458,11 +458,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$42.50</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ64p8oubYEwHxxKhXRM9E7')} 
-                        disabled={loadingPrice === 'price_1TZ64p8oubYEwHxxKhXRM9E7'}
+                        onClick={() => handleBuy('price_1TZ8qO8oubYEwHxxuOcRIKNG')} 
+                        disabled={loadingPrice === 'price_1TZ8qO8oubYEwHxxuOcRIKNG'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ64p8oubYEwHxxKhXRM9E7' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8qO8oubYEwHxxuOcRIKNG' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -474,11 +474,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$40.00</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ66p8oubYEwHxxHp0XPQuE')} 
-                        disabled={loadingPrice === 'price_1TZ66p8oubYEwHxxHp0XPQuE'}
+                        onClick={() => handleBuy('price_1TZ8tM8oubYEwHxxQf5uCyk2')} 
+                        disabled={loadingPrice === 'price_1TZ8tM8oubYEwHxxQf5uCyk2'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ66p8oubYEwHxxHp0XPQuE' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8tM8oubYEwHxxQf5uCyk2' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
@@ -490,11 +490,11 @@ export default function RMAPage() {
                     <td className="p-6 font-mono">$37.50</td>
                     <td className="p-6">
                       <button 
-                        onClick={() => handleBuy('price_1TZ68r8oubYEwHxxrwNikdbj')} 
-                        disabled={loadingPrice === 'price_1TZ68r8oubYEwHxxrwNikdbj'}
+                        onClick={() => handleBuy('price_1TZ8w98oubYEwHxxW9PxHhXW')} 
+                        disabled={loadingPrice === 'price_1TZ8w98oubYEwHxxW9PxHhXW'}
                         className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        {loadingPrice === 'price_1TZ68r8oubYEwHxxrwNikdbj' ? '...' : t('ui.btn_buy')}
+                        {loadingPrice === 'price_1TZ8w98oubYEwHxxW9PxHhXW' ? '...' : t('ui.btn_buy')}
                       </button>
                     </td>
                   </tr>
