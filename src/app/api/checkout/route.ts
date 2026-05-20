@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     const defaultSuccessUrl = `${baseUrl}/intake`;
     const defaultCancelUrl = `${baseUrl}/rma`;
 
-    let sessionConfig: Stripe.Checkout.SessionCreateParams = {
+    let sessionConfig: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       payment_method_types: ['card'],
       success_url: successUrl || defaultSuccessUrl,
       cancel_url: cancelUrl || defaultCancelUrl,
