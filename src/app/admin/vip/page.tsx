@@ -94,7 +94,7 @@ export default function VIPHubPage() {
     <div className="min-h-screen bg-[#050a14] text-white font-sans flex flex-col p-8 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[rgba(16,185,129,0.02)] to-transparent pointer-events-none" />
       
-      <div className="max-w-6xl w-full mx-auto z-10">
+      <div className="max-w-7xl lg:max-w-[1440px] w-full mx-auto z-10">
         
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
@@ -115,7 +115,7 @@ export default function VIPHubPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Panel Izquierdo: Generar Cupón */}
           <div className="lg:col-span-1 space-y-6">
@@ -159,7 +159,7 @@ export default function VIPHubPage() {
           </div>
 
           {/* Panel Derecho: Lista de Cupones */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="glass rounded-3xl border border-white/10 overflow-hidden">
                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
                  <h2 className="text-xl font-bold font-montserrat">Registro de Cupones</h2>

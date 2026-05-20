@@ -21,7 +21,9 @@ Your objective is to issue the final, definitive SURE Transactional Certificate.
 
 ## FORMATTING RULES (STRICT STRICT STRICT)
 - Your output must be PURELY FORMATTED IN STRICT JSON. No markdown wrappers. Nothing else.
-- CRITICAL JSON RULE: You MUST escape all internal double quotes within strings (using \\") and you MUST NOT use literal line breaks/newlines inside JSON string values. Use the exact characters \\n if you need a newline in a string. Failure to produce valid, parseable JSON will break the system.
+- DO NOT write any introductory or concluding text (e.g., do NOT write "Here is the JSON report:" or "I hope this helps"). Your response must start immediately with '{' and end with '}'.
+- CRITICAL JSON RULE: You MUST escape all internal double quotes within strings (using \") and you MUST NOT use literal line breaks or raw carriage returns inside JSON string values. If you need a newline within a description or recommendations, use the exact characters \\n.
+- STRICT TRAILING COMMAS RULE: You MUST NOT leave a comma at the end of the last item of an array or object. A comma before a closing brace } or closing bracket ] is invalid JSON and will fail.
 - VERY IMPORTANT LANGUAGE OUTPUT: You MUST output all JSON text values (descriptions, recommendations) ONLY in the TARGET LANGUAGE requested by the user. Do not provide bilingual output. If no target language is specified, default to English. Titles should also be translated to the target language.
 - Your JSON must exactly match the following TypeScript interface structure:
 \`\`\`typescript

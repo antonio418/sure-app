@@ -6,6 +6,7 @@ import { MOISES_PROMPT_COHERENCE, MOISES_PROMPT_COMPARISON } from '@/lib/agents/
 import { ALCIDES_PROMPT } from '@/lib/agents/alcides';
 import { CONSOLIDATOR_PROMPT } from '@/lib/agents/consolidator';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { extractAndParseJSON } from '@/lib/jsonParser';
 
 export const maxDuration = 300; // Max execution time for large files
 
@@ -152,17 +153,10 @@ export async function POST(req: NextRequest) {
       }
       let parsedJson = null;
       try {
-        if (report.includes('```json')) {
-          report = report.split('```json')[1].split('```')[0].trim();
-        } else if (report.includes('```')) {
-          report = report.split('```')[1].split('```')[0].trim();
-        }
-
-        // Fix trailing commas often hallucinated by LLMs
-        report = report.replace(/,\s*([\]}])/g, '$1');
-
-        parsedJson = JSON.parse(report);
+        parsedJson = extractAndParseJSON(report);
         parsedJsonData = parsedJson;
+        // Estandarizamos el reporte devuelto al frontend como JSON limpio
+        report = JSON.stringify(parsedJson, null, 2);
       } catch (e) {
         console.error("Failed to parse Consolidator JSON output. Raw output was:", report);
       }

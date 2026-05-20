@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key } from 'lucide-react';
+import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key, Copy, Check, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import dynamic from 'next/dynamic';
 import { msaTranslations } from '@/lib/msaTranslations';
 import LanguageSelector from '@/components/ui/LanguageSelector';
+import { extractAndParseJSON } from '@/lib/jsonParser';
 
 const RMAPdfGenerator = dynamic(
   () => import('@/components/pdf/RMAPdfGenerator'),
@@ -72,6 +73,9 @@ export default function IntakePortal() {
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<string[]>([]);
   const [finalReport, setFinalReport] = useState<any | null>(null);
+  const [rawReport, setRawReport] = useState<string | null>(null);
+  const [parseError, setParseError] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
   const [agentStatus, setAgentStatus] = useState<Record<string, 'idle'|'running'|'success'|'error'>>({
     roberto: 'idle', moises: 'idle', alcides: 'idle', consolidator: 'idle'
   });
@@ -94,6 +98,14 @@ export default function IntakePortal() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+    }
+  };
+
+  const handleCopy = () => {
+    if (rawReport) {
+      navigator.clipboard.writeText(rawReport);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -209,20 +221,20 @@ export default function IntakePortal() {
       addLog(`${t('ui.log_dossier_done')} ${email}`);
       setProgress(90);
 
+      if (consolidatorData.report) {
+         setRawReport(consolidatorData.report);
+      }
+
       try {
-         let jsonStr = consolidatorData.report;
-         if (jsonStr.includes('```json')) jsonStr = jsonStr.split('```json')[1].split('```')[0].trim();
-         else if (jsonStr.includes('```')) jsonStr = jsonStr.split('```')[1].split('```')[0].trim();
-         
-         // Fix trailing commas often hallucinated by LLMs
-         jsonStr = jsonStr.replace(/,\s*([\]}])/g, '$1');
-         
-         const parsedReport = JSON.parse(jsonStr) as any;
+         const parsedReport = extractAndParseJSON(consolidatorData.report);
          parsedReport.dateGenerated = new Date().toLocaleDateString();
          setFinalReport(parsedReport);
+         setParseError(false);
       } catch (e) {
          addLog(t('ui.log_error_pdf'));
-         console.error(e);
+         console.error("Error al parsear el reporte en frontend:", e);
+         setParseError(true);
+         setFinalReport(null);
       }
 
       setProgress(100);
@@ -291,11 +303,61 @@ export default function IntakePortal() {
              </div>
            )}
 
-           {status === 'success' && !finalReport && (
-             <div className="mt-8 pt-8 border-t border-white/10 text-center">
-                <p className="text-emerald-400 font-bold">{t('ui.intake_done_success')}</p>
-             </div>
-           )}
+            {status === 'success' && !finalReport && (
+              <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center w-full">
+                <div className="w-full bg-slate-950/40 rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-[60px] pointer-events-none" />
+                   
+                   <div className="flex flex-col items-center text-center mb-6">
+                      <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                         <ShieldCheck className="w-8 h-8" />
+                      </div>
+                      <h2 className="text-xl font-black text-white tracking-wide">{t('ui.intake_done_title')}</h2>
+                      <p className="text-xs text-slate-400 mt-2 max-w-lg leading-relaxed">
+                         {t('ui.intake_done_desc')} ({email}). El certificado interactivo se encuentra disponible a continuación en formato de texto estructurado.
+                      </p>
+                   </div>
+
+                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 flex items-start gap-3 text-left">
+                      <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-[11px] text-amber-200/80 leading-relaxed font-semibold">
+                         Nota: Los hallazgos del análisis son 100% íntegros y legibles. El formato interactivo (PDF) presentó ligeras desviaciones de formato en el estructurador, pero puedes leer, copiar y guardar la transcripción oficial directamente desde el visor.
+                      </div>
+                   </div>
+
+                   <div className="relative mb-6">
+                      <div className="absolute top-3 right-3 z-10 flex gap-2">
+                         <button 
+                            type="button"
+                            onClick={handleCopy}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg ${
+                               copied 
+                               ? 'bg-emerald-500 text-black shadow-emerald-500/20' 
+                               : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5'
+                            }`}
+                         >
+                            {copied ? (
+                               <><Check className="w-3 h-3" /> ¡Copiado!</>
+                            ) : (
+                               <><Copy className="w-3 h-3" /> Copiar Texto</>
+                            )}
+                         </button>
+                      </div>
+                      
+                      <div className="w-full bg-slate-950/90 rounded-2xl border border-white/5 p-6 font-mono text-[11px] text-slate-300 leading-relaxed max-h-[320px] overflow-y-auto whitespace-pre-wrap select-all shadow-inner">
+                         {rawReport || "No se ha recibido el texto del reporte del consolidador."}
+                      </div>
+                   </div>
+
+                   <div className="flex flex-col items-center">
+                      <p className="text-[11px] text-emerald-400/80 font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                         <CheckCircle2 className="w-3.5 h-3.5" /> {t('ui.intake_done_success')}
+                      </p>
+                      <p className="text-[10px] text-slate-500 italic">SURE Forensics Ecosystem &copy; {new Date().getFullYear()}</p>
+                   </div>
+                </div>
+              </div>
+            )}
 
         </div>
       </div>
