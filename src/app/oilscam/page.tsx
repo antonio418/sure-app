@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { useLanguage } from '@/context/LanguageContext';
+import { Language } from '@/lib/translations';
 
 const RMAPdfGenerator = dynamic(
   () => import('@/components/pdf/RMAPdfGenerator'),
@@ -70,6 +72,7 @@ const AgentStatusNode = ({ id, name, role, status, icon: Icon }: any) => {
 };
 
 export default function OilScamAlertPage() {
+  const { language, setLanguage } = useLanguage();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
@@ -79,6 +82,12 @@ export default function OilScamAlertPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [betaCode, setBetaCode] = useState('');
   const [isBetaActive, setIsBetaActive] = useState(true); // Default to free beta mode for viral launch
+
+  // Force English by default on mounting /oilscam
+  useEffect(() => {
+    setLanguage('en');
+    setReportLanguage('en');
+  }, []);
 
   const [status, setStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -343,10 +352,33 @@ ACTIONABLE STEPS (for reference and due diligence record purposes only — engag
             OILSCAM <span className="text-red-500">ALERT</span>
           </span>
         </div>
-        <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
-          <span className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1 rounded-full flex items-center gap-1 uppercase tracking-wider font-bold">
+        <div className="flex items-center gap-4">
+          <span className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1 rounded-full flex items-center gap-1 uppercase tracking-wider font-bold text-[10px] hidden sm:flex">
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span> Live Scanner
           </span>
+          
+          <div className="relative flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lang:</span>
+            <select
+              value={language}
+              onChange={(e) => {
+                const lang = e.target.value as Language;
+                setLanguage(lang);
+                setReportLanguage(lang);
+              }}
+              className="bg-transparent text-xs text-white font-bold focus:outline-none cursor-pointer border-none pr-1"
+            >
+              <option value="en" className="bg-slate-950 text-white">🇺🇸 EN</option>
+              <option value="es" className="bg-slate-950 text-white">🇪🇸 ES</option>
+              <option value="fr" className="bg-slate-950 text-white">🇫🇷 FR</option>
+              <option value="de" className="bg-slate-950 text-white">🇩🇪 DE</option>
+              <option value="pt" className="bg-slate-950 text-white">🇧🇷 PT</option>
+              <option value="zh" className="bg-slate-950 text-white">🇨🇳 ZH</option>
+              <option value="ru" className="bg-slate-950 text-white">🇷🇺 RU</option>
+              <option value="ar" className="bg-slate-950 text-white">🇦🇪 AR</option>
+              <option value="hi" className="bg-slate-950 text-white">🇮🇳 HI</option>
+            </select>
+          </div>
         </div>
       </header>
 
@@ -650,14 +682,22 @@ ACTIONABLE STEPS (for reference and due diligence record purposes only — engag
                       <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Target Report Language</label>
                       <select
                         value={reportLanguage}
-                        onChange={(e) => setReportLanguage(e.target.value)}
+                        onChange={(e) => {
+                          const lang = e.target.value as Language;
+                          setReportLanguage(lang);
+                          setLanguage(lang);
+                        }}
                         className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-500 transition-colors"
                       >
-                        <option value="en">English (Inglés)</option>
-                        <option value="es">Español (Spanish)</option>
-                        <option value="pt">Português</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="pt">🇧🇷 Português</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="ru">🇷🇺 Русский</option>
+                        <option value="ar">🇦🇪 العربية</option>
+                        <option value="hi">🇮🇳 हिन्दी</option>
                       </select>
                     </div>
                   </div>
