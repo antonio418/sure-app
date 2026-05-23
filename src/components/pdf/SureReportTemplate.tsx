@@ -784,7 +784,10 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
       sanitized = sanitized.replace(/[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F]/g, '');
     }
     if (!isChinese) {
-      sanitized = sanitized.replace(/[\u4E00-\u9FFF\u3400-\u4DBF\u20000-\u2A6DF]/g, '');
+      sanitized = sanitized.replace(/[\u4E00-\u9FFF\u3400-\u4DBF]/g, '');
+      try {
+        sanitized = sanitized.replace(new RegExp('[\\u{20000}-\\u{2A6DF}]', 'gu'), '');
+      } catch (e) {}
     }
     if (!isHindi) {
       sanitized = sanitized.replace(/[\u0900-\u097F]/g, '');
