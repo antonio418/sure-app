@@ -112,7 +112,7 @@ export default function OilScamAlertPage() {
     setLogs([
       `[${new Date().toLocaleTimeString()}] Initializing OilScam Alert Digital Sieve...`,
       `[${new Date().toLocaleTimeString()}] Access granted for: DEMO ACCESS PORTAL`,
-      `[${new Date().toLocaleTimeString()}] Retrieving sample document 'LLP_RESSOIL_SCO_FAKE.pdf' from archives...`,
+      `[${new Date().toLocaleTimeString()}] Retrieving sample document 'LLP_R******L_SCO_FAKE.pdf' from archives...`,
       `[${new Date().toLocaleTimeString()}] ROBERTO (Document Integrity) -> Analysis complete. 6 critical discrepancies logged.`,
       `[${new Date().toLocaleTimeString()}] MOISÉS (Coherence Auditor) -> Analysis complete. 4 physical impossibilities found.`,
       `[${new Date().toLocaleTimeString()}] ALCIDES (Sanctions Specialist) -> Analysis complete. Direct Russian ESPO sanctions risk flagged.`,
@@ -534,7 +534,7 @@ ACTIONABLE STEPS (for reference and due diligence record purposes only — engag
                   className="px-6 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(239,68,68,0.1)] flex items-center gap-2 cursor-pointer group"
                 >
                   <Search size={14} className="group-hover:scale-110 transition-transform" />
-                  🔍 View Live Sample Report: LLP Ressoil (Risk Score: 96/100)
+                  🔍 View Live Sample Report: LLP R******L (Risk Score: 96/100)
                 </button>
               </div>
 
