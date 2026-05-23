@@ -777,20 +777,24 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
     if (!text) return text;
     let sanitized = text;
 
-    if (!isArabic) {
-      sanitized = sanitized.replace(/[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, '');
-    }
-    if (!isRussian) {
-      sanitized = sanitized.replace(/[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F]/g, '');
-    }
-    if (!isChinese) {
-      sanitized = sanitized.replace(/[\u4E00-\u9FFF\u3400-\u4DBF]/g, '');
+    if (isArabic) {
+      // Keep Latin-1 + Arabic ranges
+      sanitized = sanitized.replace(/[^\x00-\xFF\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '');
+    } else if (isRussian) {
+      // Keep Latin-1 + Standard Cyrillic
+      sanitized = sanitized.replace(/[^\x00-\xFF\u0400-\u04FF]/g, '');
+    } else if (isChinese) {
+      // Keep Latin-1 + CJK Unified + CJK Ext A
+      sanitized = sanitized.replace(/[^\x00-\xFF\u4E00-\u9FFF\u3400-\u4DBF]/g, '');
       try {
-        sanitized = sanitized.replace(new RegExp('[\\u{20000}-\\u{2A6DF}]', 'gu'), '');
+        sanitized = sanitized.replace(new RegExp('[^\\x00-\\xFF\\u4E00-\\u9FFF\\u3400-\\u4DBF\\u{20000}-\\u{2A6DF}]', 'gu'), '');
       } catch (e) {}
-    }
-    if (!isHindi) {
-      sanitized = sanitized.replace(/[\u0900-\u097F]/g, '');
+    } else if (isHindi) {
+      // Keep Latin-1 + Devanagari
+      sanitized = sanitized.replace(/[^\x00-\xFF\u0900-\u097F]/g, '');
+    } else {
+      // For English, Spanish, Portuguese, French, German: Keep only Latin-1 (code points 0-255)
+      sanitized = sanitized.replace(/[^\x00-\xFF]/g, '');
     }
 
     return sanitized.replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim();
