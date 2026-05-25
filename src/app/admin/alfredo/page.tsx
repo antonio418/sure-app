@@ -816,19 +816,20 @@ export default function AlfredoAdminPage() {
 
                  {/* Pestañas (o apilado) para ver Email vs LinkedIn */}
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {/* Lógica Multi-idioma */}
                     {(() => {
                        const contentStr = (activeDraft.email_1_content || '').toLowerCase();
                        const isPortuguese = contentStr.includes('atenciosamente') || contentStr.includes('segurança') || contentStr.includes('bom dia');
                        const isSpanish = contentStr.includes('saludos') || contentStr.includes('estimado') || contentStr.includes('buenos días');
-                       // Por defecto a Inglés si no detecta explícitamente español o portugués (ya que es para mercado global)
-                       const isEnglish = !isPortuguese && !isSpanish;
+                       const isLithuanian = contentStr.includes('gerb') || contentStr.includes('laba diena') || contentStr.includes('marija ai') || contentStr.includes('odontologijos') || contentStr.includes('klinika') || contentStr.includes('šypsenos');
+                       // Por defecto a Inglés si no detecta explícitamente español, portugués o lituano
+                       const isEnglish = !isPortuguese && !isSpanish && !isLithuanian;
                        
-                       const lastName = activeDraft.nombre_contacto?.split(' ').pop() || 'Colleague';
+                       const lastName = activeDraft.nombre_contacto?.split(' ').pop() || 'kolega';
                        
                        const lnShortEs = `Dear Mr. ${lastName}, un honor. He desarrollado una IA que detecta estafadores de comercio exterior con 90% de precisión. Quisiera conectar.`;
                        const lnShortEn = `Filtering fake buyers & sellers with 90% accuracy. I developed a forensic AI for international trade. I'd love to connect, Mr. ${lastName}.`;
                        const lnShortPt = `Dear Mr. ${lastName}, uma honra. Desenvolvi uma IA que detecta fraudadores no comércio internacional com 90% de precisão. Gostaria de conectar.`;
+                       const lnShortLt = `Sveiki, malonu susisiekti. Sukūriau specializuotą medicinos DI asistentą „Marija AI“, kuris padeda odontologijos klinikoms pritraukti 15-20% daugiau pacientų ne darbo valandomis.`;
                        
                        const lnLongEs = `¿Es posible detectar a un estafador internacional con un 90% de precisión antes de firmar?
 He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados KEMA hasta supuestas garantías bancarias.
@@ -887,7 +888,7 @@ Imagine isso por um segundo:
 2. E se nos desse instruções precisas sobre o que exigir da contraparte para desarmar sua armadilha?
 3. E se cruzasse dados de sanções internacionais e impossibilidades técnicas geográficas em tempo real?
 Nós temos, assim nasceu SURE FORENSICS (Projeto RMA).
-Contratar uma Due Diligence tradicional pode custar dezenas de milhares de dólares e paralisar um negócio por semanas. SURE faz o trabalho de uma equipe de 20 analistas em exatamente 7 minutos.
+Contratar uma Due Diligence tradicional pode costar dezenas de milhares de dólares e paralisar um negócio por semanas. SURE faz o trabalho de uma equipe de 20 analistas em exatamente 7 minutos.
 Além disso, para a aquisição de produtos tecnológicos, complementamos esta blindagem algorítmica com uma auditoria profunda de direitos de propriedade intelectual e especialmente se existem patentes vigentes e em quais países. Para isso, contamos com uma equipe humana de elite formada por ex-diretores de patentes e pesquisadores de renomadas universidades europeias.
 Para comprovar, recentemente quis brincar de testar nossa nova arquitetura tecnológica. Comecei a enviar arquivos antigos dos meus próprios arquivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
 O que descobri foi assustador. A taxa de falsidades indetectáveis que passaram despercebidas pelo olho humano era imensa.
@@ -896,9 +897,24 @@ O pragmatismo é simples: Suponha que você receba ofertas de 20 fornecedores di
 Você acabou de salvar seu capital (e os empregos de sua equipe). Agora, sua equipe pode dedicar energia e talento exclusivamente a negociar com os 3 fornecedores reais, alavancados em um relatório forense que diz exatamente onde estão pisando.
 A confiança no comércio internacional estava quebrada. Acabamos de consertá-la.
 👇 Se sua mesa de trading tem uma operação em andamento, envie-me uma mensagem direta. Vamos passar esses documentos pelo cofre do SURE antes que você assine.`;
+                       const lnLongLt = `Laba diena, gerb. ${lastName},
 
-                       const shortNote = isEnglish ? lnShortEn : isPortuguese ? lnShortPt : lnShortEs;
-                       const longNote = isEnglish ? lnLongEn : isPortuguese ? lnLongPt : lnLongEs;
+Kreipiuosi, nes pastebėjau Jūsų sėkmingą veiklą odontologijos srityje Kaune.
+
+Šiuolaikinės klinikos susiduria su dideliu administratoriaus perkrovimu – atsakant į pasikartojančius klausimus (kainos, laisvi laikai, PSD kompensacijos) sugaištama iki 60% laiko. Kai klinika nedirba (naktimis, savaitgaliais), potencialūs pacientai registruojasi pas konkurentus.
+
+Mes sukūrėme „Marija AI“ – dirbtinio intelekto asistentą, kuris veikia Jūsų svetainėje 24/7, atsako lietuvių, anglų, rusų kalbomis ir registruoja pacientus tiesiai į Jūsų kalendorių (pvz., Google Calendar, API ar hibridiniu būdu).
+
+Klinikose šis asistentas pritraukia 15-20% daugiau vizitų per pirmąsias 60 dienų. Mielai parengtume Jūsų klinikai nemokamą asmeninę demo versiją.
+
+Ar būtų įdomu trumpai pasikalbėti apie šią galimybę?
+
+Su pagarba,
+Antonio Baronas
+MB PROCDI direktorius`;
+
+                       const shortNote = isEnglish ? lnShortEn : isPortuguese ? lnShortPt : isLithuanian ? lnShortLt : lnShortEs;
+                       const longNote = isEnglish ? lnLongEn : isPortuguese ? lnLongPt : isLithuanian ? lnLongLt : lnLongEs;
 
                        return (
                           <>

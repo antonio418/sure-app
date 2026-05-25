@@ -225,8 +225,37 @@ async function handleDispatch(req: NextRequest) {
     let bccEmail = 'alfredo@sure-forensic.com';
 
     if (targetLead.project_id) {
-       const { data: project } = await supabaseAdmin.from('projects').select('name').eq('id', targetLead.project_id).single();
-       // Si es necesario usar otro correo para proyectos específicos en el futuro, se puede agregar aquí.
+       const { data: project } = await supabaseAdmin.from('projects').select('name, objective').eq('id', targetLead.project_id).single();
+       if (project) {
+          const nameLower = (project.name || '').toLowerCase();
+          const objectiveLower = (project.objective || '').toLowerCase();
+          const emailBodyLower = body.toLowerCase();
+          
+          const isProcdiProject = 
+              nameLower.includes('clinica') || 
+              nameLower.includes('clínica') ||
+              nameLower.includes('medical') || 
+              nameLower.includes('kaun') || 
+              nameLower.includes('vilniu') ||
+              nameLower.includes('marija') ||
+              nameLower.includes('procdi') ||
+              nameLower.includes('odontolog') ||
+              nameLower.includes('dant') ||
+              nameLower.includes('lietuva') ||
+              objectiveLower.includes('procdi') ||
+              objectiveLower.includes('antonio@procdi.com') ||
+              objectiveLower.includes('marija') ||
+              objectiveLower.includes('gerb') ||
+              objectiveLower.includes('laba diena') ||
+              emailBodyLower.includes('procdi') ||
+              emailBodyLower.includes('antonio@procdi.com') ||
+              emailBodyLower.includes('marija');
+
+          if (isProcdiProject) {
+             fromEmail = 'Antonio Baronas - MB PROCDI <antonio@procdi.com>';
+             bccEmail = 'antonio@procdi.com';
+          }
+       }
     }
 
     const sendPayload: any = {

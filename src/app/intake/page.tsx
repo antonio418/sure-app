@@ -312,7 +312,6 @@ export default function IntakePortal() {
       abortControllerRef.current = null;
     }
   };
-  };
 
   if (status === 'analyzing' || status === 'success') {
     return (
@@ -672,8 +671,8 @@ export default function IntakePortal() {
              ) : (
                 <button 
                   type="submit"
-                  disabled={status === 'uploading' || (files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
-                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'uploading' || (files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
+                  disabled={(files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
+                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${(files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
                 >
                   <Network className="w-5 h-5" /> {t('ui.intake_btn_start')}
                 </button>

@@ -58,14 +58,16 @@ export async function POST(req: NextRequest) {
 
     // Process in parallel to save time
     await Promise.all(leads.map(async (lead) => {
-      const isGermaniumRFQ = /germanio|germanium|geo2/i.test(campaignGoal || '');
-      const isImportDiligence = /import|mid-market|rma|distribuidor/i.test(campaignGoal || '') || /import|mid-market|rma|distribuidor/i.test(projectName || '');
-      const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
-      
       const isSpanish = /español|espanol|spanish/i.test(campaignGoal || '');
       const isPortuguese = /portugués|portugues|portuguese/i.test(campaignGoal || '');
-      const languageCode = isSpanish ? 'es' : (isPortuguese ? 'pt' : 'en');
-      const languageName = isSpanish ? 'ESPAÑOL' : (isPortuguese ? 'PORTUGUÉS' : 'INGLÉS');
+      const isLithuanian = /gerb|laba diena|marija ai|odontologijos|klinika|šypsenos/i.test(campaignGoal || '');
+      
+      const isGermaniumRFQ = /germanio|germanium|geo2/i.test(campaignGoal || '');
+      const isImportDiligence = !isLithuanian && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
+      const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
+      
+      const languageCode = isSpanish ? 'es' : (isPortuguese ? 'pt' : (isLithuanian ? 'lt' : 'en'));
+      const languageName = isSpanish ? 'ESPAÑOL' : (isPortuguese ? 'PORTUGUÉS' : (isLithuanian ? 'LITUANO' : 'INGLÉS'));
 
       const cleanEmpresaName = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim().toUpperCase() || 'TEAM';
 
@@ -156,13 +158,14 @@ export async function POST(req: NextRequest) {
             - Email/Dominio: ${lead.email}
 
             REGLAS ESTRICTAS DE IDIOMA:
-            1. Analiza el dominio del correo y el nombre de la empresa.
-            2. Si el dominio termina en .br o la empresa es de Brasil -> Escribe obligatoriamente en PORTUGUÉS (traduce el modelo al portugués corporativo).
-            3. Si la empresa es de España o Latinoamérica -> Escribe en ESPAÑOL.
-            4. CRÍTICO: Para cualquier otro país (China, India, USA, Europa), o si NO TIENES 100% DE CERTEZA absoluta, usa el MODELO EN INGLÉS. No uses español si tienes dudas.
+            1. Analiza el idioma del "MODELO EXACTO Y CONDICIONES" proporcionado arriba por el usuario. Si el modelo/plantilla del usuario está escrito en LITUANO (LIETUVIŲ), se establece el lituano como idioma maestro absoluto. DEBES escribir toda la secuencia de 3 correos (Asuntos y Cuerpos de Email 1, 2 y 3) OBLIGATORIAMENTE en LITUANO formal, adaptándolo de manera natural para la clínica lituana.
+            2. De lo contrario (si el modelo original está en inglés o español), analiza el dominio del correo y procedencia:
+            3. Si el dominio termina en .br o la empresa es de Brasil -> Escribe obligatoriamente en PORTUGUÉS (traduce el modelo al portugués corporativo).
+            4. Si la empresa es de España o Latinoamérica -> Escribe en ESPAÑOL.
+            5. CRÍTICO: Para cualquier otro país (China, India, USA, Europa), o si NO TIENES 100% DE CERTEZA absoluta, usa el MODELO EN INGLÉS. No uses español si tienes dudas.
 
-            Genera una SECUENCIA DE 3 CORREOS (Drip Campaign). Adapta y traduce el contenido al idioma seleccionado según las reglas anteriores.
-            Devuelve ÚNICAMENTE un objeto JSON válido, sin formato markdown (\`\`\`), sin texto adicional.
+             Genera una SECUENCIA DE 3 CORREOS (Drip Campaign). Adapta y traduce el contenido al idioma seleccionado según las reglas anteriores.
+             Devuelve ÚNICAMENTE un objeto JSON válido, sin formato markdown (\`\`\`), sin texto adicional.
             
             Estructura JSON estricta requerida:
             {

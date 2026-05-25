@@ -30,7 +30,7 @@ const resend = new Resend(resendApiKey);
 // ==========================================
 // CONFIGURATION: SENDER & LIMITS
 // ==========================================
-const SENDER_EMAIL = 'alfredo@sureforensic.com'; 
+const SENDER_EMAIL = 'antonio@procdi.com'; 
 const DAILY_LIMIT = 45; 
 const IS_TEST_MODE = true; 
 const TEST_EMAIL_ADDRESS = 'antonio@procdi.com'; 
@@ -197,10 +197,11 @@ async function runMailerEngine() {
       console.log(`   -> Sending to: ${targetEmail} (Real Contact: ${lead.email}) [Lang: ${lang.toUpperCase()}, Model: ${modelId}]`);
 
       const { error: resendError } = await resend.emails.send({
-        from: `Antonio Baronas <${SENDER_EMAIL}>`,
+        from: `Antonio Baronas - MB PROCDI <${SENDER_EMAIL}>`,
         to: targetEmail,
         subject: subject,
         html: html,
+        bcc: 'antonio@procdi.com'
       });
 
       if (resendError) {
