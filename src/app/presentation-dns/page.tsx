@@ -6,79 +6,6 @@ import LanguageSelector from '@/components/ui/LanguageSelector';
 import { ShieldCheck, Lock, ArrowRight, ArrowLeft, Loader2, UploadCloud, Search, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const LOCAL_TRANSLATIONS: Record<string, any> = {
-  es: {
-    s1_title: "El Problema",
-    s1_sub: "(Por qué estás aquí)",
-    s1_desc: "Tus correos importantes están cayendo en Spam o siendo bloqueados por problemas de seguridad (Spoofing) en tu dominio.",
-    s2_title: "La Consecuencia",
-    s2_sub: "(Negocio Perdido)",
-    s2_desc: "Debido a esto, los servidores receptores bloquean tus correos legítimos, causando graves problemas de comunicación con clientes y socios.",
-    s3_title: "La Causa",
-    s3_sub: "(Fallas Técnicas)",
-    s3_desc: "Tus registros DNS (SPF, DKIM, DMARC) faltan o están mal configurados, dejando tu identidad expuesta.",
-    s4_title: "La Solución",
-    s4_sub: "(Conoce a Alfredo)",
-    s4_desc: "Nuestro Agente de Ciberseguridad de IA te guiará paso a paso para proteger tu dominio en menos de 5 minutos.",
-    continue: "CONTINUAR",
-    s1_img_text: "¿ESTÁN TUS COTIZACIONES TERMINANDO AQUÍ?",
-    spam_folder: "SPAM (127)",
-    spam_subject: "¡URGENTE! Propuesta Comercial y Precios...",
-    spam_sender: "Suministros B2B",
-    
-    // Slide 5
-    s5_hero_title: "Auditoría de Infraestructura DNS",
-    s5_hero_subtitle: "Descubre si alguien puede enviar facturas falsas desde tu dominio corporativo. En 30 segundos. Sin instalaciones.",
-    s5_placeholder: "ej: empresa.com",
-    s5_btn_audit: "AUDITAR ->",
-    
-    // Slide 6
-    s6_crit_title: "VULNERABILIDAD CRÍTICA",
-    s6_infra: "Servidor Privado (Desconocido)",
-    s6_risk_1: "Infraestructura de Recepción Inválida",
-    s6_risk_2: "Suplantación de Identidad Permitida",
-    s6_risk_3: "Falta de Monitoreo Anti-Fraude (BEC)",
-    s6_impact_title: "Impacto Operativo:",
-    s6_impact_desc: "En este momento, cualquier actor externo puede suplantar tu dominio, insertar instrucciones de pago falsas en un hilo de email activo, y hacer que tu proveedor o cliente transfiera fondos a una cuenta fraudulenta.",
-    s6_conv_title: "Cierra esta puerta antes de tu próxima transferencia.",
-    s6_conv_desc: "Nuestra IA te guiará paso a paso para cerrar esta vulnerabilidad en tu proveedor específico. Sin equipo técnico, en menos de 10 minutos.",
-    s6_price_title: "$70",
-    s6_price_sub: "LICENCIA FOUNDER /Mes (Suscripción RMA)",
-    s6_prompt: "¿Deseas proteger tu dominio?",
-    yes: "SÍ",
-    no: "NO",
-    
-    // Slide 7
-    s7_discount_note: "Si tienes un código de descuento, introdúcelo en la casilla, presiona 'Apply' (Aplicar) y luego procede al pago.",
-    
-    // Slide 8
-    s8_unlocked_title: "AUDITORÍA DESBLOQUEADA",
-    s8_unlocked_badge: "Pago Verificado",
-    s8_real_case: "Este es un caso real de uno de nuestros Clientes",
-    s8_infra_title: "Tu Proveedor de Infraestructura:",
-    s8_radio_title: "Radiología DNS Actual:",
-    s8_exposed_title: "Vectores Técnicos Expuestos:",
-    
-    // Slide 9
-    s9_title: "ASISTENCIA VISUAL DE IA",
-    s9_desc: "Por favor, conéctate a la página de tu proveedor, toma una captura de pantalla (Tip: usa Win+Shift+S en Windows o Cmd+Shift+4 en Mac para mayor precisión), pégala con \"CTRL V\" o pulsa el botón azul \"Pegar desde el portapapeles\" y presiona \"CONTINUAR\".",
-    s9_desc2: "Si no sabes DÓNDE estás o qué hacer, solo toma una captura de pantalla de la página donde te encuentras, pégala (Ctrl+V o botón azul) aquí y presiona \"CONTINUAR\". Nosotros te indicaremos exactamente qué hacer.",
-    s9_upload_title: "Sube tu captura o presiona Ctrl+V / botón azul",
-    s9_upload_sub: "Haz clic, arrastra la imagen o pega desde el portapapeles (PNG, JPG)",
-    
-    // Slide 10
-    s10_title: "INSTRUCCIONES DE ALFREDO",
-    s10_no_spoiler: "Después de que el Cliente sube los datos detallados del DNS, nuestro agente de IA proporcionará instrucciones precisas sobre lo que debe cambiarse para que su dominio esté limpio y seguro.\n\nComo último paso, después de que el Cliente haya cambiado los parámetros, nuestro agente de IA realiza un segundo escaneo de seguridad que muestra el éxito de esta operación.",
-    
-    // Slide 11 & 12 & 13
-    s11_title: "VERIFICACIÓN",
-    s11_desc: "Toma una nueva captura de pantalla de los registros corregidos y pégala aquí (Ctrl+V o botón azul) para la verificación final.",
-    s12_title: "REPORTE FINAL SEGURO",
-    s12_desc: "Tu dominio está ahora 100% Protegido y Autenticado.",
-    s13_q1: "Del 1 al 10, ¿qué tan fácil fue seguir las instrucciones de Alfredo?",
-    s13_q2: "¿Siente plena confianza en que los correos de su empresa ahora están totalmente protegidos contra el SPAM y la suplantación de identidad? (Sí/No)",
-    s13_q3: "¿Recomendaría esto a colegas y amigos? (Sí/No)",
-    finish: "FINALIZAR",
-  },
   en: {
     s1_title: "The Problem",
     s1_sub: "(Why You're Here)",
@@ -115,7 +42,7 @@ const LOCAL_TRANSLATIONS: Record<string, any> = {
     s6_conv_title: "Close this door before your next wire transfer.",
     s6_conv_desc: "Our AI will guide you step-by-step to close this vulnerability in your specific provider. No technical team needed, in under 10 minutes.",
     s6_price_title: "$70",
-    s6_price_sub: "FOUNDER'S LICENSE /Month (RMA Subscription)",
+    s6_price_sub: "FOUNDER'S LICENSE / Domain (One-Time Payment)",
     s6_prompt: "Do you want to protect your domain?",
     yes: "YES",
     no: "NO",
@@ -336,12 +263,10 @@ export default function DNSPresentation() {
         return (
           <div className="w-full max-w-2xl mx-auto text-center cursor-pointer" onClick={nextStep}>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-6">
-              {language === 'es' ? 'Auditoría de Infraestructura DNS' : 'DNS Infrastructure Audit'}
+              DNS Infrastructure Audit
             </h1>
             <p className="text-xl text-slate-400 mb-10 font-light">
-              {language === 'es' 
-                ? 'Descubre si alguien puede enviar facturas falsas desde tu dominio corporativo. En 30 segundos. Sin instalaciones.' 
-                : 'Discover if someone can send fake invoices from your corporate domain. In 30 seconds. No installations.'}
+              Discover if someone can send fake invoices from your corporate domain. In 30 seconds. No installations.
             </p>
             <div className="relative group max-w-lg mx-auto">
               <input 

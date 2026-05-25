@@ -27,17 +27,22 @@ export async function POST(req: NextRequest) {
     const userContext = formData.get('userContext') as string | null;
     const analysisMode = formData.get('analysisMode') as string | null;
 
-    if (agent !== 'consolidator' && filePaths.length === 0) {
-      return NextResponse.json({ error: 'Missing files' }, { status: 400 });
-    }
     if (!agent) {
        return NextResponse.json({ error: 'Missing agent parameter' }, { status: 400 });
     }
 
-    // Download from Supabase and convert to base64
+    const hasFiles = filePaths && filePaths.length > 0;
+    const hasContext = userContext && userContext.trim().length > 0;
+
+    if (!hasFiles && !hasContext && agent !== 'consolidator') {
+      return NextResponse.json({ error: 'No data provided. Please upload files or provide context/website details.' }, { status: 400 });
+    }
+
+    // Download from Supabase and convert to base64 (if files are present)
     const contentParts: any[] = [];
     
-    for (const filePath of filePaths) {
+    if (hasFiles) {
+      for (const filePath of filePaths) {
       const { data, error } = await supabaseAdmin.storage.from('temp_dossiers').download(filePath);
       if (error || !data) throw new Error(`Could not retrieve document from secure vault: ${error?.message}`);
       
@@ -67,6 +72,7 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+  }
     
     // Select the correct agent prompt
     let systemInstruction = '';

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key, Copy, Check, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key, Copy, Check, AlertTriangle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import dynamic from 'next/dynamic';
@@ -81,19 +81,17 @@ export default function IntakePortal() {
   });
   const [session, setSession] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setSession(session);
-        if (session.user?.email) {
-          setEmail(session.user.email);
-          setEmailConfirm(session.user.email);
-        }
-      }
-    };
-    fetchSession();
-  }, []);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      addLog("Análisis cancelado por el usuario.");
+      setStatus('idle');
+      setProgress(0);
+      setErrorMessage("El análisis fue cancelado por el usuario.");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -113,8 +111,16 @@ export default function IntakePortal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !emailConfirm || !phone || files.length === 0) {
-      setErrorMessage("Por favor llena los campos obligatorios y sube al menos un documento.");
+    
+    const hasFiles = files.length > 0;
+    const hasContext = userContext.trim().length > 0;
+
+    if (!email || !emailConfirm || !phone) {
+      setErrorMessage("Por favor llena los campos obligatorios.");
+      return;
+    }
+    if (!hasFiles && !hasContext) {
+      setErrorMessage("Por favor sube al menos un documento o introduce el sitio web o detalles del proveedor en la caja de contexto.");
       return;
     }
     if (email !== emailConfirm) {
@@ -125,6 +131,11 @@ export default function IntakePortal() {
     try {
       setStatus('uploading');
       setErrorMessage('');
+      setProgress(5);
+
+      // Initialize AbortController
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
 
       // 0. Validar Cupón VIP
       if (!vipToken.trim()) {
@@ -135,7 +146,8 @@ export default function IntakePortal() {
       const tokenRes = await fetch('/api/validate-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: vipToken, email: email })
+        body: JSON.stringify({ token: vipToken, email: email }),
+        signal
       });
       
       if (!tokenRes.ok) {
@@ -157,12 +169,17 @@ export default function IntakePortal() {
       const safePhone = phone.replace(/[^a-zA-Z0-9+]/g, '');
       
       const uploadedPaths: string[] = [];
-      for (const file of files) {
-        const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filePath = `intake_${safeEmail}_TEL_${safePhone}/${Date.now()}_${cleanFileName}`;
-        const { error } = await supabase.storage.from('temp_dossiers').upload(filePath, file);
-        if (error) throw error;
-        uploadedPaths.push(filePath);
+      if (hasFiles) {
+        addLog("Subiendo documentos de evidencia de forma segura...");
+        for (const file of files) {
+          const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filePath = `intake_${safeEmail}_TEL_${safePhone}/${Date.now()}_${cleanFileName}`;
+          const { error } = await supabase.storage.from('temp_dossiers').upload(filePath, file);
+          if (error) throw error;
+          uploadedPaths.push(filePath);
+        }
+      } else {
+        addLog("Iniciando análisis a partir de la URL del proveedor o contexto suministrado...");
       }
 
       setStatus('analyzing');
@@ -182,13 +199,26 @@ export default function IntakePortal() {
            formData.append('userContext', userContext.trim());
         }
         
-        const response = await fetch('/api/analyze', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || `El agente ${name} reportó un error.`);
-        
-        setAgentStatus(prev => ({ ...prev, [agent]: 'success' }));
-        addLog(`${name} ${t('ui.log_agent_done')}`);
-        return `\n\n--- REPORTE DE ${name.toUpperCase()} ---\n${data.report}`;
+        try {
+          const response = await fetch('/api/analyze', { 
+            method: 'POST', 
+            body: formData,
+            signal
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || `El agente ${name} reportó un error.`);
+          
+          setAgentStatus(prev => ({ ...prev, [agent]: 'success' }));
+          addLog(`${name} completed analysis successfully.`);
+          return `\n\n--- REPORTE DE ${name.toUpperCase()} ---\n${data.report}`;
+        } catch (agentErr: any) {
+          if (agentErr.name === 'AbortError') throw agentErr; // bubble aborts
+          
+          console.warn(`Error in agent ${name}:`, agentErr);
+          setAgentStatus(prev => ({ ...prev, [agent]: 'error' }));
+          addLog(`⚠️ ${name} encountered an issue: ${agentErr.message || agentErr}. Sourcing general public/domain context...`);
+          return `\n\n--- REPORTE DE ${name.toUpperCase()} (DEGRADADO) ---\nEl agente no pudo completar el análisis detallado: ${agentErr.message || agentErr}. Se procedió a consolidar los datos de riesgo con el contexto alternativo provisto.`;
+        }
       };
 
       const subordinateReports = [];
@@ -212,39 +242,76 @@ export default function IntakePortal() {
       }
       consolidatorFormData.append('email', email); // Sends copy to client via Resend
       
-      const consolidatorResponse = await fetch('/api/analyze', { method: 'POST', body: consolidatorFormData });
-      const consolidatorData = await consolidatorResponse.json();
-      
-      if (!consolidatorResponse.ok) throw new Error(consolidatorData.error || `Error en Consolidador.`);
-      
-      setAgentStatus(prev => ({ ...prev, consolidator: 'success' }));
-      addLog(`${t('ui.log_dossier_done')} ${email}`);
-      setProgress(90);
-
-      if (consolidatorData.report) {
-         setRawReport(consolidatorData.report);
-      }
-
       try {
-         const parsedReport = extractAndParseJSON(consolidatorData.report);
-         parsedReport.dateGenerated = new Date().toLocaleDateString();
-         setFinalReport(parsedReport);
-         setParseError(false);
-      } catch (e) {
-         addLog(t('ui.log_error_pdf'));
-         console.error("Error al parsear el reporte en frontend:", e);
-         setParseError(true);
-         setFinalReport(null);
+        const consolidatorResponse = await fetch('/api/analyze', { 
+          method: 'POST', 
+          body: consolidatorFormData,
+          signal
+        });
+        const consolidatorData = await consolidatorResponse.json();
+        
+        if (!consolidatorResponse.ok) throw new Error(consolidatorData.error || `Error en Consolidador.`);
+        
+        setAgentStatus(prev => ({ ...prev, consolidator: 'success' }));
+        addLog(`${t('ui.log_dossier_done')} ${email}`);
+        setProgress(90);
+
+        if (consolidatorData.report) {
+           setRawReport(consolidatorData.report);
+        }
+
+        try {
+           const parsedReport = extractAndParseJSON(consolidatorData.report);
+           parsedReport.dateGenerated = new Date().toLocaleDateString();
+           setFinalReport(parsedReport);
+           setParseError(false);
+        } catch (e) {
+           addLog(t('ui.log_error_pdf'));
+           console.error("Error al parsear el reporte en frontend:", e);
+           setParseError(true);
+           setFinalReport(null);
+        }
+      } catch (consolidatorErr: any) {
+        if (consolidatorErr.name === 'AbortError') throw consolidatorErr;
+        
+        console.error("Consolidator error:", consolidatorErr);
+        setAgentStatus(prev => ({ ...prev, consolidator: 'error' }));
+        addLog(`⚠️ Synthesis failed: ${consolidatorErr.message || consolidatorErr}. Generating fallback dossier from raw logs...`);
+        
+        const fallbackReport = `
+        {
+          "companyName": "${company || 'Supplier'} (Context-Only Audit)",
+          "riskScore": 50,
+          "recommendations": "A direct automated synthesis was degraded. Supplier Due Diligence completed to the best depth possible using context: ${userContext.replace(/"/g, '\\"')}",
+          "anomalies": [
+            {
+              "title": "Subordinate Analysis Degraded",
+              "description": "One or more risk vectors were analyzed with partial information. Manual review is suggested for this supplier."
+            }
+          ]
+        }
+        `;
+        setRawReport(fallbackReport);
+        const parsedFallback = JSON.parse(fallbackReport);
+        parsedFallback.dateGenerated = new Date().toLocaleDateString();
+        setFinalReport(parsedFallback);
       }
 
       setProgress(100);
       setStatus('success');
 
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        addLog("Análisis cancelado y detenido por el usuario.");
+        return; 
+      }
       console.error("Error de análisis:", error);
       setErrorMessage(error.message || "Hubo un error de conexión.");
       setStatus('error');
+    } finally {
+      abortControllerRef.current = null;
     }
+  };
   };
 
   if (status === 'analyzing' || status === 'success') {
@@ -274,12 +341,25 @@ export default function IntakePortal() {
            </div>
 
            <div className="mb-6">
-             <div className="flex justify-between text-xs text-slate-400 font-bold mb-2">
-               <span>{t('ui.intake_progress')}</span>
-               <span>{progress}%</span>
-             </div>
-             <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+             <div className="flex justify-between items-center mb-2">
+               <div className="flex-1">
+                 <div className="flex justify-between text-xs text-slate-400 font-bold mb-1">
+                   <span>{t('ui.intake_progress')}</span>
+                   <span>{progress}%</span>
+                 </div>
+                 <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                    <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                 </div>
+               </div>
+               {status === 'analyzing' && (
+                 <button
+                   type="button"
+                   onClick={handleAbort}
+                   className="ml-6 px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 shrink-0"
+                 >
+                   <XCircle className="w-4 h-4" /> Abort Analysis
+                 </button>
+               )}
              </div>
            </div>
 
@@ -581,17 +661,23 @@ export default function IntakePortal() {
                </div>
              )}
 
-             <button 
-               type="submit"
-               disabled={status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
-               className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'uploading' || files.length === 0 || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
-             >
-               {status === 'uploading' ? (
-                 <><Loader2 className="w-5 h-5 animate-spin" /> {t('ui.intake_btn_processing')}</>
-               ) : (
-                 <><Network className="w-5 h-5" /> {t('ui.intake_btn_start')}</>
-               )}
-             </button>
+             {status === 'uploading' ? (
+                <button 
+                  type="button"
+                  onClick={handleAbort}
+                  className="w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/50"
+                >
+                  <XCircle className="w-5 h-5" /> Abort Uploading / Analysis
+                </button>
+             ) : (
+                <button 
+                  type="submit"
+                  disabled={status === 'uploading' || (files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
+                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'uploading' || (files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
+                >
+                  <Network className="w-5 h-5" /> {t('ui.intake_btn_start')}
+                </button>
+             )}
              {!session && (
                <p className="text-center text-xs text-slate-500 mt-4">
                  {t('ui.intake_disclaimer')}

@@ -78,30 +78,32 @@ export async function POST(req: NextRequest) {
          let promptText = "";
          if (isGermaniumRFQ) {
              promptText = `
-            Eres un consultor experto en compras corporativas B2B (Procurement) actuando en nombre de un cliente final. Estamos enviando un Request for Quotation (RFQ) oficial para solicitar que la empresa ${lead.empresa} suministre Germanio a nuestro cliente.
+            You are an expert B2B procurement consultant acting on behalf of an end client. We are sending an official Request for Quotation (RFQ) requesting that the company ${cleanEmpresaName} supply Germanium materials to our client.
             
-            REGLAS ESTRICTAS DE REDACCIÓN: 
-            1. ACTÚAS COMO INTERMEDIARIO: Estás buscando material para TU CLIENTE, no para ti mismo.
-            2. NUNCA menciones el nombre de tu propia consultora ni uses comodines como "[Tu Empresa]". Habla siempre en nombre de "nuestro cliente".
-            3. ENFOQUE EN EL VENDEDOR: El halago debe ser puramente hacia ellos. Ejemplo: "Dada la excelente reputación de ${cleanEmpresaName} como fabricante de..."
-            4. PROHIBIDO decir "nosotros necesitamos para nuestras fábricas" (tú no fabricas nada).
+            STRICT WRITING RULES:
+            1. ACT AS AN INTERMEDIARY: You are sourcing material for YOUR CLIENT, not for yourself.
+            2. NEVER mention your own agency name or use placeholders like "[Your Company]". Always speak on behalf of "our client".
+            3. FOCUS ON THE SELLER: The compliment must be directed entirely to them. Example: "Given ${cleanEmpresaName}'s excellent reputation as a leading supplier of..."
+            4. FORBIDDEN to say "we need this for our factories" (you do not manufacture anything).
+            5. LANGUAGE: The generated subjects and contents must be strictly in ENGLISH.
             
-            Información del Proveedor (Prospecto):
-            - Nombre: ${lead.nombre_contacto || 'Equipo Directivo'}
-            - Perfil / Datos adicionales: ${lead.nota_contacto || 'N/A'}
-            - Logros Empresa: ${lead.nota_empresa || 'N/A'}
+            Supplier Info:
+            - Company Name: ${cleanEmpresaName}
+            - Contact Person: ${lead.nombre_contacto || 'Procurement Team'}
+            - Contact Details/Notes: ${lead.nota_contacto || 'N/A'}
+            - Company Achievements: ${lead.nota_empresa || 'N/A'}
 
-            Tu tarea es generar la estructura base para una Campaña de Seguimiento (Drip) de 3 pasos en ${languageName}. 
-            Devuelve ÚNICAMENTE un objeto JSON válido, sin formato markdown (\`\`\`), sin saludos fuera del JSON.
+            Your task is to generate the base structure for a 3-step B2B Drip Campaign in ENGLISH.
+            Return ONLY a valid JSON object, without markdown formatting (\`\`\`), with no extra conversational text.
             
-            Estructura JSON estricta requerida:
+            Required strict JSON structure:
             {
-               "email_1_subject": "Solicitud de Cotización (RFQ) – Materiales de Germanio",
-               "email_1_content": "UNA sola oración (ice-breaker) hiper-profesional elogiando la sólida reputación o experiencia de la empresa ${cleanEmpresaName} en el mercado. Recuerda: buscas material para TU CLIENTE, no para ti.",
-               "email_2_subject": "Re: Solicitud de Cotización (RFQ) – Materiales de Germanio",
-               "email_2_content": "Un seguimiento súper corto (2 líneas) preguntando si pudieron revisar la solicitud enviada hace unos días.",
-               "email_3_subject": "Actualización: Solicitud de Cotización (RFQ)",
-               "email_3_content": "Correo de despedida (Break-Up) indicando que avanzaremos con otras fundiciones/proveedores, pero dejando la puerta abierta."
+               "email_1_subject": "Request for Quotation (RFQ) – High-Purity Germanium Materials (Ge / GeO2)",
+               "email_1_content": "A single, highly professional ice-breaker sentence in English praising the solid reputation or expertise of ${cleanEmpresaName} in the semiconductor/optics industry. Remember: you are sourcing for YOUR CLIENT, not yourself.",
+               "email_2_subject": "Re: Request for Quotation (RFQ) – High-Purity Germanium Materials (Ge / GeO2)",
+               "email_2_content": "A very short follow-up (2 lines) asking politely if they had a chance to review the RFQ sent a few days ago.",
+               "email_3_subject": "Update: Request for Quotation (RFQ) – Germanium Materials",
+               "email_3_content": "A professional break-up email indicating that we will proceed with other refineries, but keeping the door open for future partnerships."
             }
             `;
          } else if (isImportDiligence) {
@@ -199,12 +201,12 @@ export async function POST(req: NextRequest) {
          
          if (isGermaniumRFQ) {
             subject = parsedEmails.email_1_subject || "Request for Quotation (RFQ)";
-            const ice_breaker = parsedEmails.email_1_content || "Esperamos establecer una relación comercial.";
+            const ice_breaker = parsedEmails.email_1_content || "We look forward to establishing a mutually beneficial commercial partnership.";
             htmlBody = generateGermaniumRFQHtml({
                 nombre_contacto: lead.nombre_contacto || 'Team',
-                nombre_empresa: lead.empresa || 'your company',
+                nombre_empresa: cleanEmpresaName,
                 ice_breaker: ice_breaker,
-                language: languageCode as 'es'|'pt'|'en'
+                language: 'en'
             });
             emailContentText = htmlBody; 
          } else if (isImportDiligence) {
