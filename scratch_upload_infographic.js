@@ -6,7 +6,7 @@ dotenv.config({ path: '.env.local' });
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 async function upload() {
-  const imagePath = 'C:/Users/anton_mn7up/.gemini/antigravity/brain/19e14534-95eb-48b9-a934-63e682162501/marija_ai_lt_languages_1779783771901.png';
+  const imagePath = 'C:/Users/anton_mn7up/.gemini/antigravity/brain/19e14534-95eb-48b9-a934-63e682162501/marija_ai_lt_final_1779784673725.png';
   if (!fs.existsSync(imagePath)) {
      console.error("El archivo no existe en la ruta especificada.");
      return;
