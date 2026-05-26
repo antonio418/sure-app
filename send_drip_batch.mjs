@@ -34,6 +34,15 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Función para reemplazar caracteres acentuados lituanos por caracteres ASCII estándar
+function sanitizeLithuanianEmail(email) {
+  const map = {
+    'ą': 'a', 'č': 'c', 'ę': 'e', 'ė': 'e', 'į': 'i', 'š': 's', 'ų': 'u', 'ū': 'u', 'ž': 'z',
+    'Ą': 'a', 'Č': 'c', 'Ę': 'e', 'Ė': 'e', 'Į': 'i', 'Š': 's', 'Ų': 'u', 'Ū': 'u', 'Ž': 'z'
+  };
+  return email.replace(/[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]/g, match => map[match]);
+}
+
 // Función para mostrar una cuenta regresiva visual en la consola
 async function countdown(seconds) {
   for (let i = seconds; i > 0; i--) {
@@ -84,8 +93,9 @@ async function runDripBatch() {
     const leadNum = index + 1;
     
     try {
-      // Limpiar comillas dobles y espacios del correo electrónico
-      const cleanEmail = (lead.email || '').replace(/"/g, '').trim();
+      // Limpiar comillas dobles, espacios y caracteres lituanos con acento en el correo
+      const rawEmail = (lead.email || '').replace(/"/g, '').trim();
+      const cleanEmail = sanitizeLithuanianEmail(rawEmail);
 
       if (!cleanEmail || !cleanEmail.includes('@')) {
         console.log(`[${leadNum}/${leads.length}] ⏭️ \x1b[31mSaltando lead:\x1b[0m ${lead.empresa || 'Sin Empresa'} (Correo electrónico vacío o inválido: "${lead.email}"). Marcando como REJECTED.`);

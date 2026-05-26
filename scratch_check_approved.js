@@ -7,11 +7,10 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 async function check() {
   const projectId = 'f588b680-816b-4bfe-99dd-18e81fbf2752';
   const { data } = await supabase.from('leads_campaign')
-    .select('empresa, status, email, email_1_subject')
-    .eq('project_id', projectId)
-    .eq('status', 'APPROVED');
+    .select('empresa, nombre_contacto, telefono, email, status')
+    .eq('project_id', projectId);
   
-  console.log("Approved clinic leads count:", data.length);
-  console.log("Details:", JSON.stringify(data, null, 2));
+  console.log("ALL CLINIC LEADS STATUS:");
+  console.log(JSON.stringify(data, null, 2));
 }
 check();
