@@ -1,5 +1,5 @@
 # MB PROCDI  |  TECHNINIS IR KOMERCINIS PASIŪLYMAS
-## Dirbtinio intelekto (DI) asistuojama 24/7 klientų aptarnavimo paslauga klinikai „[Klinikos Pavadinimas]“
+## Prarastos apyvartos sugrąžinimo ir tuščių kėdžių apsaugos sistema „Marija DI“ klinikai „[Klinikos Pavadinimas]“
 **Pasiūlymo numeris:** TP-2026-05  
 **Data:** 2026 m. gegužės 26 d.  
 **Klasifikacija:** Komercinis pasiūlymas (B2B)
@@ -16,23 +16,23 @@
 
 Laba diena,
 
-Šiuolaikinės pirmaujančios odontologijos ir medicinos klinikos susiduria su dideliu iššūkiu – **komunikacijos kanalų perkrova**. Tyrimai rodo, kad administratoriai net **40–60 % savo darbo laiko** sugaišta atsakydami į pasikartojančius, žemos pridėtinės vertės klausimus: apie paslaugų kainas, teritorinių ligonių kasų (PSD) kompensacijas, automobilių stovėjimą ar darbo laiką.
+Šiuolaikinės pirmaujančios odontologijos ir medicinos klinikos susiduria su kritiniu iššūkiu – **nepanaudotu gydytojų laiku ir prarasta apyvarta (tuščiomis kėdėmis)**. Didžiausias klinikos vadovo ir direktoriaus skausmas yra tuščia gydytojo kėdė. Tuo pat metu registratūra (pvz., administratorė Aistė) sugaišta net **40–60 % savo darbo laiko** atsakydama į pasikartojančius, žemos pridėtinės vertės klausimus: apie paslaugų kainas, teritorinių ligonių kasų (PSD) kompensacijas, automobilių stovėjimą ar klinikos vietą.
 
 Kai Jūsų registratūra yra užimta arba klinika nedirba (naktimis, savaitgaliais, švenčių dienomis), potencialūs pacientai, ieškantys skubios pagalbos ar norintys užsiregistruoti, dažnai neranda greito atsakymo ir kreipiasi į konkurentus.
 
-Norime Jums pristatyti **„Marija AI“** – specializuotą dirbtinio intelekto asistentą, sukurtą medicinos ir odontologijos klinikoms. Tai debesų kompiuterijos (SaaS) sprendimas, kuris automatizuoja pacientų aptarnavimą, atlieka pirminę registraciją ir padidina vizitų skaičių nepadidinant Jūsų personalo išlaidų.
+Norime Jums pristatyti **„Marija DI“** – prarastos apyvartos sugrąžinimo sistemą, sukurtą išskirtinai medicinos ir odontologijos klinikoms. Tai nėra paprastas pokalbių robotas; tai veikia kaip **24/7 draudimo polisas prieš prarastas pajamas ir tuščias kėdes**, užtikrinantis, kad joks pacientas nebūtų paliktas be atsako.
 
 ---
 
-### **Pagrindinės „Marija AI“ funkcijos ir nauda Jūsų klinikai:**
+### **Pagrindinės „Marija DI“ funkcijos ir nauda Jūsų klinikai:**
 
-*   **🚀 Prieinamumas 24/7 (Papildomų pacientų pritraukimas):** Dantų skausmas ar noras užsiregistruoti vizitui neturi darbo valandų. „Marija AI“ atsako į pacientų užklausas akimirksniu, 24 valandas per parą, 365 dienas per metus – paversdama naktinį interneto srautą patvirtintomis registracijomis.
+*   **🚀 Tuščių kėdžių fiksavimas (Apyvartos sugrąžinimas):** Dantų skausmas ar noras užsiregistruoti vizitui neturi darbo valandų. „Marija DI“ akimirksniu reaguoja į pacientų užklausas 24 valandas per parą, 365 dienas per metus – paversdama naktinį ir savaitgalio interneto srautą patvirtintomis registracijomis ir tiesiogiai užpildydama laisvus gydytojų laikus.
 *   **🌐 Automatinis daugiakalbiškumas (Daugiakalbė aplinka):** Asistentė akimirksniu atpažįsta kalbą, kuria kreipiasi pacientas (**lietuvių, anglų, ispanų, rusų, lenkų** ir kt.), ir bendrauja su juo sklandžia, profesionalia kalba. Ji pati išverčia klinikos duomenis (kainas, taisykles) iš lietuvių kalbos į paciento kalbą realiuoju laiku.
-*   **⚡ Neribotas vienalaikių pokalbių skaičius:** Skirtingai nei žmogus, kuris vienu metu gali kalbėti tik su vienu pacientu, „Marija AI“ gali sklandžiai vesti **šimtus pokalbių vienu metu**. Pamirškite užimtas telefono linijas ar laukimo eiles.
-*   **📅 Integracija su Jūsų klinikos registracijos sistema (CRM):** Siūlome 3 lankstaus sujungimo lygius:
-    1.  *Tiesioginė API integracija:* Automatinis laisvų laikų nuskaitymas ir tiesioginis vizito įrašymas į Jūsų debesų programą (*Dentally, Cliniko, Docplanner* ar vietines lietuviškas sistemas).
-    2.  *Standartinis sinchronizavimas:* Rezervacijos atliekamos per bendrus *Google Calendar* arba *Outlook* kalendorius.
-    3.  *Hibridinis pre-registracijos modelis (Nulinė instaliacija):* Vizitai patenka į Jūsų asmeninį internetinį skydelį kaip „laukia patvirtinimo“. Administratorius el. paštu gauna pranešimą ir vienu paspaudimu perkelia duomenis į savo darbinę programą, išlaikydamas visišką kontrolę.
+*   **⚡ Neribotas vienalaikių pokalbių skaičius:** Skirtingai nei žmogus, kuris vienu metu gali kalbėti tik su vienu pacientu, „Marija DI“ gali sklandžiai vesti **šimtus pokalbių vienu metu**. Pamirškite užimtas telefono linijas ar laukimo eiles piko valandomis.
+*   **📅 Lankstus vizitų koordinavimas (Friccijos nulis):** Siūlome 3 lankstaus sujungimo lygius:
+    1.  *Tiesioginis sinchronizavimas:* Rezervacijos atliekamos per bendrus *Google Calendar* arba *Outlook* kalendorius.
+    2.  *Hibridinis pre-registracijos modelis (Nulinė instaliacija):* Vizitai patenka į Jūsų asmeninį internetinį skydelį kaip „laukia patvirtinimo“. Administratorius el. paštu gauna pranešimą ir vienu paspaudimu perkelia duomenis į savo darbinę programą, išlaikydamas visišką kontrolę be jokios IT rizikos pradinėje fazėje.
+    3.  *Pilna integracija:* Automatinis laisvų laikų nuskaitymas ir tiesioginis vizito įrašymas į Jūsų programą (*Dentally, Foxus* ar kitas sistemas).
 
 ---
 
@@ -48,31 +48,32 @@ Norime Jums pristatyti **„Marija AI“** – specializuotą dirbtinio intelekt
 
 ---
 
-*   **⚡ Pirminis poreikių įvertinimas ir skubios pagalbos administravimas (MDR atitiktis):**
+*   **⚡ „SKUBUS“ registracijos protokolas ir pirminis poreikių įvertinimas (MDR atitiktis):**
     
     > **[REKOMENDUOJAMAS VAIZDINIS APARTALAS: Callout dėžutė su kairiuoju 3pt Cian Eléctrico bordu ir šviesiu fonu]**  
-    > Jei pacientas mini ūmų skausmą, patinimą ar traumą, asistentė aktyvuoja skubos pranešimo protokolą: pateikia klinikos budinčio telefono numerį ir sistemoje iškart pažymi šią užklausą **ryškiai raudona „SKUBUS“ žyma**. 
+    > Kai pacientas pokalbyje mini tokius raktinius žodžius kaip **„skausmas“ (skausmas)** arba **„trauma“ (trauma)**, asistentė akimirksniu aktyvuoja specialų skubos pranešimo protokolą: sistemoje pažymi šią užklausą **ryškiai raudona „SKUBUS“ žyma** ir pateikia klinikos budinčio telefono numerį. Tai paverčia užklausą aukščiausio prioriteto finansine transakcija prieš pacientui išeinant pas konkurentus.
     > 
-    > *Svarbi pastaba:* Sistema yra griežtai **administracinio ir informacinio pobūdžio**. Ji neatlieka jokios klinikinės diagnozės ar medicininio triažo ir nepataria dėl gydymo eigų. Užsienio kalba įvestus simptomus ji automatiškai išverčia į lietuvių kalbą Jūsų administratorių patogumui (pvz., išverčia *„arreglar caries“* į *„taisyti ėduonį“*).
+    > *Svarbi pastaba dėl medicininio atitikimo (MDR):* Sistema yra griežtai **administracinio ir informacinio pobūdžio**. Ji neatlieka jokios klinikinės diagnozės ar medicininio triažo ir nepataria dėl gydymo eigų. Ji naudoja tikslią ir profesionalią medicinos terminiją (pvz., visada naudoja oficialų terminą **„taisyti ėduonį“** vietoj buitinio „taisyti skyles“ ar užsienietiško *„arreglar caries“*) ir visada pagarbiai kreipiasi į pacientą įvardžiu **„Jūs“**.
 
-*   **☁️ Diegimas per 10 minučių (Nereikalauja IT žinių):** Sprendimas veikia debesyje. Į Jūsų svetainę įterpiamas paprastas skriptas, kuris sukuria elegantišką plaukiojantį pokalbių burbulą. Nereikia pirkti jokios papildomos techninės ar programinės įrangos.
+*   **☁️ „Nulinė instaliacija“ per 10 minučių (Jokių IT departamentų kliūčių):**
+    Sistemos diegimas atliekamas akimirksniu – į Jūsų svetainę tiesiog įterpiama viena skripto eilutė (`<script>`), kuri sukuria elegantišką plaukiojantį pokalbių burbulą. Pradinėje fazėje neliečiami jokie klinikos vidiniai serveriai ar duomenų bazės, todėl **visiškai išvengiama IT saugumo rizikų** ir paraližiaus sprendimo priėmimo procese.
 
 ---
 
 ### **Finansinis poveikis ir investicijų grąža (ROI):**
 
-1.  **Vizitų skaičiaus augimas (15–20 %):** Užtikrinant greitą atsakymą ne darbo valandomis, klinikos patiria tiesioginį naujų pacientų registracijų padidėjimą jau per pirmąsias 60 dienų.
-2.  **Personalo laiko išlaisvinimas:** Administratoriai atsikrato pasikartojančios rutinos ir gali visą dėmesį skirti klinikoje fiziškai esančių pacientų priėmimui bei kokybiškam VIP aptarnavimui.
+1.  **Užkirstas kelias prarastiems naktiniams ir savaitgalio pacientams:** Konkurentai dažnai perima pacientus, kurie patiria dantų skausmą ar traumą ne darbo valandomis (pvz., sekmadienį 2 val. nakties). „Marija DI“ užfiksuoja šį didelės vertės pacientą iškart, prieš jam ieškant kitos klinikos.
+2.  **Darbo krūvio valdymas piko valandomis:** Ryto piko metu (8:00–11:00 val.) sistema perima visą buitinių užklausų srautą iš administratorės Aistės, leisdama jai sutaupyti **40–60 % laiko** ir susitelkti į klinikoje fiziškai esančių pacientų priėmimą bei brangių gydymo planų derinimą.
 
 ---
 
 ### **Technologinis kelrodis: Ateities balso skambučiai**
-Šiuo metu aktyviai ruošiame **2-ąją „Marija AI“ fazę (Balso asistentas telefonu)**:
+Šiuo metu aktyviai ruošiame **2-ąją „Marija DI“ fazę (Balso asistentas telefonu)**:
 *   **Išmanusis VoIP skambutis:** Galimybė priimti įeinančius skambučius tiesiogiai klinikos numeriu.
 *   **Autonominiai patvirtinimo skambučiai:** Išankstiniai skambučiai pacientams likus dienai iki vizito natūralia lietuvių kalbos balso intonacija.
 *   *No-Show* sumažinimas **35–45 %**: Pasaulinė statistika rodo, kad tokie automatiniai balso priminimai sumažina neatvykstančių pacientų skaičių, o tai klinikos metines pajamas padidina vidutiniškai **5 %**.
 
-Mielai parengtume nemokamą interaktyvią demonstracinę versiją (kloną) su Jūsų klinikos duomenimis ir logotipu, kad galėtumėte patys išbandyti asistentės darbą praktiškai.
+Mielai parengtume nemokamą interaktyvią demonstracinę versiją (kloną) su Jūsų klinikos logotipu, spalvomis ir PSD tarifais, kad galėtumėte patys per 2 minutes įsitikinti, kaip lengvai sugrąžinama prarasta apyvarta.
 
 ---
 

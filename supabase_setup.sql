@@ -30,3 +30,13 @@ ALTER TABLE public.user_credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.webhook_logs ENABLE ROW LEVEL SECURITY;
 
 -- Nota: No creamos políticas (Policies) públicas porque manejaremos todo desde el Backend (Service Role).
+-- 
+-- ⚠️ NOTA DE SEGURIDAD (Supabase - Mayo 2026):
+-- A partir de esta fecha, las tablas nuevas en el esquema 'public' no se exponen por defecto a la API de datos
+-- (PostgREST / supabase-js para anon/authenticated). 
+-- Como estas tablas (user_credits y webhook_logs) se acceden exclusivamente desde tu Backend seguro con 
+-- la Service Role Key, esta restricción es ideal y no requiere ningún cambio.
+-- Si en el futuro creases una tabla que debas consultar directamente desde el Front-End, 
+-- deberás añadir explícitamente:
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.nombre_tabla TO anon, authenticated;
+
