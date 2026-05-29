@@ -287,6 +287,7 @@ export default function PresentationMarija() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [audioObj, setAudioObj] = useState<HTMLAudioElement | null>(null);
+  const [isRecordingFinished, setIsRecordingFinished] = useState(false);
 
   // Navigation key listeners for clinical presentation mode
   useEffect(() => {
@@ -348,8 +349,10 @@ export default function PresentationMarija() {
         setCurrentSlide(8);
       }
 
-      if (audioObj.ended) {
+      if (time >= 76 || audioObj.ended) {
+        audioObj.pause();
         setIsPlaying(false);
+        setIsRecordingFinished(true);
         clearInterval(interval);
       }
     }, 100);
@@ -380,6 +383,7 @@ export default function PresentationMarija() {
       
       // Trigger a 1.5-second countdown delay to allow the user to sweep their mouse off screen!
       setIsCountingDown(true);
+      setIsRecordingFinished(false);
       setCurrentSlide(1);
       setChairFilled(false);
       setContractSigned(false);
@@ -454,51 +458,86 @@ export default function PresentationMarija() {
         </div>
       )}
 
+      {/* Recording Finished Glassmorphic Overlay */}
+      {isRecordingFinished && (
+        <div className="absolute inset-0 bg-[#0B192C]/90 backdrop-blur-xl z-50 flex flex-col items-center justify-center animate-fadeIn">
+          <div className="p-12 rounded-[2.5rem] border-2 border-emerald-500/50 bg-[#050D1A]/95 text-center flex flex-col items-center gap-6 shadow-[0_0_60px_rgba(16,185,129,0.4)] max-w-xl relative">
+            <button 
+              onClick={() => setIsRecordingFinished(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-white text-2xl font-bold px-4 py-2 hover:bg-white/10 rounded-full transition-all"
+            >
+              ✕
+            </button>
+            <div className="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] animate-pulse">
+              <Check className="w-14 h-14 stroke-[3.5]" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <h3 className="font-black text-3xl text-white uppercase tracking-wider">
+                {currentLang === 'lt' ? 'ĮRAŠYMAS BAIGTAS!' : currentLang === 'es' ? '¡GRABACIÓN FINALIZADA!' : 'RECORDING COMPLETE!'}
+              </h3>
+              <p className="text-emerald-400 font-bold text-xl leading-relaxed">
+                {currentLang === 'lt' 
+                  ? 'Pristatymas sėkmingai baigėsi. Dabar galite sustabdyti OBS įrašymą.' 
+                  : currentLang === 'es' 
+                    ? 'La presentación ha concluido con éxito. Ya puedes detener la grabación en OBS.' 
+                    : 'The presentation has successfully ended. You can now stop your OBS recording.'}
+              </p>
+            </div>
+            <button 
+              onClick={() => setIsRecordingFinished(false)}
+              className="mt-4 px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base rounded-xl transition-all uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+            >
+              {currentLang === 'lt' ? 'Uždaryti' : currentLang === 'es' ? 'Entendido' : 'Close'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar / Slide Header - MB PROCDI Branding */}
-      <header className="w-full flex justify-between items-center z-20 pb-5 border-b border-[#008DDA]/30 relative">
-        <div className="flex items-center gap-4">
-          <ProcdiLogo className="w-16 h-16 shrink-0 drop-shadow-[0_0_15px_rgba(0,141,218,0.5)]" />
+      <header className="w-full flex justify-between items-center z-20 pb-6 border-b border-[#00E5FF]/30 relative">
+        <div className="flex items-center gap-5">
+          <ProcdiLogo className="w-20 h-20 shrink-0 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" />
           <div className="flex flex-col">
-            <span className="font-bold text-3xl tracking-wider text-white leading-none">
+            <span className="font-semibold text-3xl md:text-4xl tracking-[0.08em] text-white leading-none">
               MB PROCDI
             </span>
-            <span className="text-sm text-[#008DDA] font-bold uppercase tracking-widest mt-2">
+            <span className="text-base md:text-lg text-[#00E5FF] font-medium uppercase tracking-[0.16em] mt-2.5">
               Marija DI • Premium Clinical AI System
             </span>
           </div>
         </div>
         
-        <div className="flex items-center gap-6">
-          {/* Interactive Play/Sync System - LARGE AND BOLD FOR PERFECT RECORDING */}
+        <div className="flex items-center gap-8">
+          {/* Interactive Play/Sync System - LARGE AND CRISP FOR PERFECT RECORDING */}
           <button 
             onClick={togglePlay}
-            className={`flex items-center gap-2 px-6 py-3 text-sm md:text-base font-bold rounded-xl border transition-all duration-300 ${isPlaying || isCountingDown ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-[#050D1A] border-[#008DDA]/50 text-[#00E5FF] hover:bg-[#008DDA]/10 shadow-[0_4px_12px_rgba(0,141,218,0.15)]'}`}
+            className={`flex items-center gap-2.5 px-8 py-3.5 text-base md:text-lg lg:text-xl font-semibold rounded-xl border transition-all duration-300 tracking-wider ${isPlaying || isCountingDown ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-[#050D1A] border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#008DDA]/20 shadow-[0_4px_16px_rgba(0,229,255,0.15)]'}`}
           >
             {isPlaying || isCountingDown ? (
               <>
-                <div className="w-2.5 h-2.5 bg-white rounded-full animate-ping mr-1" />
+                <div className="w-3 h-3 bg-white rounded-full animate-ping mr-1.5" />
                 {isCountingDown 
                   ? (currentLang === 'lt' ? 'PASIRUOŠIMAS...' : 'PREPARANDO...') 
                   : (currentLang === 'lt' ? 'ATKURIAMA (LT)' : currentLang === 'es' ? 'REPRODUCIR (ES)' : 'PLAYING (EN)')}
               </>
             ) : (
               <>
-                <svg className="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 fill-current mr-2" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                {currentLang === 'lt' ? 'ATKURTI & SINCHRONIZUOTI' : currentLang === 'es' ? 'AUTO-PLAY SINCRO' : 'AUTO-PLAY SYNC'}
+                {currentLang === 'lt' ? 'ATKURTI IR SINCHRONIZUOTI' : currentLang === 'es' ? 'AUTO-PLAY SINCRONIZAR' : 'AUTO-PLAY SYNC'}
               </>
             )}
           </button>
 
-          {/* Overhauled Language Selector: LARGER, SEMI-BOLD, EXTREMELY CRISP AND HIGH CONTRAST */}
-          <div className="flex bg-[#050D1A]/95 backdrop-blur-md rounded-full p-2 border-2 border-[#008DDA]/40 shadow-2xl">
+          {/* Overhauled Language Selector: MUCH LARGER, SEMI-BOLD, EXTREMELY HIGH CONTRAST */}
+          <div className="flex bg-[#050D1A]/95 backdrop-blur-md rounded-full p-2 gap-3 border-2 border-[#00E5FF]/40 shadow-2xl">
             <button 
               onClick={() => {
                 if (isPlaying) togglePlay();
                 setCurrentLang('lt');
               }}
-              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'lt' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
+              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'lt' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
             >
               LT (Lietuvių)
             </button>
@@ -507,7 +546,7 @@ export default function PresentationMarija() {
                 if (isPlaying) togglePlay();
                 setCurrentLang('es');
               }}
-              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'es' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
+              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'es' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
             >
               ES (Español)
             </button>
@@ -516,13 +555,13 @@ export default function PresentationMarija() {
                 if (isPlaying) togglePlay();
                 setCurrentLang('en');
               }}
-              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'en' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
+              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'en' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
             >
               EN (English)
             </button>
           </div>
           
-          <div className="text-base font-bold text-[#00E5FF] bg-[#050D1A]/95 border-2 border-[#008DDA]/40 px-5 py-2 rounded-xl shadow-inner">
+          <div className="text-lg md:text-xl font-semibold text-[#00E5FF] bg-[#050D1A]/95 border-2 border-[#00E5FF]/40 px-6 py-3.5 rounded-xl shadow-inner tracking-wider">
             Slide {currentSlide} / 8
           </div>
         </div>
