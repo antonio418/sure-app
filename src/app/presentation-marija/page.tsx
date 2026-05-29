@@ -302,54 +302,72 @@ export default function PresentationMarija() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, isPlaying, audioObj, isCountingDown]);
 
-  // Audio Play / Sync effect
+  // Audio Play / Sync effect - Dynamically calibrated to exact real audio track lengths
   useEffect(() => {
     if (!isPlaying || !audioObj) return;
+
+    // Calibrate precise slide transitions and interactive state triggers to match the real durations:
+    // Lithuanian (voiceover_marija_lt.mp3): 58.06 seconds
+    // Spanish (voiceover_marija.mp3): 55.74 seconds
+    const boundaries = currentLang === 'lt' ? {
+      s2: 8.0,
+      s2_fill: 15.0,
+      s3: 22.0,
+      s4: 36.0,
+      s5: 43.0,
+      s6: 46.0,
+      s6_sign: 48.5,
+      s7: 51.0,
+      s8: 55.0,
+      end: 58.0
+    } : { // Spanish or English Fallback
+      s2: 8.0,
+      s2_fill: 14.0,
+      s3: 21.0,
+      s4: 34.0,
+      s5: 41.0,
+      s6: 44.0,
+      s6_sign: 46.0,
+      s7: 49.0,
+      s8: 53.0,
+      end: 55.7
+    };
 
     const interval = setInterval(() => {
       const time = audioObj.currentTime;
       
-      // Professional Voiceover Sync Mapping:
-      // Slide 1 (Efficiency Cover): 0:00 to 0:12 (12s)
-      // Slide 2 (Empty Chair losses): 0:12 to 0:21 (9s)
-      // Slide 3 (Overwhelmed Reception): 0:21 to 0:31 (10s)
-      // Slide 4 (Marija 24/7 smart assistant): 0:31 to 0:42 (11s)
-      // Slide 5 (Legal security & MDR): 0:42 to 0:51 (9s)
-      // Slide 6 (Adhesion Contract Shield): 0:51 to 1:04 (13s)
-      // Slide 7 (Chairs 95% ROI): 1:04 to 1:11 (7s)
-      // Slide 8 (Zero Friction Cierre): 1:11 to 1:16 (5s)
-      
-      if (time >= 0 && time < 12) {
+      if (time >= 0 && time < boundaries.s2) {
         setCurrentSlide(1);
-      } else if (time >= 12 && time < 21) {
+      } else if (time >= boundaries.s2 && time < boundaries.s3) {
         setCurrentSlide(2);
-        // Automatically simulate filling dental chair at second 16
-        if (time >= 16) {
+        // Automatically simulate filling dental chair at precisely calibrated second
+        if (time >= boundaries.s2_fill) {
           setChairFilled(true);
         } else {
           setChairFilled(false);
         }
-      } else if (time >= 21 && time < 31) {
+      } else if (time >= boundaries.s3 && time < boundaries.s4) {
         setCurrentSlide(3);
-      } else if (time >= 31 && time < 42) {
+      } else if (time >= boundaries.s4 && time < boundaries.s5) {
         setCurrentSlide(4);
-      } else if (time >= 42 && time < 51) {
+      } else if (time >= boundaries.s5 && time < boundaries.s6) {
         setCurrentSlide(5);
-      } else if (time >= 51 && time < 64) {
+      } else if (time >= boundaries.s6 && time < boundaries.s7) {
         setCurrentSlide(6);
-        // Automatically simulate contract digital signature at second 55
-        if (time >= 55) {
+        // Automatically simulate contract digital signature at precisely calibrated second
+        if (time >= boundaries.s6_sign) {
           setContractSigned(true);
         } else {
           setContractSigned(false);
         }
-      } else if (time >= 64 && time < 71) {
+      } else if (time >= boundaries.s7 && time < boundaries.s8) {
         setCurrentSlide(7);
-      } else if (time >= 71) {
+      } else if (time >= boundaries.s8) {
         setCurrentSlide(8);
       }
 
-      if (time >= 76 || audioObj.ended) {
+      // Hard stop at end of the exact audio track to prevent OBS running too long
+      if (time >= boundaries.end || audioObj.ended) {
         audioObj.pause();
         setIsPlaying(false);
         setIsRecordingFinished(true);
@@ -358,7 +376,7 @@ export default function PresentationMarija() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isPlaying, audioObj]);
+  }, [isPlaying, audioObj, currentLang]);
 
   // Clean audio on unmount
   useEffect(() => {
