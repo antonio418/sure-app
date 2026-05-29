@@ -17,7 +17,7 @@ const SCRIPTS = {
     rma: {
         title: "SURE RMA - Mitigación de Riesgo en Commodities (Español)",
         voice: "es-MX-JorgeNeural",
-        text: "En la compra de commodities bulk, las pérdidas no ocurren en el mar; ocurren en su escritorio. Inconsistencias documentales imperceptibles drenan silenciosamente el cinco por ciento de su valor transaccional. La inspección tradicional llega demasiado tarde. Valida la cantidad física en el puerto, pero ignora firmas manipuladas, inconsistencias de contratos y patrones de fraude antes de la carga. SURE RMA reescribe las reglas. A través del blindaje Quad-Shield, evaluamos instantáneamente el cumplimiento legal de Roberto, la validez contractual de Moisés, y los parámetros físicos de Alcides. Sin instalaciones de software. Un Reporte Transaccional de Riesgo en solo siete minutos, por exactamente cincuenta dólares la transacción. Su equipo solo envía el documento por e-mail. Si ocurre una pérdida fiduciaria millonaria por firmas falsas que un análisis autónomo de cincuenta dólares pudo detectar en minutos, la junta directiva asume negligencia personal. Pruébenos sin riesgo. Envíenos un negocio fallido o muerto del año dos mil veintiséis y haremos una auditoría forense ciega y gratuita para mostrarle exactamente dónde estuvo el fraude. SURE RMA. Contacto en alfredo arroba sureforensic punto com."
+        text: "En la compra de commodities bulk, las pérdidas no ocurren en el mar; ocurren en su escritorio. Inconsistencias documentales imperceptibles drenan silenciosamente el cinco por ciento de su valor transaccional. La inspección tradicional llega demasiado tarde. Valida la cantidad física en el puerto, pero ignora firmas manipuladas, inconsistencias de contratos y patrones de fraude antes de la carga. SURE RMA reescribe las rules. A través del blindaje Quad-Shield, evaluamos instantáneamente el cumplimiento legal de Roberto, la validez contractual de Moisés, y los parámetros físicos de Alcides. Sin instalaciones de software. Un Reporte Transaccional de Riesgo en solo siete minutos, por exactamente cincuenta dólares la transacción. Su equipo solo envía el documento por e-mail. Si ocurre una pérdida fiduciaria millonaria por firmas falsas que un análisis autónomo de cincuenta dólares pudo detectar en minutos, la junta directiva asume negligencia personal. Pruébenos sin riesgo. Envíenos un negocio fallido o muerto del año dos mil veintiséis y haremos una auditoría forense ciega y gratuita para mostrarle exactamente dónde estuvo el fraude. SURE RMA. Contacto en alfredo arroba sureforensic punto com."
     },
     marija: {
         title: "Marija DI - Automatización Dental Lituania (Español)",
@@ -55,9 +55,32 @@ async function generateVoiceover(name, config) {
 }
 
 async function start() {
-    console.log("=" * 70);
+    // Check command line arguments first
+    const arg = process.argv[2]?.trim().toLowerCase();
+    
+    if (arg) {
+        if (arg === "dns") {
+            await generateVoiceover("dns", SCRIPTS.dns);
+        } else if (arg === "rma") {
+            await generateVoiceover("rma", SCRIPTS.rma);
+        } else if (arg === "marija") {
+            await generateVoiceover("marija", SCRIPTS.marija);
+        } else if (arg === "marija_lt") {
+            await generateVoiceover("marija_lt", SCRIPTS.marija_lt);
+        } else if (arg === "all") {
+            await generateVoiceover("dns", SCRIPTS.dns);
+            await generateVoiceover("rma", SCRIPTS.rma);
+            await generateVoiceover("marija", SCRIPTS.marija);
+            await generateVoiceover("marija_lt", SCRIPTS.marija_lt);
+        } else {
+            console.log(`[!] Argumento desconocido: "${arg}". Intente con: dns, rma, marija, marija_lt o all.`);
+        }
+        return;
+    }
+
+    console.log("=".repeat(70));
     console.log("     SURE & PROCDI - GENERADOR LOCAL DE LOCUCIONES (NODE.JS)    ");
-    console.log("=" * 70);
+    console.log("=".repeat(70));
     console.log("Este script genera los archivos de audio MP3 comerciales exactos de 75s");
     printMenu();
 
