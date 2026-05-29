@@ -33,7 +33,7 @@ const LOCAL_TRANSLATIONS: Record<string, any> = {
     s3_point1: "Kainų ir PSD (Ligonių kasų) taisyklių aiškinimas telefonu.",
     s3_point2: "Rankinis vizitų patvirtinimas ir priminimų siuntimas.",
     s3_point3: "Pacientai su stipriu skausmu po darbo valandų nueina pas konkurentus.",
-    s3_chart_label: "Administracinė našta",
+    s3_chart_label: "Administracinė naštos pasiskirstymas",
     
     s4_title: "Marija DI: Išmanioji Asistentė 24/7",
     s4_subtitle: "Jūsų klinikos augimas be papildomų personalo išlaidų.",
@@ -455,24 +455,24 @@ export default function PresentationMarija() {
       )}
 
       {/* Top Bar / Slide Header - MB PROCDI Branding */}
-      <header className="w-full flex justify-between items-center z-20 pb-4 border-b border-[#008DDA]/30 relative">
+      <header className="w-full flex justify-between items-center z-20 pb-5 border-b border-[#008DDA]/30 relative">
         <div className="flex items-center gap-4">
-          <ProcdiLogo className="w-14 h-14 shrink-0 drop-shadow-[0_0_15px_rgba(0,141,218,0.5)]" />
+          <ProcdiLogo className="w-16 h-16 shrink-0 drop-shadow-[0_0_15px_rgba(0,141,218,0.5)]" />
           <div className="flex flex-col">
-            <span className="font-black text-3xl tracking-wider text-white leading-none">
+            <span className="font-bold text-3xl tracking-wider text-white leading-none">
               MB PROCDI
             </span>
-            <span className="text-[12px] text-[#008DDA] font-black uppercase tracking-widest mt-1.5">
+            <span className="text-sm text-[#008DDA] font-bold uppercase tracking-widest mt-2">
               Marija DI • Premium Clinical AI System
             </span>
           </div>
         </div>
         
         <div className="flex items-center gap-6">
-          {/* Interactive Play/Sync System */}
+          {/* Interactive Play/Sync System - LARGE AND BOLD FOR PERFECT RECORDING */}
           <button 
             onClick={togglePlay}
-            className={`flex items-center gap-2 px-6 py-2.5 text-xs font-black rounded-xl border transition-all duration-300 ${isPlaying || isCountingDown ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-[#050D1A] border-[#008DDA]/40 text-[#00E5FF] hover:bg-[#008DDA]/10 shadow-[0_4px_12px_rgba(0,141,218,0.1)]'}`}
+            className={`flex items-center gap-2 px-6 py-3 text-sm md:text-base font-bold rounded-xl border transition-all duration-300 ${isPlaying || isCountingDown ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-[#050D1A] border-[#008DDA]/50 text-[#00E5FF] hover:bg-[#008DDA]/10 shadow-[0_4px_12px_rgba(0,141,218,0.15)]'}`}
           >
             {isPlaying || isCountingDown ? (
               <>
@@ -483,7 +483,7 @@ export default function PresentationMarija() {
               </>
             ) : (
               <>
-                <svg className="w-3.5 h-3.5 fill-current mr-1" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
                 {currentLang === 'lt' ? 'ATKURTI & SINCHRONIZUOTI' : currentLang === 'es' ? 'AUTO-PLAY SINCRO' : 'AUTO-PLAY SYNC'}
@@ -491,13 +491,14 @@ export default function PresentationMarija() {
             )}
           </button>
 
-          <div className="flex bg-[#050D1A]/95 backdrop-blur-md rounded-full p-1.5 border border-[#008DDA]/35 shadow-2xl">
+          {/* Overhauled Language Selector: LARGER, SEMI-BOLD, EXTREMELY CRISP AND HIGH CONTRAST */}
+          <div className="flex bg-[#050D1A]/95 backdrop-blur-md rounded-full p-2 border-2 border-[#008DDA]/40 shadow-2xl">
             <button 
               onClick={() => {
                 if (isPlaying) togglePlay();
                 setCurrentLang('lt');
               }}
-              className={`px-4 py-1.5 text-xs font-black rounded-full transition-all ${currentLang === 'lt' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-300 hover:text-white'}`}
+              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'lt' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
             >
               LT (Lietuvių)
             </button>
@@ -506,7 +507,7 @@ export default function PresentationMarija() {
                 if (isPlaying) togglePlay();
                 setCurrentLang('es');
               }}
-              className={`px-4 py-1.5 text-xs font-black rounded-full transition-all ${currentLang === 'es' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-300 hover:text-white'}`}
+              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'es' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
             >
               ES (Español)
             </button>
@@ -515,13 +516,13 @@ export default function PresentationMarija() {
                 if (isPlaying) togglePlay();
                 setCurrentLang('en');
               }}
-              className={`px-4 py-1.5 text-xs font-black rounded-full transition-all ${currentLang === 'en' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-300 hover:text-white'}`}
+              className={`px-5 py-2 text-sm md:text-base font-bold rounded-full transition-all ${currentLang === 'en' ? 'bg-[#008DDA] text-white shadow-[0_0_15px_rgba(0,141,218,0.5)]' : 'text-slate-100 hover:text-white'}`}
             >
               EN (English)
             </button>
           </div>
           
-          <div className="text-sm font-black text-[#008DDA] bg-[#050D1A]/80 border border-[#008DDA]/40 px-4 py-1.5 rounded-xl shadow-inner drop-shadow-[0_0_10px_rgba(0,141,218,0.15)]">
+          <div className="text-base font-bold text-[#00E5FF] bg-[#050D1A]/95 border-2 border-[#008DDA]/40 px-5 py-2 rounded-xl shadow-inner">
             Slide {currentSlide} / 8
           </div>
         </div>
@@ -535,14 +536,14 @@ export default function PresentationMarija() {
           {currentSlide === 1 && (
             <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
               <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                {/* 1. SOLID, HIGH-CONTRAST AND SPACIOUS TOP RIBBON BADGE */}
-                <span className="self-start text-[13px] font-black uppercase tracking-[0.16em] px-6 py-3.5 rounded-2xl bg-[#008DDA] text-[#0B192C] mb-8 shadow-[0_0_25px_rgba(0,141,218,0.45)] border-2 border-[#00E5FF]/40">
+                {/* SOLID, HIGH-CONTRAST AND SPACIOUS TOP RIBBON BADGE */}
+                <span className="self-start text-[14px] md:text-[16px] font-bold uppercase tracking-[0.16em] px-6 py-3.5 rounded-2xl bg-[#008DDA] text-[#0B192C] mb-8 shadow-[0_0_25px_rgba(0,141,218,0.45)] border-2 border-[#00E5FF]/40">
                   {t('s1_badge')}
                 </span>
                 <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.1] mb-6">
                   {t('s1_title')}
                 </h1>
-                {/* 2. ELEGANT, SPACIOUS AND LIGHTER SUBTITLE STYLE */}
+                {/* ELEGANT, SPACIOUS AND LIGHTER SUBTITLE STYLE */}
                 <p className="text-2xl md:text-3.5xl font-semibold tracking-wide text-[#00E5FF] mb-8 leading-relaxed">
                   {t('s1_subtitle')}
                 </p>
