@@ -38,7 +38,7 @@ async function generateVoiceover(name, config) {
     console.log(`    Archivo de salida: ${outputFile}`);
 
     try {
-        const comm = new Communicate(config.text, { voice: config.voice });
+        const comm = new Communicate(config.text, { voice: config.voice, rate: "-15%" });
         const fileStream = fs.createWriteStream(outputFile);
 
         for await (const chunk of comm.stream()) {

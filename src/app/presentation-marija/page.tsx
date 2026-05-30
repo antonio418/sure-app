@@ -307,30 +307,30 @@ export default function PresentationMarija() {
     if (!isPlaying || !audioObj) return;
 
     // Calibrate precise slide transitions and interactive state triggers to match the real durations:
-    // Lithuanian (voiceover_marija_lt.mp3): 58.06 seconds
-    // Spanish (voiceover_marija.mp3): 55.74 seconds
+    // Lithuanian (voiceover_marija_lt.mp3) slowed down by -15%: 68.31 seconds
+    // Spanish (voiceover_marija.mp3) slowed down by -15%: 65.59 seconds
     const boundaries = currentLang === 'lt' ? {
-      s2: 8.0,
-      s2_fill: 15.0,
-      s3: 22.0,
-      s4: 36.0,
-      s5: 43.0,
-      s6: 46.0,
-      s6_sign: 48.5,
-      s7: 51.0,
-      s8: 55.0,
-      end: 58.0
+      s2: 9.5,
+      s2_fill: 18.0,
+      s3: 26.5,
+      s4: 43.5,
+      s5: 52.0,
+      s6: 56.0,
+      s6_sign: 57.5,
+      s7: 60.5,
+      s8: 64.5,
+      end: 68.3
     } : { // Spanish or English Fallback
-      s2: 8.0,
-      s2_fill: 14.0,
-      s3: 21.0,
-      s4: 34.0,
-      s5: 41.0,
-      s6: 44.0,
-      s6_sign: 46.0,
-      s7: 49.0,
-      s8: 53.0,
-      end: 55.7
+      s2: 9.5,
+      s2_fill: 17.0,
+      s3: 25.5,
+      s4: 41.5,
+      s5: 49.5,
+      s6: 53.5,
+      s6_sign: 55.0,
+      s7: 58.0,
+      s8: 62.0,
+      end: 65.5
     };
 
     const interval = setInterval(() => {
