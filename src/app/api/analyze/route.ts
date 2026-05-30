@@ -223,6 +223,16 @@ export async function POST(req: NextRequest) {
 
            const riskLevelLabel = parsedJsonData.riskScore > 60 ? mt.high : parsedJsonData.riskScore > 30 ? mt.med : mt.low;
 
+           const scaleTitle = lang === 'es' ? "Índice de Escala de Riesgo Forense SURE" : "SURE Forensic Risk Scale Index";
+           const scaleLow = lang === 'es' ? "Riesgo Bajo (0-20)" : "Low Risk (0-20)";
+           const scaleLowDesc = lang === 'es' ? "Integridad verificada, contraparte elegible." : "Verified integrity, compliant counterparty.";
+           const scaleMod = lang === 'es' ? "Riesgo Moderado (21-50)" : "Moderate Risk (21-50)";
+           const scaleModDesc = lang === 'es' ? "Anomalías menores o datos KYC incompletos." : "Minor anomalies or incomplete KYC data.";
+           const scaleHigh = lang === 'es' ? "Riesgo Alto (51-75)" : "High Risk (51-75)";
+           const scaleHighDesc = lang === 'es' ? "Discrepancias graves o desvíos de origen." : "Severe discrepancies or origin mismatches.";
+           const scaleCrit = lang === 'es' ? "Riesgo Crítico (76-100)" : "Critical Risk (76-100)";
+           const scaleCritDesc = lang === 'es' ? "Sospecha de falsificación o licencia vencida." : "Structural forgery or expired/inactive license.";
+
            emailSubject = `${mt.subj} - ${parsedJsonData.companyName || 'Unknown Entity'} (${mt.riskLbl}: ${parsedJsonData.riskScore}/100)`;
            
            emailHtml = `
@@ -260,6 +270,33 @@ export async function POST(req: NextRequest) {
                       </h2>
                       <div style="color: #1e293b; font-size: 14.5px; margin: 0; line-height: 1.7; white-space: pre-line;">${parsedJsonData.recommendations}</div>
                    </div>
+
+                    <!-- Risk Scale Index Legend -->
+                    <div style="margin-bottom: 40px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                      <h3 style="margin: 0 0 15px 0; color: #0f172a; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">${scaleTitle}</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                          <td style="padding: 10px 10px 10px 0; width: 50%; vertical-align: top; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9;">
+                            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; background-color: #f0fdf4; color: #065f46; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">${scaleLow}</span>
+                            <div style="font-size: 11px; color: #64748b; line-height: 1.4;">${scaleLowDesc}</div>
+                          </td>
+                          <td style="padding: 10px 0 10px 10px; width: 50%; vertical-align: top; border-bottom: 1px solid #f1f5f9;">
+                            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; background-color: #fffbeb; color: #b45309; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">${scaleMod}</span>
+                            <div style="font-size: 11px; color: #64748b; line-height: 1.4;">${scaleModDesc}</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 10px 10px 0 0; width: 50%; vertical-align: top; border-right: 1px solid #f1f5f9;">
+                            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; background-color: #fff7ed; color: #f59e0b; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">${scaleHigh}</span>
+                            <div style="font-size: 11px; color: #64748b; line-height: 1.4;">${scaleHighDesc}</div>
+                          </td>
+                          <td style="padding: 10px 0 0 10px; width: 50%; vertical-align: top;">
+                            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; background-color: #fef2f2; color: #991b1b; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">${scaleCrit}</span>
+                            <div style="font-size: 11px; color: #64748b; line-height: 1.4;">${scaleCritDesc}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
 
                    <!-- Anomalies Section -->
                    <div style="margin-bottom: 30px;">

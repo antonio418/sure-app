@@ -309,6 +309,52 @@ const styles = StyleSheet.create({
   signatureAgent: { fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 },
   signatureId: { fontSize: 8, color: slateText, fontFamily: 'Courier', marginBottom: 4 },
   signatureHash: { fontSize: 6, color: primaryBlue, fontFamily: 'Courier' },
+  
+  // Risk Scale Legend
+  scaleLegendWrapper: {
+    marginBottom: 20,
+    border: '1px solid #e2e8f0',
+    borderRadius: 6,
+    padding: 10,
+    backgroundColor: '#ffffff',
+  },
+  scaleLegendTitle: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: slateDark,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 6,
+    borderBottom: '1px solid #f1f5f9',
+    paddingBottom: 4,
+  },
+  scaleGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  scaleSegment: {
+    width: '24%',
+    padding: 6,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  scaleSegmentTitle: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    marginBottom: 3,
+    textTransform: 'uppercase',
+  },
+  scaleSegmentRange: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  scaleSegmentDesc: {
+    fontSize: 6,
+    color: slateText,
+    textAlign: 'center',
+    lineHeight: 1.3,
+  },
 });
 
 export interface ReportData {
@@ -766,7 +812,19 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
   const isHighRisk = data.riskScore > 50;
   
   // Ensure fallback to english if language is not explicitly defined in our dictionary
-  const t = pdfTranslations[language] || pdfTranslations["en"];
+  const baseT = pdfTranslations[language] || pdfTranslations["en"];
+  const t = {
+    ...baseT,
+    scaleTitle: language === 'es' ? "Índice de Escala de Riesgo Forense SURE" : "SURE Forensic Risk Scale Index",
+    scale020Title: language === 'es' ? "Riesgo Bajo" : "Low Risk",
+    scale020Desc: language === 'es' ? "Integridad verificada, contraparte elegible" : "Verified integrity, compliant counterparty",
+    scale2150Title: language === 'es' ? "Riesgo Moderado" : "Moderate Risk",
+    scale2150Desc: language === 'es' ? "Anomalías menores o datos KYC incompletos" : "Minor anomalies or incomplete KYC data",
+    scale5175Title: language === 'es' ? "Riesgo Alto" : "High Risk",
+    scale5175Desc: language === 'es' ? "Discrepancias graves o desvíos de origen" : "Severe discrepancies or origin mismatches",
+    scale76100Title: language === 'es' ? "Riesgo Crítico" : "Critical Risk",
+    scale76100Desc: language === 'es' ? "Sospecha de falsificación o licencia vencida" : "Structural forgery or expired license suspected",
+  };
   const isArabic = language === 'ar';
   const isRussian = language === 'ru';
   const isChinese = language === 'zh';
@@ -894,6 +952,33 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
             <Text style={styles.riskVerdictDesc}>
               {isHighRisk ? t.redAlertDesc : t.greenLightDesc}
             </Text>
+          </View>
+        </View>
+
+        {/* Risk Scale Legend Index */}
+        <View style={styles.scaleLegendWrapper}>
+          <Text style={styles.scaleLegendTitle}>{t.scaleTitle}</Text>
+          <View style={styles.scaleGrid}>
+            <View style={{ ...styles.scaleSegment, backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderLeft: '3px solid #065f46' }}>
+              <Text style={{ ...styles.scaleSegmentTitle, color: '#065f46' }}>{t.scale020Title}</Text>
+              <Text style={{ ...styles.scaleSegmentRange, color: '#065f46' }}>0 - 20</Text>
+              <Text style={styles.scaleSegmentDesc}>{t.scale020Desc}</Text>
+            </View>
+            <View style={{ ...styles.scaleSegment, backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderLeft: '3px solid #b45309' }}>
+              <Text style={{ ...styles.scaleSegmentTitle, color: '#b45309' }}>{t.scale2150Title}</Text>
+              <Text style={{ ...styles.scaleSegmentRange, color: '#b45309' }}>21 - 50</Text>
+              <Text style={styles.scaleSegmentDesc}>{t.scale2150Desc}</Text>
+            </View>
+            <View style={{ ...styles.scaleSegment, backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderLeft: '3px solid #f59e0b' }}>
+              <Text style={{ ...styles.scaleSegmentTitle, color: '#f59e0b' }}>{t.scale5175Title}</Text>
+              <Text style={{ ...styles.scaleSegmentRange, color: '#f59e0b' }}>51 - 75</Text>
+              <Text style={styles.scaleSegmentDesc}>{t.scale5175Desc}</Text>
+            </View>
+            <View style={{ ...styles.scaleSegment, backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderLeft: '3px solid #991b1b' }}>
+              <Text style={{ ...styles.scaleSegmentTitle, color: '#991b1b' }}>{t.scale76100Title}</Text>
+              <Text style={{ ...styles.scaleSegmentRange, color: '#991b1b' }}>76 - 100</Text>
+              <Text style={styles.scaleSegmentDesc}>{t.scale76100Desc}</Text>
+            </View>
           </View>
         </View>
 
