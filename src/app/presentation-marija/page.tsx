@@ -608,22 +608,36 @@ export default function PresentationMarija() {
   const totalMonthlyBenefit = noShowSavings + slotRecoverySavings;
 
   return (
-    <main className="w-screen h-screen bg-[#0B192C] text-slate-100 font-montserrat selection:bg-[#008DDA]/20 overflow-hidden flex flex-col justify-between p-8 md:p-10 relative">
+    <main className="w-screen h-screen bg-[#F8FAFC] text-[#0B192C] font-montserrat selection:bg-[#008DDA]/10 overflow-hidden flex flex-col justify-between p-6 relative">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+        .font-montserrat {
+          font-family: 'Montserrat', sans-serif !important;
+        }
+        @keyframes ecgPulse {
+          0% { stroke-dashoffset: 1000; }
+          100% { stroke-dashoffset: 0; }
+        }
+        .animate-ecgPulse {
+          stroke-dasharray: 1000;
+          animation: ecgPulse 8s linear infinite;
+        }
+      `}</style>
       
-      {/* Background radial glowing gradients matching the brand manual */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#008DDA]/10 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#008DDA]/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      {/* Soft radial tech glows in Light Mode */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#008DDA]/5 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#008DDA]/30 rounded-full blur-[120px] pointer-events-none z-0" />
 
       {/* 1.5-second Countdown / Preparation Screen Overlay */}
       {isCountingDown && (
-        <div className="absolute inset-0 bg-[#0B192C]/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center animate-fadeIn">
-          <div className="p-12 rounded-[2.5rem] border-2 border-[#008DDA]/50 bg-[#050D1A]/95 text-center flex flex-col items-center gap-6 shadow-[0_0_60px_rgba(0,141,218,0.4)] max-w-lg">
-            <div className="w-20 h-20 rounded-full border-4 border-t-transparent border-[#00E5FF] animate-spin flex items-center justify-center text-white font-black" />
+        <div className="absolute inset-0 bg-[#F8FAFC]/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center animate-fadeIn">
+          <div className="p-12 rounded-[2.5rem] border-2 border-[#0B192C] bg-white text-center flex flex-col items-center gap-6 shadow-2xl max-w-lg">
+            <div className="w-20 h-20 rounded-full border-4 border-t-transparent border-[#008DDA] animate-spin flex items-center justify-center text-[#0B192C] font-black" />
             <div className="flex flex-col gap-3">
-              <h3 className="font-black text-3xl text-white uppercase tracking-wider">
+              <h3 className="font-black text-3xl text-[#0B192C] uppercase tracking-wider">
                 {currentLang === 'lt' ? 'Pasiruoškite...' : currentLang === 'es' ? '¡Prepárate!' : 'Prepare...'}
               </h3>
-              <p className="text-[#00E5FF] font-black text-lg leading-relaxed">
+              <p className="text-[#008DDA] font-black text-lg leading-relaxed">
                 {currentLang === 'lt' 
                   ? 'Patraukite pelės žymeklį nuo ekrano!' 
                   : currentLang === 'es' 
@@ -637,22 +651,22 @@ export default function PresentationMarija() {
 
       {/* Recording Finished Glassmorphic Overlay */}
       {isRecordingFinished && (
-        <div className="absolute inset-0 bg-[#0B192C]/90 backdrop-blur-xl z-50 flex flex-col items-center justify-center animate-fadeIn">
-          <div className="p-12 rounded-[2.5rem] border-2 border-emerald-500/50 bg-[#050D1A]/95 text-center flex flex-col items-center gap-6 shadow-[0_0_60px_rgba(16,185,129,0.4)] max-w-xl relative">
+        <div className="absolute inset-0 bg-[#F8FAFC]/90 backdrop-blur-xl z-50 flex flex-col items-center justify-center animate-fadeIn">
+          <div className="p-12 rounded-[2.5rem] border-2 border-emerald-500 bg-white text-center flex flex-col items-center gap-6 shadow-2xl max-w-xl relative">
             <button 
               onClick={() => setIsRecordingFinished(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white text-2xl font-bold px-4 py-2 hover:bg-white/10 rounded-full transition-all"
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-2xl font-bold px-4 py-2 hover:bg-slate-100 rounded-full transition-all"
             >
               ✕
             </button>
-            <div className="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] animate-pulse">
+            <div className="w-24 h-24 rounded-full bg-emerald-100 border-2 border-emerald-500 flex items-center justify-center text-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.2)] animate-pulse">
               <Check className="w-14 h-14 stroke-[3.5]" />
             </div>
             <div className="flex flex-col gap-3">
-              <h3 className="font-black text-3xl text-white uppercase tracking-wider">
+              <h3 className="font-black text-3xl text-[#0B192C] uppercase tracking-wider">
                 {currentLang === 'lt' ? 'ĮRAŠYMAS BAIGTAS!' : currentLang === 'es' ? '¡GRABACIÓN FINALIZADA!' : 'RECORDING COMPLETE!'}
               </h3>
-              <p className="text-emerald-400 font-bold text-xl leading-relaxed">
+              <p className="text-emerald-600 font-bold text-xl leading-relaxed">
                 {currentLang === 'lt' 
                   ? 'Pristatymas sėkmingai baigėsi. Dabar galite sustabdyti OBS įrašymą.' 
                   : currentLang === 'es' 
@@ -662,7 +676,7 @@ export default function PresentationMarija() {
             </div>
             <button 
               onClick={() => setIsRecordingFinished(false)}
-              className="mt-4 px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base rounded-xl transition-all uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+              className="mt-4 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base rounded-xl transition-all uppercase tracking-widest shadow-[0_4px_12px_rgba(16,185,129,0.3)]"
             >
               {currentLang === 'lt' ? 'Uždaryti' : currentLang === 'es' ? 'Entendido' : 'Close'}
             </button>
@@ -670,380 +684,478 @@ export default function PresentationMarija() {
         </div>
       )}
 
-      {/* Top Bar / Slide Header - MB PROCDI Branding */}
-      <header className="w-full flex justify-between items-center z-20 pb-6 border-b border-[#00E5FF]/30 relative">
-        <div className="flex items-center gap-5">
-          <ProcdiLogo className="w-20 h-20 shrink-0 drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]" />
-          <div className="flex flex-col">
-            <span className="font-semibold text-3xl md:text-4xl tracking-[0.08em] text-white leading-none">
-              MB PROCDI
-            </span>
-            <span className="text-base md:text-lg text-[#00E5FF] font-medium uppercase tracking-[0.16em] mt-2.5">
-              Marija DI • Premium Clinical AI System
-            </span>
-          </div>
-        </div>
+      {/* Slide Inner Card Frame with cyber corner notch styling */}
+      <div className="flex-1 w-full bg-white rounded-[2rem] border-2 border-[#0B192C] p-8 flex flex-col justify-between relative shadow-[0_16px_48px_rgba(15,23,42,0.06)] overflow-hidden z-10">
         
-        <div className="flex items-center gap-8">
-          {/* Interactive Play/Sync System - LARGE AND CRISP FOR PERFECT RECORDING */}
-          <button 
-            onClick={togglePlay}
-            className={`flex items-center gap-2.5 px-8 py-3.5 text-base md:text-lg lg:text-xl font-semibold rounded-xl border transition-all duration-300 tracking-wider ${isPlaying || isCountingDown ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-[#050D1A] border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#008DDA]/20 shadow-[0_4px_16px_rgba(0,229,255,0.15)]'}`}
-          >
-            {isPlaying || isCountingDown ? (
-              <>
-                <div className="w-3 h-3 bg-white rounded-full animate-ping mr-1.5" />
-                {isCountingDown 
-                  ? (currentLang === 'lt' ? 'PASIRUOŠIMAS...' : 'PREPARANDO...') 
-                  : (currentLang === 'lt' ? 'ATKURIAMA (LT)' : currentLang === 'es' ? 'REPRODUCIR (ES)' : 'PLAYING (EN)')}
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5 fill-current mr-2" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                {currentLang === 'lt' ? 'ATKURTI IR SINCHRONIZUOTI' : currentLang === 'es' ? 'AUTO-PLAY SINCRONIZAR' : 'AUTO-PLAY SYNC'}
-              </>
-            )}
-          </button>
+        {/* Cyber Tech Corner Brackets */}
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#008DDA] rounded-tl-xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#008DDA] rounded-tr-xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#008DDA] rounded-bl-xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#008DDA] rounded-br-xl pointer-events-none" />
 
-          {/* Overhauled Language Selector: MUCH LARGER, SEMI-BOLD, EXTREMELY HIGH CONTRAST */}
-          <div className="flex bg-[#050D1A]/95 backdrop-blur-md rounded-full p-2 gap-3 border-2 border-[#00E5FF]/40 shadow-2xl">
-            <button 
-              onClick={() => {
-                if (isPlaying) togglePlay();
-                setCurrentLang('lt');
-              }}
-              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'lt' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
-            >
-              LT (Lietuvių)
-            </button>
-            <button 
-              onClick={() => {
-                if (isPlaying) togglePlay();
-                setCurrentLang('es');
-              }}
-              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'es' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
-            >
-              ES (Español)
-            </button>
-            <button 
-              onClick={() => {
-                if (isPlaying) togglePlay();
-                setCurrentLang('en');
-              }}
-              className={`px-6 py-3 text-base md:text-lg lg:text-xl font-semibold rounded-full transition-all tracking-wider ${currentLang === 'en' ? 'bg-[#00E5FF] text-[#0B192C] shadow-[0_0_25px_rgba(0,229,255,0.75)] font-bold' : 'text-slate-200 hover:text-white hover:bg-[#00E5FF]/10'}`}
-            >
-              EN (English)
-            </button>
+        {/* Top Bar / Slide Header - Premium Light Theme */}
+        <header className="w-full flex justify-between items-center z-20 pb-4 border-b border-[#0B192C]/10 relative">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center justify-center border border-slate-200 bg-white rounded-xl p-2 w-16 h-16 shadow-sm shrink-0">
+              <ProcdiLogo className="w-10 h-10 shrink-0" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-2xl tracking-[0.06em] text-[#0B192C] leading-none">
+                  PRÓCDI
+                </span>
+                <span className="text-[10px] text-white bg-[#008DDA] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                  MB PROCDI
+                </span>
+              </div>
+              <span className="text-xs text-slate-500 font-semibold uppercase tracking-[0.12em] mt-1">
+                Marija DI • Premium Clinical AI System
+              </span>
+            </div>
           </div>
           
-          <div className="text-lg md:text-xl font-semibold text-[#00E5FF] bg-[#050D1A]/95 border-2 border-[#00E5FF]/40 px-6 py-3.5 rounded-xl shadow-inner tracking-wider">
-            Slide {currentSlide} / 8
-          </div>
-        </div>
-      </header>
+          <div className="flex items-center gap-4">
+            {/* Background Music Toggle */}
+            <button 
+              onClick={() => setMusicEnabled(!musicEnabled)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs md:text-sm font-bold rounded-full border transition-all duration-300 tracking-wider ${musicEnabled ? 'bg-cyan-100 border-cyan-300 text-[#008DDA] shadow-[0_0_12px_rgba(0,141,218,0.2)] animate-pulse' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800'}`}
+            >
+              <Music className={`w-4 h-4 ${musicEnabled ? 'animate-spin' : ''}`} />
+              <span>{t('music_toggle')}</span>
+            </button>
 
-      {/* Main Slide Content Sandbox Area - Crisp, Large & Highly legible layouts */}
-      <section className="flex-1 w-full flex items-center justify-center py-6 overflow-hidden relative z-10">
-        <div className="w-full h-full flex flex-col justify-center relative">
-
-          {/* SLIDE 1: Portada */}
-          {currentSlide === 1 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                {/* SOLID, HIGH-CONTRAST AND SPACIOUS TOP RIBBON BADGE */}
-                <span className="self-start text-[14px] md:text-[16px] font-bold uppercase tracking-[0.16em] px-6 py-3.5 rounded-2xl bg-[#008DDA] text-[#0B192C] mb-8 shadow-[0_0_25px_rgba(0,141,218,0.45)] border-2 border-[#00E5FF]/40">
-                  {t('s1_badge')}
-                </span>
-                <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.1] mb-6">
-                  {t('s1_title')}
-                </h1>
-                {/* ELEGANT, SPACIOUS AND LIGHTER SUBTITLE STYLE */}
-                <p className="text-2xl md:text-3.5xl font-semibold tracking-wide text-[#00E5FF] mb-8 leading-relaxed">
-                  {t('s1_subtitle')}
-                </p>
-                <p className="text-slate-100 text-lg md:text-2xl leading-relaxed font-bold">
-                  {t('s1_desc')}
-                </p>
-              </div>
-              <div className="flex-[0.8] flex items-center justify-center">
-                <div className="relative w-80 h-80 rounded-3xl bg-[#050D1A]/90 border-2 border-[#008DDA]/45 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.6)] group backdrop-blur-md">
-                  <div className="absolute inset-4 rounded-2xl bg-gradient-to-br from-[#008DDA]/20 to-emerald-500/5 animate-pulse" />
-                  <div className="w-56 h-56 rounded-2xl bg-[#020710] border border-[#008DDA]/30 shadow-inner flex flex-col items-center justify-center gap-6 relative z-10">
-                    <Activity className="w-24 h-24 text-[#00E5FF] filter drop-shadow-[0_0_20px_rgba(0,229,255,0.45)] animate-pulse" />
-                    <span className="font-extrabold text-sm text-[#00E5FF] uppercase tracking-widest">MARIJA DI ACTIVE</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* SLIDE 2: Costo Oculto - Silla Vacía */}
-          {currentSlide === 2 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-8 leading-tight">
-                  {t('s2_title')}
-                </h2>
-                <div className="flex items-center gap-8 mb-8 bg-[#050D1A]/95 p-8 rounded-3xl border-2 border-[#008DDA]/45 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                  <div className="text-7xl md:text-8xl font-black text-[#00E5FF] tracking-tight drop-shadow-[0_0_20px_rgba(0,229,255,0.55)]">
-                    25%
-                  </div>
-                  <div>
-                    <h3 className="font-black text-white text-2xl md:text-3xl mb-2">{t('s2_metric_title')}</h3>
-                    <p className="text-base md:text-xl text-slate-100 font-bold leading-relaxed">{t('s2_metric_desc')}</p>
-                  </div>
-                </div>
-                <p className="text-slate-100 text-lg md:text-2.5xl leading-relaxed mb-8 font-bold">
-                  {t('s2_fact')}
-                </p>
-                <div className="flex gap-5">
-                  <button 
-                    onClick={() => setChairFilled(true)}
-                    className="px-8 py-4.5 bg-[#008DDA] hover:bg-[#00A3FF] text-white text-sm font-black rounded-xl shadow-[0_0_25px_rgba(0,141,218,0.5)] transition-all uppercase tracking-widest"
-                  >
-                    {t('s2_btn_fill')}
-                  </button>
-                  <button 
-                    onClick={() => setChairFilled(false)}
-                    className="px-8 py-4.5 bg-[#050D1A] hover:bg-slate-800 text-slate-100 text-sm font-black rounded-xl border border-white/30 transition-all uppercase tracking-widest"
-                  >
-                    {t('s2_btn_empty')}
-                  </button>
-                </div>
-              </div>
-              <div className="flex-[0.8] flex items-center justify-center">
-                <div className="w-[360px] p-10 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/45 flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative backdrop-blur-md">
-                  <div className={`w-full py-4 px-6 rounded-2xl text-center text-base font-black mb-8 transition-all duration-300 ${chairFilled ? 'bg-emerald-500/25 text-[#00E676] border border-emerald-500/50 shadow-[0_0_20px_rgba(0,230,118,0.25)]' : 'bg-red-500/25 text-[#FF4A4A] border border-red-500/50 shadow-[0_0_20px_rgba(255,74,74,0.25)] animate-pulse'}`}>
-                    {chairFilled ? t('s2_status_filled') : t('s2_status_empty')}
-                  </div>
-                  
-                  {/* SVG de Sillón Dental Interactivo */}
-                  <svg className="w-64 h-64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="25" y="65" width="50" height="8" rx="4" fill="#64748B" />
-                    <line x1="50" y1="65" x2="50" y2="45" stroke="#64748B" strokeWidth="6" />
-                    <path 
-                      d="M20,40 Q35,42 50,40 T80,35 Q85,45 80,50 T45,47 Q30,48 20,40 Z" 
-                      fill={chairFilled ? "#00E676" : "#FF4A4A"} 
-                      className="transition-colors duration-500" 
-                      stroke="#0B192C"
-                      strokeWidth="2"
-                    />
-                    <path 
-                      d="M22,30 Q30,35 40,30 Q45,20 35,15 Q25,20 22,30 Z" 
-                      fill="#475569" 
-                      stroke="#0B192C"
-                      strokeWidth="2"
-                    />
+            {/* Play/Sync Button */}
+            <button 
+              onClick={togglePlay}
+              className={`flex items-center gap-2 px-5 py-2.5 text-xs md:text-sm font-bold rounded-full border transition-all duration-300 tracking-wider ${isPlaying || isCountingDown ? 'bg-emerald-600 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse' : 'bg-[#0B192C] border-[#0B192C] text-white hover:bg-[#008DDA] hover:border-[#008DDA] shadow-md'}`}
+            >
+              {isPlaying || isCountingDown ? (
+                <>
+                  <div className="w-2 h-2 bg-white rounded-full animate-ping mr-1" />
+                  {isCountingDown 
+                    ? (currentLang === 'lt' ? 'PASIRUOŠIMAS...' : 'PREPARANDO...') 
+                    : (currentLang === 'lt' ? 'GROJA (LT)' : currentLang === 'es' ? 'REPRODUCIENDO (ES)' : 'PLAYING (EN)')}
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
                   </svg>
-                </div>
-              </div>
-            </div>
-          )}
+                  {currentLang === 'lt' ? 'GROTI IR SINCHRONIZUOTI' : currentLang === 'es' ? 'AUTO-PLAY SINCRONIZAR' : 'AUTO-PLAY SYNC'}
+                </>
+              )}
+            </button>
 
-          {/* SLIDE 3: Recepción Perkrauta */}
-          {currentSlide === 3 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-8 leading-tight">
-                  {t('s3_title')}
-                </h2>
-                <div className="flex items-center gap-8 mb-8 bg-[#050D1A]/95 p-8 rounded-3xl border-2 border-[#008DDA]/45 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                  <div className="text-6xl md:text-7xl font-black text-[#FF4A4A] tracking-tight drop-shadow-[0_0_20px_rgba(255,74,74,0.55)]">
-                    60%
-                  </div>
-                  <div>
-                    <h3 className="font-black text-white text-2xl md:text-3xl mb-2">{t('s3_stat_title')}</h3>
-                    <p className="text-base md:text-xl text-slate-100 font-bold leading-relaxed">{t('s3_stat_desc')}</p>
-                  </div>
+            {/* Language Selector */}
+            <div className="flex bg-slate-100 rounded-full p-1 border border-slate-200 shadow-inner">
+              <button 
+                onClick={() => {
+                  if (isPlaying) togglePlay();
+                  setCurrentLang('lt');
+                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all tracking-wider ${currentLang === 'lt' ? 'bg-[#0B192C] text-white shadow-md' : 'text-slate-600 hover:text-[#0B192C]'}`}
+              >
+                LT
+              </button>
+              <button 
+                onClick={() => {
+                  if (isPlaying) togglePlay();
+                  setCurrentLang('es');
+                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all tracking-wider ${currentLang === 'es' ? 'bg-[#0B192C] text-white shadow-md' : 'text-slate-600 hover:text-[#0B192C]'}`}
+              >
+                ES
+              </button>
+              <button 
+                onClick={() => {
+                  if (isPlaying) togglePlay();
+                  setCurrentLang('en');
+                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all tracking-wider ${currentLang === 'en' ? 'bg-[#0B192C] text-white shadow-md' : 'text-slate-600 hover:text-[#0B192C]'}`}
+              >
+                EN
+              </button>
+            </div>
+            
+            <div className="text-xs font-bold text-[#008DDA] bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-full shadow-sm tracking-wider">
+              Slide {currentSlide} / 8
+            </div>
+          </div>
+        </header>
+
+        {/* Main Slide Content Sandbox Area */}
+        <section className="flex-1 w-full flex items-center justify-center py-4 overflow-hidden relative z-10">
+          <div className="w-full h-full flex flex-col justify-center relative">
+
+            {/* SLIDE 1: Portada */}
+            {currentSlide === 1 && (
+              <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-8 animate-fadeIn">
+                <div className="flex-[1.5] flex flex-col justify-center max-w-3xl">
+                  <span className="self-start text-[11px] md:text-[12px] font-black uppercase tracking-[0.14em] px-4 py-2 rounded-full bg-[#008DDA]/10 border border-[#008DDA]/30 text-[#008DDA] mb-6 shadow-sm">
+                    {t('s1_badge')}
+                  </span>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-[#0B192C] leading-[1.15] mb-4">
+                    {t('s1_title')}
+                  </h1>
+                  <p className="text-xl md:text-2xl font-bold tracking-wide text-[#008DDA] mb-6 leading-relaxed">
+                    {t('s1_subtitle')}
+                  </p>
+                  <p className="text-slate-600 text-base md:text-lg leading-relaxed font-semibold">
+                    {t('s1_desc')}
+                  </p>
                 </div>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-slate-100 font-bold leading-relaxed">
-                    <AlertTriangle className="w-8 h-8 text-[#FF4A4A] flex-shrink-0 mt-0.5 animate-pulse" />
-                    <span>{t('s3_point1')}</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-slate-100 font-bold leading-relaxed">
-                    <AlertTriangle className="w-8 h-8 text-[#FF4A4A] flex-shrink-0 mt-0.5 animate-pulse" />
-                    <span>{t('s3_point2')}</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-slate-100 font-bold leading-relaxed">
-                    <AlertTriangle className="w-8 h-8 text-[#FF4A4A] flex-shrink-0 mt-0.5 animate-pulse" />
-                    <span>{t('s3_point3')}</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="flex-[0.8] flex items-center justify-center">
-                <div className="w-96 p-10 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/45 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4)] h-96 backdrop-blur-md">
-                  <span className="text-xs font-black uppercase tracking-widest text-[#00E5FF] text-center w-full block border-b border-[#008DDA]/20 pb-3">{t('s3_chart_label')}</span>
-                  <div className="flex-1 flex items-end justify-center gap-14 mt-8">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-24 bg-[#0B192C] border-2 border-white/30 rounded-t-2xl h-32 flex items-center justify-center text-slate-100 font-black text-lg shadow-md transition-all hover:scale-105">
-                        40%
+                <div className="flex-[0.9] flex items-center justify-center">
+                  <div className="relative w-72 h-72 rounded-3xl bg-slate-50 border border-slate-200 flex items-center justify-center shadow-md p-6 overflow-hidden">
+                    <div className="w-full flex flex-col items-center gap-4">
+                      <svg className="w-full h-32" viewBox="0 0 200 100" fill="none">
+                        <path d="M0 10H200M0 20H200M0 30H200M0 40H200M0 50H200M0 60H200M0 70H200M0 80H200M0 90H200" stroke="#E2E8F0" strokeWidth="0.5" />
+                        <path d="M20 0V100M40 0V100M60 0V100M80 0V100M100 0V100M120 0V100M140 0V100M160 0V100M180 0V100" stroke="#E2E8F0" strokeWidth="0.5" />
+                        <path 
+                          d="M0 50 L60 50 L70 30 L80 70 L90 50 L100 50 L105 20 L110 80 L115 50 L125 50 L130 45 L135 55 L140 50 L200 50" 
+                          stroke="#008DDA" 
+                          strokeWidth="3.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="animate-ecgPulse"
+                        />
+                      </svg>
+                      <div className="flex items-center gap-2 mt-2 bg-emerald-100 border border-emerald-300 text-emerald-700 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        MARIJA DI ACTIVE
                       </div>
-                      <span className="text-xs font-black text-slate-200 uppercase tracking-widest">{currentLang === 'lt' ? 'Klinika' : 'Clínica'}</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-24 bg-[#FF4A4A] border-2 border-[#FF8A8A] rounded-t-2xl h-48 flex items-center justify-center text-white font-black text-lg shadow-[0_0_25px_rgba(255,74,74,0.4)] animate-pulse transition-all hover:scale-105">
-                        60%
-                      </div>
-                      <span className="text-xs font-black text-slate-200 uppercase tracking-widest">{currentLang === 'lt' ? 'Admin' : 'Admin'}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* SLIDE 4: Marija DI Asistente */}
-          {currentSlide === 4 && (
-            <div className="flex-1 flex flex-col justify-center">
-              <div className="mb-10 max-w-5xl">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6">
-                  {t('s4_title')}
-                </h2>
-                <p className="text-[#00E5FF] font-black text-2xl md:text-4.5xl drop-shadow-[0_0_15px_rgba(0,229,255,0.25)]">
-                  {t('s4_subtitle')}
-                </p>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 hover:border-[#00E5FF]/60 transition-all flex flex-col justify-between shadow-[0_15px_40px_rgba(0,0,0,0.4)] group backdrop-blur-md">
-                  <div>
-                    <div className="w-14 h-14 rounded-2xl bg-[#008DDA]/20 flex items-center justify-center text-[#00E5FF] mb-6 group-hover:scale-110 transition-all shadow-[0_0_15px_rgba(0,141,218,0.25)] border border-[#008DDA]/40">
-                      <Clock className="w-8 h-8" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white mb-4">{t('s4_feature1_title')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s4_feature1_desc')}</p>
-                  </div>
+            {/* SLIDE 2: Nematomi nuostoliai */}
+            {currentSlide === 2 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-4">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C] leading-tight">
+                    {t('s2_title')}
+                  </h2>
                 </div>
-                
-                <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 hover:border-[#00E5FF]/60 transition-all flex flex-col justify-between shadow-[0_15px_40px_rgba(0,0,0,0.4)] group backdrop-blur-md">
-                  <div>
-                    <div className="w-14 h-14 rounded-2xl bg-[#008DDA]/20 flex items-center justify-center text-[#00E5FF] mb-6 group-hover:scale-110 transition-all shadow-[0_0_15px_rgba(0,141,218,0.25)] border border-[#008DDA]/40">
-                      <Calendar className="w-8 h-8" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white mb-4">{t('s4_feature2_title')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s4_feature2_desc')}</p>
-                  </div>
-                </div>
-                
-                <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 hover:border-[#00E5FF]/60 transition-all flex flex-col justify-between shadow-[0_15px_40px_rgba(0,0,0,0.4)] group backdrop-blur-md">
-                  <div>
-                    <div className="w-14 h-14 rounded-2xl bg-[#008DDA]/20 flex items-center justify-center text-[#00E5FF] mb-6 group-hover:scale-110 transition-all shadow-[0_0_15px_rgba(0,141,218,0.25)] border border-[#008DDA]/40">
-                      <Settings className="w-8 h-8" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white mb-4">{t('s4_feature3_title')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s4_feature3_desc')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* SLIDE 5: Seguridad Legal y MDR */}
-          {currentSlide === 5 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                <span className="self-start text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-full bg-[#008DDA]/20 text-[#00E5FF] mb-6 border border-[#008DDA]/45 shadow-[0_0_15px_rgba(0,141,218,0.25)]">
-                  {t('s5_badge')}
-                </span>
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white leading-tight mb-6">
-                  {t('s5_header')}
-                </h2>
-                <p className="text-[#00E5FF] font-black text-xl md:text-2.5xl mb-8 leading-relaxed">
-                  {t('s5_legal_desc')}
-                </p>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-white font-bold leading-relaxed">
-                    <CheckCircle2 className="w-8 h-8 text-[#00E5FF] flex-shrink-0 mt-0.5" />
-                    <span>{t('s5_point_a')}</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-white font-bold leading-relaxed">
-                    <CheckCircle2 className="w-8 h-8 text-[#00E5FF] flex-shrink-0 mt-0.5" />
-                    <span>{t('s5_point_b')}</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-lg md:text-2xl text-white font-bold leading-relaxed">
-                    <CheckCircle2 className="w-8 h-8 text-[#00E5FF] flex-shrink-0 mt-0.5" />
-                    <span>{t('s5_point_c')}</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="flex-[0.8] flex items-center justify-center">
-                <div className="w-96 p-10 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/45 flex flex-col items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.4)] h-96 gap-8 backdrop-blur-md">
-                  <div className="w-28 h-28 rounded-full bg-[#008DDA]/20 border-2 border-[#008DDA]/45 flex items-center justify-center text-[#00E5FF] shadow-[0_0_35px_rgba(0,141,218,0.4)] animate-pulse">
-                    <ShieldCheck className="w-16 h-16" />
+                <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 py-2">
+                  <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    
+                    <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-5 shadow-sm hover:border-[#008DDA] transition-all flex flex-col justify-between h-36 relative">
+                      <div className="text-[#008DDA] font-bold text-xs uppercase tracking-widest border-b border-slate-200 pb-2">Dideli Kaštai</div>
+                      <p className="text-slate-700 text-xs md:text-sm font-bold mt-2 leading-relaxed">{t('s2_card1')}</p>
+                      <div className="self-end text-slate-300"><Clock className="w-5 h-5" /></div>
+                    </div>
+
+                    <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-5 shadow-sm hover:border-[#008DDA] transition-all flex flex-col justify-between h-36 relative">
+                      <div className="text-[#008DDA] font-bold text-xs uppercase tracking-widest border-b border-slate-200 pb-2">No-Shows</div>
+                      <p className="text-slate-700 text-xs md:text-sm font-bold mt-2 leading-relaxed">{t('s2_card2')}</p>
+                      <div className="self-end text-slate-300"><AlertTriangle className="w-5 h-5" /></div>
+                    </div>
+
+                    <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-5 shadow-sm hover:border-[#008DDA] transition-all flex flex-col justify-between h-36 relative">
+                      <div className="text-[#008DDA] font-bold text-xs uppercase tracking-widest border-b border-slate-200 pb-2">Prarasti Skubūs</div>
+                      <p className="text-slate-700 text-xs md:text-sm font-bold mt-2 leading-relaxed">{t('s2_card3')}</p>
+                      <div className="self-end text-slate-300"><Calendar className="w-5 h-5" /></div>
+                    </div>
+
+                    <div className="bg-[#0B192C] rounded-2xl p-5 text-center flex flex-col justify-center items-center h-36 shadow-md border-2 border-[#008DDA]">
+                      <span className="text-[#00E5FF] font-black text-4xl tracking-tight drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]">-25%</span>
+                      <span className="text-white text-[10px] font-black uppercase tracking-widest mt-2 leading-snug">
+                        {currentLang === 'lt' ? 'Pajamų praradimas' : currentLang === 'es' ? 'Pérdida de Ingresos' : 'Revenue Loss'}
+                      </span>
+                    </div>
+
                   </div>
-                  <span className="text-center font-black text-white text-2xl tracking-wide">MDR 2017/745 EXEMPT</span>
-                  <span className="text-center text-sm font-black text-[#00E5FF] uppercase tracking-widest leading-relaxed">100% REGULATORY SANITARY SAFE</span>
+
+                  <div className="w-60 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-between shadow-sm h-60 shrink-0">
+                    <div className={`w-full py-1.5 px-3 rounded-xl text-center text-[10px] font-black transition-all duration-300 ${chairFilled ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-red-100 text-red-700 border border-red-300 animate-pulse'}`}>
+                      {chairFilled ? t('s2_status_filled') : t('s2_status_empty')}
+                    </div>
+                    
+                    <svg className="w-28 h-28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="65" width="50" height="6" rx="3" fill="#94A3B8" />
+                      <line x1="50" y1="65" x2="50" y2="45" stroke="#94A3B8" strokeWidth="4" />
+                      <path 
+                        d="M20,40 Q35,42 50,40 T80,35 Q85,45 80,50 T45,47 Q30,48 20,40 Z" 
+                        fill={chairFilled ? "#10B981" : "#EF4444"} 
+                        className="transition-colors duration-500" 
+                        stroke="#0B192C"
+                        strokeWidth="1.5"
+                      />
+                      <path 
+                        d="M22,30 Q30,35 40,30 Q45,20 35,15 Q25,20 22,30 Z" 
+                        fill="#64748B" 
+                        stroke="#0B192C"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+
+                    <div className="flex gap-2 w-full justify-center">
+                      <button onClick={() => setChairFilled(true)} className="px-3 py-1 bg-[#008DDA] text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-wider">Fill</button>
+                      <button onClick={() => setChairFilled(false)} className="px-3 py-1 bg-slate-200 text-slate-700 text-[9px] font-black rounded-lg transition-all uppercase tracking-wider">Empty</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full bg-[#0B192C] text-white text-xs md:text-sm font-bold py-3 px-6 rounded-2xl text-center leading-relaxed mt-2">
+                  {t('s2_footer')}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* SLIDE 6: El Escudo Contractual */}
-          {currentSlide === 6 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.6] flex flex-col justify-center max-w-4xl">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-4 leading-tight">
-                  {t('s6_title')}
-                </h2>
-                <p className="text-[#00E5FF] font-black text-2xl md:text-3.5xl mb-8">
-                  {t('s6_subtitle')}
-                </p>
-                <p className="text-slate-100 text-lg md:text-2.5xl leading-relaxed mb-8 font-bold">
-                  {t('s6_desc')}
-                </p>
-                <ul className="space-y-6 mb-8">
-                  <li className="flex items-center gap-4 text-lg md:text-2.5xl text-white font-bold">
-                    <Check className="w-8 h-8 text-emerald-400 stroke-[3.5]" />
-                    <span>{t('s6_benefit1')}</span>
-                  </li>
-                  <li className="flex items-center gap-4 text-lg md:text-2.5xl text-white font-bold">
-                    <Check className="w-8 h-8 text-emerald-400 stroke-[3.5]" />
-                    <span>{t('s6_benefit2')}</span>
-                  </li>
-                </ul>
-                <button 
-                  onClick={() => setContractSigned(true)}
-                  className="self-start px-10 py-5 bg-[#008DDA] hover:bg-[#00A3FF] text-white text-sm font-black rounded-xl shadow-[0_0_25px_rgba(0,141,218,0.5)] transition-all uppercase tracking-widest"
-                >
-                  {t('s6_sign_btn')}
-                </button>
-              </div>
-              <div className="flex-[0.8] flex items-center justify-center">
-                <div className="w-96 p-10 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/45 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4)] h-96 backdrop-blur-md">
-                  <span className="text-xs font-black uppercase tracking-widest text-[#00E5FF] text-center w-full block border-b border-[#008DDA]/20 pb-3">Digital Contract Seal</span>
+            {/* SLIDE 3: Perkrauta registratūra */}
+            {currentSlide === 3 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-4">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C]">
+                    {t('s3_title')}
+                  </h2>
+                </div>
+
+                <div className="flex-1 grid md:grid-cols-2 gap-6 items-center py-2">
                   
-                  <div className="flex-1 flex items-center justify-center w-full mt-4">
-                    {contractSigned ? (
-                      <div className="flex flex-col items-center gap-6 text-emerald-400 animate-bounce">
-                        <ShieldCheck className="w-24 h-24 filter drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
-                        <span className="text-base font-black uppercase tracking-wider">{t('s6_signed_status')}</span>
-                      </div>
-                    ) : (
-                      <div className="w-full h-40 border-2 border-dashed border-[#008DDA]/40 rounded-2xl flex items-center justify-center text-slate-200 text-lg font-black hover:border-[#00E5FF] hover:text-[#00E5FF] cursor-pointer transition-all shadow-inner bg-[#020710]" onClick={() => setContractSigned(true)}>
-                        [ Click to sign / Pasirašyti ]
-                      </div>
-                    )}
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between h-56">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h3 className="font-extrabold text-base text-red-600 uppercase tracking-wider">
+                        {t('s3_col1_title')}
+                      </h3>
+                      <span className="bg-red-100 text-red-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Rutininis krūvis</span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-3">
+                      <svg className="w-20 h-20 shrink-0" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#E2E8F0" strokeWidth="4.5" />
+                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#EF4444" strokeWidth="4.5" strokeDasharray="60 40" strokeDashoffset="25" />
+                        <text x="18" y="20.5" className="font-montserrat font-black text-[9px]" fill="#EF4444" textAnchor="middle">60%</text>
+                      </svg>
+                      <p className="text-slate-600 text-xs md:text-sm font-semibold leading-relaxed">
+                        {t('s3_col1_desc')}
+                      </p>
+                    </div>
                   </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between h-56">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h3 className="font-extrabold text-base text-[#008DDA] uppercase tracking-wider">
+                        {t('s3_col2_title')}
+                      </h3>
+                      <span className="bg-[#008DDA]/10 text-[#008DDA] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Prarastos skubios</span>
+                    </div>
+                    <div className="mt-3 flex flex-col justify-center">
+                      <div className="w-full bg-slate-200 h-2 rounded-full relative overflow-hidden mb-3">
+                        <div className="absolute top-0 right-0 left-1/2 bg-[#008DDA] h-full rounded-full animate-pulse" />
+                      </div>
+                      <div className="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-wider mb-2">
+                        <span>08:00 - 20:00</span>
+                        <span className="text-[#008DDA] font-black">20:00 - 08:00 & Savaitgaliai</span>
+                      </div>
+                      <p className="text-slate-600 text-xs md:text-sm font-semibold leading-relaxed">
+                        {t('s3_col2_desc')}
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="w-full bg-[#008DDA]/10 border border-[#008DDA]/20 text-[#0B192C] text-xs md:text-sm font-bold py-3 px-6 rounded-2xl text-center leading-relaxed mt-2">
+                  {t('s3_footer')}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* SLIDE 7: Retorno de Inversión (ROI) */}
-          {currentSlide === 7 && (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-[1.4] flex flex-col justify-center max-w-4xl">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-8 leading-tight">
-                  {t('s7_title')}
-                </h2>
-                <div className="bg-[#050D1A]/95 border-2 border-[#008DDA]/45 rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.4)] mb-8 backdrop-blur-md">
-                  <h3 className="font-black text-white text-xl md:text-2xl uppercase tracking-wider mb-6">{t('s7_calc_title')}</h3>
-                  <div className="flex flex-col gap-4">
-                    <label className="text-base text-slate-200 font-extrabold">{t('s7_calc_label')}</label>
-                    <div className="flex items-center gap-8">
+            {/* SLIDE 4: Marija DI Asistente */}
+            {currentSlide === 4 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-4">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C]">
+                    {t('s4_title')}
+                  </h2>
+                </div>
+
+                <div className="flex-1 flex flex-col justify-center relative py-4">
+                  <div className="absolute left-1/12 right-1/12 top-[64px] h-0.5 border-t-2 border-dashed border-cyan-300 hidden md:block z-0" />
+
+                  <div className="grid md:grid-cols-3 gap-6 relative z-10">
+                    
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-white border-4 border-[#008DDA] shadow-md flex items-center justify-center text-[#008DDA] mb-3 hover:scale-105 transition-all">
+                        <Clock className="w-8 h-8" />
+                      </div>
+                      <h3 className="font-extrabold text-[#0B192C] text-base uppercase tracking-wider mb-1">{t('s4_card1_title')}</h3>
+                      <p className="text-slate-600 text-xs font-semibold leading-relaxed max-w-xs">{t('s4_card1_desc')}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-white border-4 border-[#008DDA] shadow-md flex items-center justify-center text-[#008DDA] mb-3 hover:scale-105 transition-all">
+                        <Activity className="w-8 h-8" />
+                      </div>
+                      <h3 className="font-extrabold text-[#0B192C] text-base uppercase tracking-wider mb-1">{t('s4_card2_title')}</h3>
+                      <p className="text-slate-600 text-xs font-semibold leading-relaxed max-w-xs">{t('s4_card2_desc')}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-white border-4 border-[#008DDA] shadow-md flex items-center justify-center text-[#008DDA] mb-3 hover:scale-105 transition-all">
+                        <Settings className="w-8 h-8" />
+                      </div>
+                      <h3 className="font-extrabold text-[#0B192C] text-base uppercase tracking-wider mb-1">{t('s4_card3_title')}</h3>
+                      <p className="text-slate-600 text-xs font-semibold leading-relaxed max-w-xs">{t('s4_card3_desc')}</p>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div className="w-full bg-[#0B192C] text-white text-xs md:text-sm font-bold py-3 px-6 rounded-2xl text-center leading-relaxed mt-2">
+                  {t('s4_footer')}
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE 5: Teisinis vientisumas */}
+            {currentSlide === 5 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-4">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C]">
+                    {t('s5_title')}
+                  </h2>
+                </div>
+
+                <div className="flex-1 grid md:grid-cols-2 gap-6 items-center py-2">
+                  
+                  <div className="bg-red-50/40 border-2 border-red-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-56">
+                    <div className="flex justify-between items-center border-b border-red-200 pb-2">
+                      <h3 className="font-extrabold text-sm md:text-base text-red-600 uppercase tracking-wider flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />
+                        {t('s5_left_title')}
+                      </h3>
+                    </div>
+                    <ul className="space-y-2 my-3">
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-red-500 rounded-full" />
+                        {t('s5_left_p1')}
+                      </li>
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-red-500 rounded-full" />
+                        {t('s5_left_p2')}
+                      </li>
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-red-500 rounded-full" />
+                        {t('s5_left_p3')}
+                      </li>
+                    </ul>
+                    <div className="text-red-500 text-[10px] font-black uppercase tracking-widest text-right">NOT ALLOWED</div>
+                  </div>
+
+                  <div className="bg-emerald-50/20 border-2 border-emerald-400 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-56">
+                    <div className="flex justify-between items-center border-b border-emerald-200 pb-2">
+                      <h3 className="font-extrabold text-sm md:text-base text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                        {t('s5_right_title')}
+                      </h3>
+                    </div>
+                    <ul className="space-y-2 my-3">
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        {t('s5_right_p1')}
+                      </li>
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        {t('s5_right_p2')}
+                      </li>
+                      <li className="flex items-center gap-2 text-slate-700 text-xs md:text-sm font-bold">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        {t('s5_right_p3')}
+                      </li>
+                    </ul>
+                    <div className="text-emerald-600 text-[10px] font-black uppercase tracking-widest text-right">MDR EXEMPT ADMINISTRATIVE TOOL</div>
+                  </div>
+
+                </div>
+
+                <div className="w-full bg-[#0B192C] text-white text-xs md:text-sm font-bold py-3 px-6 rounded-2xl text-center leading-relaxed mt-2">
+                  {t('s5_footer')}
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE 6: Escudo de Contrato */}
+            {currentSlide === 6 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-4">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C]">
+                    {t('s6_title')}
+                  </h2>
+                </div>
+
+                <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 py-2">
+                  <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center h-36 flex flex-col justify-between shadow-sm relative group hover:border-[#008DDA] transition-all">
+                      <span className="text-[#008DDA] font-black text-lg">01</span>
+                      <p className="text-slate-700 text-[10px] md:text-xs font-bold leading-normal">{t('s6_step1')}</p>
+                      <div className="absolute right-[-14px] top-1/2 -translate-y-1/2 hidden md:block text-[#008DDA] z-20 font-black text-base">▶</div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center h-36 flex flex-col justify-between shadow-sm relative group hover:border-[#008DDA] transition-all">
+                      <span className="text-[#008DDA] font-black text-lg">02</span>
+                      <p className="text-slate-700 text-[10px] md:text-xs font-bold leading-normal">{t('s6_step2')}</p>
+                      <div className="absolute right-[-14px] top-1/2 -translate-y-1/2 hidden md:block text-[#008DDA] z-20 font-black text-base">▶</div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center h-36 flex flex-col justify-between shadow-sm relative group hover:border-[#008DDA] transition-all">
+                      <span className="text-[#008DDA] font-black text-lg">03</span>
+                      <p className="text-slate-700 text-[10px] md:text-xs font-bold leading-normal">{t('s6_step3')}</p>
+                      <div className="absolute right-[-14px] top-1/2 -translate-y-1/2 hidden md:block text-[#008DDA] z-20 font-black text-base">▶</div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center h-36 flex flex-col justify-between shadow-sm relative group hover:border-[#008DDA] transition-all">
+                      <span className="text-[#008DDA] font-black text-lg">04</span>
+                      <p className="text-slate-700 text-[10px] md:text-xs font-bold leading-normal">{t('s6_step4')}</p>
+                    </div>
+
+                  </div>
+
+                  <div className="w-72 p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between shadow-sm h-56 shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#008DDA] text-center w-full block border-b border-slate-200 pb-2">Digital Contract Seal</span>
+                    
+                    <div className="flex-1 flex items-center justify-center w-full mt-3">
+                      {contractSigned ? (
+                        <div className="flex flex-col items-center gap-3 text-emerald-600 animate-bounce">
+                          <ShieldCheck className="w-12 h-12 text-emerald-500 filter drop-shadow-[0_0_10px_rgba(16,185,129,0.2)]" />
+                          <span className="text-[10px] font-black uppercase tracking-wider text-center">{t('s6_signed_status')}</span>
+                        </div>
+                      ) : (
+                        <div className="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 text-[10px] md:text-xs font-black hover:border-[#008DDA] hover:text-[#008DDA] cursor-pointer transition-all shadow-inner bg-white" onClick={() => setContractSigned(true)}>
+                          [ Pasirašyti skaitmeniniu būdu ]
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="w-full bg-[#008DDA]/10 border border-[#008DDA]/20 text-[#0B192C] text-xs md:text-sm font-bold py-3 px-6 rounded-2xl text-center leading-relaxed mt-2">
+                  {t('s6_footer')}
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE 7: Retorno de Inversión (ROI) */}
+            {currentSlide === 7 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-2">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C] mb-0.5">
+                    {t('s7_title')}
+                  </h2>
+                  <span className="text-xs text-[#008DDA] font-extrabold uppercase tracking-widest block">{t('s7_subtitle')}</span>
+                </div>
+
+                <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 py-2">
+                  
+                  <div className="w-72 p-5 rounded-2xl bg-[#0B192C] text-white border-2 border-[#008DDA] flex flex-col justify-between shadow-lg h-60 shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#00E5FF] text-center w-full block border-b border-white/10 pb-2">Investicijų Skaičiuoklė</span>
+                    
+                    <div className="flex flex-col gap-2.5 my-3">
+                      <label className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider">{t('s7_calc_label')}</label>
                       <input 
                         type="range" 
                         min="5000" 
@@ -1051,115 +1163,186 @@ export default function PresentationMarija() {
                         step="1000"
                         value={monthlyRevenue} 
                         onChange={(e) => setMonthlyRevenue(Number(e.target.value))}
-                        className="flex-1 accent-[#008DDA] h-2 bg-[#020710] rounded-lg appearance-none cursor-pointer" 
+                        className="w-full accent-[#008DDA] h-1.5 bg-[#050D1A] rounded-lg appearance-none cursor-pointer" 
                       />
-                      <span className="text-3xl font-black text-[#00E5FF] w-36 text-right bg-[#020710] px-5 py-2.5 border-2 border-[#008DDA]/45 rounded-xl shadow-inner drop-shadow-[0_0_12px_rgba(0,229,255,0.3)]">
+                      <div className="text-center bg-[#050D1A] px-3 py-1.5 border border-[#00E5FF]/20 rounded-xl font-black text-xl text-[#00E5FF] drop-shadow-[0_0_10px_rgba(0,229,255,0.3)] mt-1">
                         {monthlyRevenue.toLocaleString()}€
-                      </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <p className="text-slate-100 text-lg md:text-2.5xl font-bold leading-relaxed">
-                  {t('s7_roi_desc')}
-                </p>
-              </div>
-              <div className="flex-[1] flex items-center justify-center">
-                <div className="w-[440px] p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/45 flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.5)] gap-6 backdrop-blur-md">
-                  <span className="text-xs font-black uppercase tracking-widest text-[#00E5FF] text-center w-full block border-b border-[#008DDA]/20 pb-3">Monthly ROI Readout</span>
-                  
-                  <div className="flex justify-between items-center py-4 border-b border-white/10">
-                    <span className="text-base text-slate-100 font-bold">{t('s7_recovery_lbl')}</span>
-                    <span className="text-xl font-black text-white">+{noShowSavings}€</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-4 border-b border-white/10">
-                    <span className="text-base text-slate-100 font-bold">{t('s7_efficiency_lbl')}</span>
-                    <span className="text-xl font-black text-white">+{slotRecoverySavings}€</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-5 bg-[#008DDA]/15 border-2 border-[#008DDA]/55 rounded-2xl px-6 mt-4 shadow-inner">
-                    <span className="text-xs text-[#00E5FF] font-black uppercase tracking-widest">{t('s7_total_lbl')}</span>
-                    <span className="text-3xl font-black text-[#00E5FF] drop-shadow-[0_0_15px_rgba(0,229,255,0.35)]">{totalMonthlyBenefit}€ / mėn.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* SLIDE 8: Cierre y Activación */}
-          {currentSlide === 8 && (
-            <div className="flex-1 flex flex-col justify-between mt-4">
-              <div>
-                <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-8 leading-tight">
-                  {t('s8_title')}
-                </h2>
-                
-                <div className="grid md:grid-cols-3 gap-8 mb-8">
-                  <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all hover:shadow-md hover:border-[#00E5FF]/60 backdrop-blur-md">
-                    <h3 className="font-black text-2xl text-[#00E5FF] uppercase tracking-wider mb-4">{t('s8_step1')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s8_step1_desc')}</p>
+                  <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    
+                    <div className="flex flex-col items-center text-center">
+                      <div className="relative w-24 h-24 rounded-full border-4 border-slate-200 shadow-inner flex items-center justify-center bg-slate-50">
+                        <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="42" className="stroke-slate-200 fill-none" strokeWidth="5" />
+                          <circle cx="48" cy="48" r="42" className="stroke-[#008DDA] fill-none" strokeWidth="5" strokeDasharray="263.9" strokeDashoffset="13.2" />
+                        </svg>
+                        <span className="text-xl font-black text-[#0B192C]">95%</span>
+                      </div>
+                      <h4 className="font-extrabold text-[#0B192C] text-xs uppercase tracking-wider mt-2.5 mb-0.5">{t('s7_card1_title')}</h4>
+                      <p className="text-slate-500 text-[10px] font-semibold leading-relaxed max-w-[150px]">{t('s7_card1_desc')}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center">
+                      <div className="relative w-24 h-24 rounded-full border-4 border-slate-200 shadow-inner flex items-center justify-center bg-slate-50">
+                        <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="42" className="stroke-slate-200 fill-none" strokeWidth="5" />
+                          <circle cx="48" cy="48" r="42" className="stroke-[#008DDA] fill-none" strokeWidth="5" strokeDasharray="263.9" strokeDashoffset="145.1" />
+                        </svg>
+                        <span className="text-xl font-black text-[#0B192C]">-45%</span>
+                      </div>
+                      <h4 className="font-extrabold text-[#0B192C] text-xs uppercase tracking-wider mt-2.5 mb-0.5">{t('s7_card2_title')}</h4>
+                      <p className="text-slate-500 text-[10px] font-semibold leading-relaxed max-w-[150px]">{t('s7_card2_desc')}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center text-center">
+                      <div className="relative w-24 h-24 rounded-full border-4 border-slate-200 shadow-inner flex items-center justify-center bg-slate-50">
+                        <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="42" className="stroke-slate-200 fill-none" strokeWidth="5" />
+                          <circle cx="48" cy="48" r="42" className="stroke-emerald-500 fill-none" strokeWidth="5" strokeDasharray="263.9" strokeDashoffset="250.7" />
+                        </svg>
+                        <span className="text-xl font-black text-emerald-600">+5%</span>
+                      </div>
+                      <h4 className="font-extrabold text-[#0B192C] text-xs uppercase tracking-wider mt-2.5 mb-0.5">{t('s7_card3_title')}</h4>
+                      <p className="text-slate-500 text-[10px] font-semibold leading-relaxed max-w-[150px]">{t('s7_card3_desc')}</p>
+                    </div>
+
                   </div>
-                  
-                  <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all hover:shadow-md hover:border-[#00E5FF]/60 backdrop-blur-md">
-                    <h3 className="font-black text-2xl text-[#00E5FF] uppercase tracking-wider mb-4">{t('s8_step2')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s8_step2_desc')}</p>
-                  </div>
-                  
-                  <div className="p-8 rounded-3xl bg-[#050D1A]/95 border-2 border-[#008DDA]/30 shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all hover:shadow-md hover:border-[#00E5FF]/60 backdrop-blur-md">
-                    <h3 className="font-black text-2xl text-[#00E5FF] uppercase tracking-wider mb-4">{t('s8_step3')}</h3>
-                    <p className="text-base md:text-lg text-slate-100 font-bold leading-relaxed">{t('s8_step3_desc')}</p>
-                  </div>
+
+                </div>
+
+                <div className="w-full mt-2">
+                  <div className="border-t-2 border-[#0B192C]/10 w-full my-2" />
+                  <p className="text-[#0B192C] text-center font-black text-base md:text-lg tracking-wide uppercase leading-none">
+                    {t('s7_footer')}
+                  </p>
                 </div>
               </div>
-              
-              <div className="w-full py-8 px-10 bg-[#050D1A] text-white rounded-3xl flex flex-col md:flex-row justify-between items-center gap-6 border-2 border-[#008DDA]/45 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                <div className="flex items-center gap-5">
-                  <ShieldCheck className="w-10 h-10 text-[#00E5FF] animate-pulse" />
-                  <span className="font-black text-lg md:text-xl uppercase tracking-widest text-white leading-relaxed">{t('s8_contact')}</span>
+            )}
+
+            {/* SLIDE 8: Cierre y Activación */}
+            {currentSlide === 8 && (
+              <div className="flex-1 flex flex-col justify-between animate-fadeIn">
+                <div className="text-center max-w-4xl mx-auto mb-2">
+                  <h2 className="text-3xl md:text-4.5xl font-black tracking-tight text-[#0B192C]">
+                    {t('s8_title')}
+                  </h2>
                 </div>
-                <div className="flex flex-col text-right items-end gap-2">
-                  <span className="text-[12px] text-slate-100 font-black tracking-widest uppercase">MB PROCDI  |  Company code: 307515454</span>
-                  <span className="text-[10px] text-[#008DDA] font-extrabold tracking-widest uppercase">Partizanų g. 61-806, LT-49282, Kaunas, Lithuania  |  +370 68941110</span>
+
+                <div className="flex-1 flex items-center relative py-2">
+                  <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-0 items-stretch border border-slate-200 rounded-3xl bg-slate-50/50 shadow-sm overflow-hidden">
+                    
+                    <div className="p-5 flex flex-col justify-between relative min-h-[180px]">
+                      <div>
+                        <h3 className="font-black text-[#008DDA] text-base md:text-lg uppercase tracking-wider mb-2">
+                          {t('s8_card1_title')}
+                        </h3>
+                        <p className="text-slate-600 text-xs font-bold leading-relaxed pr-6">
+                          {t('s8_card1_desc')}
+                        </p>
+                      </div>
+                      <div className="self-end mt-2 bg-white border border-slate-200 p-2 rounded-full shadow-sm text-[#008DDA] z-10 shrink-0">
+                        <svg className="w-5 h-5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                        </svg>
+                      </div>
+                      
+                      <div className="absolute right-0 top-0 bottom-0 w-[40px] flex items-center justify-center pointer-events-none hidden md:flex">
+                        <div className="h-[75%] border-r-2 border-cyan-300" />
+                        <span className="absolute bg-[#F8FAFC] border-2 border-cyan-300 rounded-lg p-0.5 text-[#008DDA] font-black text-[10px] z-20">≫</span>
+                      </div>
+                    </div>
+
+                    <div className="p-5 flex flex-col justify-between relative min-h-[180px]">
+                      <div className="md:pl-6">
+                        <h3 className="font-black text-[#008DDA] text-base md:text-lg uppercase tracking-wider mb-2">
+                          {t('s8_card2_title')}
+                        </h3>
+                        <p className="text-slate-600 text-xs font-bold leading-relaxed pr-6">
+                          {t('s8_card2_desc')}
+                        </p>
+                      </div>
+                      <div className="self-end mt-2 bg-white border border-slate-200 p-2 rounded-full shadow-sm text-[#008DDA] z-10 shrink-0">
+                        <svg className="w-5 h-5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v16.481m3-16.481v16.481m-9-16.481h15m-15 15h15" />
+                        </svg>
+                      </div>
+                      
+                      <div className="absolute right-0 top-0 bottom-0 w-[40px] flex items-center justify-center pointer-events-none hidden md:flex">
+                        <div className="h-[75%] border-r-2 border-cyan-300" />
+                        <span className="absolute bg-[#F8FAFC] border-2 border-cyan-300 rounded-lg p-0.5 text-[#008DDA] font-black text-[10px] z-20">≫</span>
+                      </div>
+                    </div>
+
+                    <div className="p-5 flex flex-col justify-between relative min-h-[180px] md:pl-8">
+                      <div>
+                        <h3 className="font-black text-[#008DDA] text-base md:text-lg uppercase tracking-wider mb-2">
+                          {t('s8_card3_title')}
+                        </h3>
+                        <p className="text-slate-600 text-xs font-bold leading-relaxed">
+                          {t('s8_card3_desc')}
+                        </p>
+                      </div>
+                      <div className="self-end mt-2 bg-white border border-slate-200 p-2 rounded-full shadow-sm text-[#008DDA] z-10 shrink-0">
+                        <svg className="w-5 h-5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div className="w-full py-4 px-6 bg-[#0B192C] text-white rounded-2xl flex flex-col md:flex-row justify-between items-center gap-3 shadow-md border-2 border-[#008DDA] mt-2">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-7 h-7 text-[#00E5FF] animate-pulse" />
+                    <span className="font-black text-xs md:text-sm uppercase tracking-widest text-center md:text-left">{t('s8_footer')}</span>
+                  </div>
+                  <div className="flex flex-col text-center md:text-right items-center md:items-end gap-0.5 font-semibold">
+                    <span className="text-[10px] text-slate-100 uppercase tracking-widest font-black">{t('s8_contact')}</span>
+                    <span className="text-[8px] text-[#00E5FF] uppercase tracking-wider font-extrabold">Partizanų g. 61-806, LT-49282, Kaunas, Lithuania  |  Company code: 307515454</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* Nav Controls Bar - Placed at the bottom inside viewport padding */}
-      <footer className="w-full flex justify-between items-center border-t border-[#008DDA]/30 pt-4 z-20 relative">
-        <button 
-          onClick={prevSlide}
-          disabled={currentSlide === 1}
-          className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-100 hover:text-[#00E5FF] transition-colors disabled:opacity-30 disabled:hover:text-slate-300"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          {t('back')}
-        </button>
+        {/* Nav Controls Bar */}
+        <footer className="w-full flex justify-between items-center border-t border-[#0B192C]/10 pt-3.5 z-20 relative">
+          <button 
+            onClick={prevSlide}
+            disabled={currentSlide === 1}
+            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#0B192C] hover:text-[#008DDA] transition-colors disabled:opacity-30 disabled:hover:text-[#0B192C]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('back')}
+          </button>
 
-        {/* Indicator dots */}
-        <div className="flex gap-3">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-            <button
-              key={s}
-              onClick={() => setCurrentSlide(s)}
-              className={`w-3.5 h-3.5 rounded-full transition-all ${currentSlide === s ? 'bg-[#008DDA] w-8 shadow-[0_0_10px_rgba(0,141,218,0.6)]' : 'bg-slate-700 hover:bg-slate-600'}`}
-            />
-          ))}
-        </div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+              <button
+                key={s}
+                onClick={() => setCurrentSlide(s)}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${currentSlide === s ? 'bg-[#008DDA] w-6 shadow-[0_0_8px_rgba(0,141,218,0.5)]' : 'bg-slate-300 hover:bg-slate-400'}`}
+              />
+            ))}
+          </div>
 
-        <button 
-          onClick={nextSlide}
-          disabled={currentSlide === 8}
-          className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-100 hover:text-[#00E5FF] transition-colors disabled:opacity-30 disabled:hover:text-slate-300"
-        >
-          {t('continue')}
-          <ArrowRight className="w-5 h-5" />
-        </button>
-      </footer>
+          <button 
+            onClick={nextSlide}
+            disabled={currentSlide === 8}
+            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#0B192C] hover:text-[#008DDA] transition-colors disabled:opacity-30 disabled:hover:text-[#0B192C]"
+          >
+            {t('continue')}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </footer>
 
+      </div>
     </main>
   );
 }
