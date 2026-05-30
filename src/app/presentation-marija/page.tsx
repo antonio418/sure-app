@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle, 
-  Activity, Check, Clock, Settings, Calendar
+  Activity, Check, Clock, Settings, Calendar, Music
 } from 'lucide-react';
 
 // Official PROCDI Brand Color Coding:
@@ -13,207 +13,246 @@ import {
 
 const LOCAL_TRANSLATIONS: Record<string, any> = {
   lt: {
-    s1_title: "Odontologijos Efektyvumo Ateitis Lietuvoje",
-    s1_subtitle: "Kaip visiškai panaikinti administracinę naštą ir užpildyti tuščias kėdes.",
-    s1_desc: "MB PROCDI pristato išmanųjį sprendimą, kuris automatizuoja pacientų srautus, užtikrina teisinį saugumą ir leidžia gydytojams susikoncentruoti tik į gydymą.",
+    s1_title: "Odontologijos efektyvumo ateitis Lietuvoje",
+    s1_subtitle: "Marija DI: Išmanusis administracinių srautų valdymas",
+    s1_desc: "Pašalinkite kasdienę administracinę trintį. Leiskite savo odontologams susitelkti į tai, ką jie daro geriausiai – gydyti pacientus ir auginti klinikos pajamas.",
     s1_badge: "MB PROCDI • AUTONOMINIS KLINIKOS VALDYMAS",
     
-    s2_title: "Paslėptos Išlaidos: Tuščios Kėdės Nuostoliai",
-    s2_metric_title: "25% veiklos neefektyvumas",
-    s2_metric_desc: "dėl neatvykimų, pavėluotų vizitų perkėlimų ir tuščių laiko tarpų.",
-    s2_fact: "Statistiškai neatvykimai (No-Show) sudaro iki 5% tiesioginių metinių pajamų nuostolių. Pastovios išlaidos personalui ir nuomai lieka, kol kėdė yra tuščia.",
+    s2_title: "Nematomi nuostoliai: Tuščios kėdės kaina",
+    s2_card1: "Dideli fiksuoti kaštai (Personalas + Įranga)",
+    s2_card2: "Neatvykimai (No-Shows) ir netikslingas planavimas",
+    s2_card3: "Prarasti skubūs skambučiai savaitgaliais",
+    s2_footer: "Iki 25% metinių klinikos pajamų prarandama dėl neefektyvaus laiko planavimo ir tuščių kėdžių. Jūsų išlaidos nesustoja, net kai kėdė atšąla.",
     s2_btn_fill: "UŽPILDYTI KĖDĘ (SIMULIACIJA)",
     s2_btn_empty: "Atlaisvinti kėdę",
     s2_status_empty: "KĖDĖ TUŠČIA - prarandama 150€/val.",
     s2_status_filled: "KĖDĖ UŽPILDYTA - pajamos aktyvios",
     
-    s3_title: "Perkrauta Registratūra: Veiklos Butelio Kaklelis",
-    s3_stat_title: "60% darbuotojų laiko",
-    s3_stat_desc: "sunaudojama rankinėms užduotims ir pasikartojantiems skambučiams.",
-    s3_point1: "Kainų ir PSD (Ligonių kasų) taisyklių aiškinimas telefonu.",
-    s3_point2: "Rankinis vizitų patvirtinimas ir priminimų siuntimas.",
-    s3_point3: "Pacientai su stipriu skausmu po darbo valandų nueina pas konkurentus.",
-    s3_chart_label: "Administracinė naštos pasiskirstymas",
+    s3_title: "Operacinis butelio kaklelis: Perkrauta registratūra",
+    s3_col1_title: "The Daytime Waste",
+    s3_col1_desc: "60% laiko švaistoma rutininiams klausimams (PSD/Ligonių kasų kompensacijos, kainoraščiai, rankinis skambučių derinimas).",
+    s3_col2_title: "The Nighttime Loss",
+    s3_col2_desc: "Aukštos vertės skubūs pacientai (ūmus skausmas, traumos) negauna atsakymo ir pasirenka konkurentus.",
+    s3_footer: "Registratūros perdegimas kainuoja brangiai. Rankinis darbas piko valandomis riboja jūsų klinikos augimą.",
     
-    s4_title: "Marija DI: Išmanioji Asistentė 24/7",
-    s4_subtitle: "Jūsų klinikos augimas be papildomų personalo išlaidų.",
-    s4_feature1_title: "Autonominis valdymas",
-    s4_feature1_desc: "Atsako į pacientų klausimus 24 valandas per parą, be poilsio dienų.",
-    s4_feature2_title: "Dinaminis tvarkaraštis",
-    s4_feature2_desc: "Automatiškai užpildo atsilaisvinusias vietas iš laukiančiųjų sąrašo.",
-    s4_feature3_title: "Friccijos nulis",
-    s4_feature3_desc: "Nereikia keisti jūsų esamos medicininės programinės įrangos.",
+    s4_title: "Marija DI: Jūsų 24/7 išmanioji asistentė",
+    s4_card1_title: "Always On",
+    s4_card1_desc: "24/7 Autonominis veikimas. Niekada nepraleidžia skambučio ar užklausos.",
+    s4_card2_title: "Filtering",
+    s4_card2_desc: "Tikslus paciento poreikių įvertinimas formalia lietuvių medicinine kalba (Jūs).",
+    s4_card3_title: "Action",
+    s4_card3_desc: "Automatinis vizitų patvirtinimas ir dinaminis laukiančiųjų sąrašų valdymas.",
+    s4_footer: "Sprendimas be IT trinties. Jokių papildomų etatų, tik maksimaliai išnaudota esama infrastruktūra.",
     
-    s5_title: "Teisinis Saugumas ir MDR Atitiktis",
-    s5_badge: "MDR 2017/745 ATITIKTIS",
-    s5_header: "Poreikių Įvertinimas (*poreikių įvertinimas*) vs. Medicininis Triažas",
-    s5_legal_desc: "Siekiant visiško reguliacinio saugumo Lietuvoje, Marija DI veikia pagal aiškią teisinę išimtį:",
-    s5_point_a: "Neatlieka medicininės diagnozės ar klinikinio triažo.",
-    s5_point_b: "Vykdo tik išankstinį poreikių klasifikavimą administraciniam srautui valdyti.",
-    s5_point_c: "100% legalu, atitinka ES ir Lietuvos sveikatos apsaugos ministerijos reikalavimus.",
+    s5_title: "Teisinis vientisumas ir MDR atitiktis",
+    s5_left_title: "Griežtai draudžiama / Strictly Forbidden",
+    s5_left_p1: "Medicininis Triažas",
+    s5_left_p2: "Klinikinis vertinimas ir diagnozės",
+    s5_left_p3: "Medicininiai patarimai",
+    s5_right_title: "100% Legal & Compliant",
+    s5_right_p1: "Poreikių įvertinimas",
+    s5_right_p2: "Administracinių srautų valdymas",
+    s5_right_p3: "Prioritetų nustatymas pagal raktinius žodžius (skausmas, trauma), skiriant žymą SKUBUS.",
+    s5_footer: "Marija DI veikia griežtai laikantis ES Medicinos priemonių reglamento (MDR 2017/745) išimčių, kaip grynai administracinis įrankis.",
     
-    s6_title: "Teisinis Skydas: Sutartis",
-    s6_subtitle: "Skaitmeninis pasirašymas prieš patvirtinant vizitą.",
-    s6_desc: "Marija DI užtikrina, kad kiekvienas naujas pacientas pasirašytų Asignavimo sutartį prieš atvykstant:",
-    s6_benefit1: "Teisinė teisė taikyti baudas už neatvykimą.",
-    s6_benefit2: "Visiškai išvengiama nepatogių pokalbių registratūroje.",
+    s6_title: "Teisinis skydas: Automatizuota prisijungimo sutartis",
+    s6_step1: "1. Paciento užklausa priimama.",
+    s6_step2: "2. Marija DI pateikia skaitmeninę klinikos paslaugų teikimo sutartį (B2B Adhesion Contract).",
+    s6_step3: "3. Pacientas patvirtina sutartį skaitmeniniu būdu.",
+    s6_step4: "4. Vizitas patvirtinamas. Klinika įgyja teisinį pagrindą taikyti netesybas už neatvykimą ar vėlyvą atšaukimą.",
+    s6_footer: "Teisinė apsauga ir baudų už neatvykimą taikymas – be jokių nepatogių pokalbių registratūroje.",
     s6_sign_btn: "PASIRAŠYTI SKAITMENINIU BŪDU",
     s6_signed_status: "Sutartis pasirašyta ir apsaugota",
     
-    s7_title: "ROI: 95% Klinikos Užimtumas",
+    s7_title: "Investicijų grąža (ROI): Kėdės dirba 95% pajėgumu",
+    s7_subtitle: "ROI Synthesis Dashboard",
+    s7_card1_title: "Kėdžių užimtumas",
+    s7_card1_desc: "(Sumažintas prastovų laikas, maksimalus pajėgumas).",
+    s7_card2_title: "Neatvykimų sumažėjimas",
+    s7_card2_desc: "(Dėl 24 val. išankstinio automatinio patvirtinimo).",
+    s7_card3_title: "Tiesioginių pajamų augimas",
+    s7_card3_desc: "(Fiksuojant prarastus naktinius ir savaitgalio pacientus).",
+    s7_footer: "Investicija, kuri atsiperka jau su pirmaisiais per mėnesį sugrąžintais pacientais.",
     s7_calc_title: "Apskaičiuokite savo klinikos grąžą:",
-    s7_calc_label: "Mėnesio klinikos pajamos (€):",
+    s7_calc_label: "Numatoma mėnesinė apyvarta (€):",
+    music_toggle: "Fono muzika (Švelni)",
     s7_recovery_lbl: "Sutaupyta dėl neatvykimų mažinimo (-45%):",
     s7_efficiency_lbl: "Papildomos pajamos iš užpildytų tarpų (+5%):",
     s7_total_lbl: "Bendra mėnesio nauda klinikai:",
-    s7_roi_desc: "Sumažinus neatvykimų skaičių iki 45%, investicija atsiperka jau per pirmuosius atkurtus pacientus.",
     
-    s8_title: "Nulinė Instaliacija: Pradėkite Šiandien",
-    s8_step1: "1. Konfigūracija",
-    s8_step1_desc: "Pritaikome sistemą jūsų klinikos procedūroms per 24 valandas.",
-    s8_step2: "2. Paleidimas",
-    s8_step2_desc: "Greitas pajungimas jūsų svetainėje ar pokalbių kanaluose (10 min).",
-    s8_step3: "3. Rezultatai",
-    s8_step3_desc: "Kėdės užpildomos autonomiškai nuo pirmosios nakties.",
-    s8_contact: "Susisiekite nemokamai demonstracijai: antonio@procdi.com",
+    s8_title: "Nulinė instaliacija: Pradėkite veikti šiandien",
+    s8_card1_title: "1. 10 Minučių Integracija",
+    s8_card1_desc: "Jokių sudėtingų IT sistemų keitimų. Paprastas <script> kodo įterpimas į jūsų svetainę.",
+    s8_card2_title: "2. Pritaikytas Klonas",
+    s8_card2_desc: "Marija DI apmokoma naudoti jūsų klinikos kainoraščius, logotipą ir PSD politikas.",
+    s8_card3_title: "3. Hibridinis Veikimas",
+    s8_card3_desc: "Gaukite išfiltruotus, skubius pre-registracijos prašymus tiesiai į savo el. paštą.",
+    s8_footer: "Išbandykite savo klinikos interaktyvią demonstraciją jau dabar.",
+    s8_contact: "Susisiekite su mumis: MB PROCDI | +370 689 41110 | antonio@procdi.com | www.procdi.com",
     
     continue: "TĘSTI",
     back: "ATGAL",
     lang_selector: "Kalba"
   },
   es: {
-    s1_title: "El Futuro de la Eficiencia Dental en Lituania",
-    s1_subtitle: "Cómo eliminar la fricción administrativa y llenar los sillones vacíos.",
-    s1_desc: "MB PROCDI presenta un motor inteligente que automatiza el flujo de pacientes, garantizando seguridad legal y permitiendo a los odontólogos facturar y curar.",
+    s1_title: "El futuro de la eficiencia dental en Lituania",
+    s1_subtitle: "Marija DI: Gestión inteligente de flujos administrativos",
+    s1_desc: "Elimine la fricción administrativa diaria. Permita que sus odontólogos se concentren en lo que mejor hacen: curar pacientes y aumentar los ingresos de la clínica.",
     s1_badge: "MB PROCDI • GESTIÓN CLÍNICA AUTÓNOMA",
     
-    s2_title: "El Costo Oculto: Pérdida por Sillón Vacío",
-    s2_metric_title: "25% de ineficiencia operativa",
-    s2_metric_desc: "debido a inasistencias (No-Show), cancelaciones tardías y huecos.",
-    s2_fact: "Estadísticamente las inasistencias provocan hasta un 5% de pérdida directa en ingresos anuales. Los costos fijos de personal siguen corriendo mientras la silla está fría.",
+    s2_title: "Pérdidas invisibles: El costo del sillón vacío",
+    s2_card1: "Altos costos fijos (Personal + Equipamiento)",
+    s2_card2: "Inasistencias (No-Shows) y planificación ineficiente",
+    s2_card3: "Pérdida de llamadas de urgencia los fines de semana",
+    s2_footer: "Se pierde hasta el 25% de los ingresos anuales de la clínica debido a una mala gestión del tiempo y sillones vacíos. Sus costos no se detienen, incluso cuando el sillón está frío.",
     s2_btn_fill: "LLENAR SILLÓN (SIMULACIÓN)",
     s2_btn_empty: "Vaciar sillón",
     s2_status_empty: "SILLÓN VACÍO - Pérdida de 150€/hora",
     s2_status_filled: "SILLÓN LLENO - Ingresos activos",
     
-    s3_title: "Recepción Saturada: El Cuello de Botella",
-    s3_stat_title: "60% del tiempo del personal",
-    s3_stat_desc: "se consume en tareas administrativas manuales y llamadas de rutina.",
-    s3_point1: "Explicar precios y reglas de la caja de salud (PSD) por teléfono.",
-    s3_point2: "Confirmar citas manualmente enviando recordatorios.",
-    s3_point3: "Pacientes con dolor agudo fuera de horario se van a la competencia.",
-    s3_chart_label: "Carga administrativa",
+    s3_title: "Cuello de botella operativo: Recepción saturada",
+    s3_col1_title: "The Daytime Waste",
+    s3_col1_desc: "60% del tiempo desperdiciado en tareas rutinarias (explicación de PSD/Caja de Salud, tarifas, confirmación manual de llamadas).",
+    s3_col2_title: "The Nighttime Loss",
+    s3_col2_desc: "Pacientes urgentes de alto valor (dolor agudo, traumas) no reciben respuesta y eligen a la competencia.",
+    s3_footer: "El agotamiento de recepción cuesta caro. El trabajo manual en horas pico limita el crecimiento de su clínica.",
     
-    s4_title: "Marija DI: Asistente Inteligente 24/7",
-    s4_subtitle: "El crecimiento de su clínica sin aumentar costos de nómina.",
-    s4_feature1_title: "Gestión autónoma",
-    s4_feature1_desc: "Responde dudas de pacientes 24 horas al día, los 365 días del año.",
-    s4_feature2_title: "Agenda dinámica",
-    s4_feature2_desc: "Reasigna automáticamente huecos usando listas de espera inteligentes.",
-    s4_feature3_title: "Fricción cero",
-    s4_feature3_desc: "No requiere cambiar su software médico o de gestión actual.",
+    s4_title: "Marija DI: Tu asistente inteligente 24/7",
+    s4_card1_title: "Always On",
+    s4_card1_desc: "Operación autónoma 24/7. Nunca pierde una llamada o consulta de paciente.",
+    s4_card2_title: "Filtering",
+    s4_card2_desc: "Evaluación preliminar precisa de las necesidades del paciente en lituano formal (Jūs).",
+    s4_card3_title: "Action",
+    s4_card3_desc: "Confirmación automática de citas y gestión dinámica de listas de espera.",
+    s4_footer: "Solución sin fricción de TI. Sin personal adicional, solo el máximo aprovechamiento de la infraestructura existente.",
     
-    s5_title: "Seguridad Legal y Cumplimiento MDR",
-    s5_badge: "CUMPLIMIENTO MDR 2017/745",
-    s5_header: "Evaluación Preliminar (*poreikių įvertinimas*) vs. Triaje Médico",
-    s5_legal_desc: "Para su absoluta tranquilidad regulatoria en Lituania, Marija DI actúa bajo una exención legal:",
-    s5_point_a: "No realiza diagnósticos clínicos ni triaje médico.",
-    s5_point_b: "Ejecuta una clasificación meramente administrativa de necesidades de agenda.",
-    s5_point_c: "100% legal, en cumplimiento con el MDR de la UE y leyes sanitarias bálticas.",
+    s5_title: "Integridad legal y conformidad MDR",
+    s5_left_title: "Strictly Forbidden / Griežtai draudžiama",
+    s5_left_p1: "Triaje médico",
+    s5_left_p2: "Evaluación clínica y diagnósticos",
+    s5_left_p3: "Consejos y asesoramiento médico",
+    s5_right_title: "100% Legal & Compliant",
+    s5_right_p1: "Evaluación preliminar de necesidades",
+    s5_right_p2: "Gestión de flujos administrativos",
+    s5_right_p3: "Establecimiento de prioridades según palabras clave (dolor, trauma), asignando etiqueta URGENTE.",
+    s5_footer: "Marija DI opera estrictamente bajo las exenciones del Reglamento Europeo de Dispositivos Médicos (MDR 2017/745), como una herramienta meramente administrativa.",
     
-    s6_title: "El Escudo Contractual: Contrato de Adhesión",
-    s6_subtitle: "Firma digital antes de confirmar cualquier cita.",
-    s6_desc: "Marija DI asegura que cada paciente acepte y firme digitalmente el contrato de adhesión de la clínica antes de llegar:",
-    s6_benefit1: "Respaldo legal directo para aplicar penalizaciones por inasistencia.",
-    s6_benefit2: "Evita discusiones incómodas con el personal de recepción.",
-    s6_sign_btn: "FIRMAR DIGITALMENTE",
+    s6_title: "Escudo legal: Contrato de adhesión automatizado",
+    s6_step1: "1. Se recibe la consulta del paciente.",
+    s6_step2: "2. Marija DI presenta el contrato digital de prestación de servicios (B2B Adhesion Contract).",
+    s6_step3: "3. El paciente firma el contrato de forma digital y segura.",
+    s6_step4: "4. Cita confirmada. La clínica obtiene el respaldo legal para aplicar penalizaciones por inasistencia o cancelación tardía.",
+    s6_footer: "Protección legal y aplicación de penalizaciones por no presentarse, sin conversaciones incómodas en recepción.",
+    s6_sign_btn: "FIRMAR DIGITALMENTE AHORA",
     s6_signed_status: "Contrato firmado y resguardado con éxito",
     
-    s7_title: "ROI: Sillones al 95% de Capacidad",
+    s7_title: "Retorno de inversión (ROI): Sillones al 95% de capacidad",
+    s7_subtitle: "ROI Synthesis Dashboard",
+    s7_card1_title: "Ocupación de sillones",
+    s7_card1_desc: "(Reducción del tiempo muerto, máxima capacidad operativa).",
+    s7_card2_title: "Reducción de ausentismo",
+    s7_card2_desc: "(Gracias a la confirmación automática previa de 24 horas).",
+    s7_card3_title: "Aumento de ingresos directos",
+    s7_card3_desc: "(Capturando pacientes urgentes de noche y fines de semana).",
+    s7_footer: "Una inversión que se recupera con los primeros pacientes rescatados al mes.",
     s7_calc_title: "Calcule el retorno de su clínica:",
     s7_calc_label: "Facturación mensual estimada (€):",
-    s7_recovery_lbl: "Recuperado por reducción de ausentismo (-45%):",
+    music_toggle: "Música de fondo (Suave)",
+    s7_recovery_lbl: "Ahorro por reducción de ausentismo (-45%):",
     s7_efficiency_lbl: "Ingreso extra por espacios reasignados (+5%):",
     s7_total_lbl: "Beneficio mensual total para la clínica:",
-    s7_roi_desc: "Al reducir el ausentismo hasta un 45%, la inversión se paga sola en los primeros pacientes rescatados.",
     
-    s8_title: "Instalación Fricción-Cero: Inicie Hoy",
-    s8_step1: "1. Configuración",
-    s8_step1_desc: "Ajustamos el sistema a las tarifas y flujos de su clínica en 24 horas.",
-    s8_step2: "2. Integración",
-    s8_step2_desc: "Instalación rápida de 10 minutos en su web o canales de mensajería.",
-    s8_step3: "3. Operación",
-    s8_step3_desc: "Los sillones se llenan de forma autónoma desde la primera noche.",
-    s8_contact: "Contáctenos para una prueba sin costo: antonio@procdi.com",
+    s8_title: "Instalación cero: Comience hoy mismo",
+    s8_card1_title: "1. 10 Minutos de Integración",
+    s8_card1_desc: "Sin cambios complejos en sus sistemas de TI. Inserción sencilla de un código <script> en su web.",
+    s8_card2_title: "2. Clon personalizado",
+    s8_card2_desc: "Marija DI es entrenada con los precios de su clínica, su logotipo y las políticas de la caja de salud (PSD).",
+    s8_card3_title: "3. Operación híbrida",
+    s8_card3_desc: "Reciba las solicitudes de pre-registro filtradas y urgentes directamente en su correo electrónico.",
+    s8_footer: "Pruebe la demostración interactiva de su clínica ahora mismo.",
+    s8_contact: "Contacto: MB PROCDI | +370 689 41110 | antonio@procdi.com | www.procdi.com",
     
     continue: "CONTINUAR",
     back: "ATRÁS",
     lang_selector: "Idioma"
   },
   en: {
-    s1_title: "The Future of Dental Efficiency in Lithuania",
-    s1_subtitle: "How to eliminate administrative burden and fill empty chairs.",
-    s1_desc: "MB PROCDI presents an intelligent system that automates patient flows, guarantees legal compliance, and lets dentists focus on billing and curing.",
+    s1_title: "The future of dental efficiency in Lithuania",
+    s1_subtitle: "Marija DI: Intelligent administrative flow management",
+    s1_desc: "Eliminate daily administrative friction. Allow your dentists to focus on what they do best – treating patients and growing clinic revenues.",
     s1_badge: "MB PROCDI • AUTONOMOUS CLINICAL MANAGEMENT",
     
-    s2_title: "The Hidden Cost: Empty Dental Chair Losses",
-    s2_metric_title: "25% operational inefficiency",
-    s2_metric_desc: "due to no-shows, late cancellations, and empty slots.",
-    s2_fact: "Statistically no-shows drain up to 5% of direct annual revenues. Fixed staff and overhead costs keep running while the chair remains cold.",
+    s2_title: "Invisible losses: The cost of the empty chair",
+    s2_card1: "High fixed costs (Staff + Equipment)",
+    s2_card2: "No-Shows and inefficient scheduling",
+    s2_card3: "Lost urgent calls during weekends",
+    s2_footer: "Up to 25% of annual clinic revenue is lost due to inefficient time planning and empty chairs. Your costs do not stop, even when the chair goes cold.",
     s2_btn_fill: "FILL CHAIR (SIMULATION)",
     s2_btn_empty: "Empty chair",
     s2_status_empty: "CHAIR EMPTY - 150€/hour lost",
     s2_status_filled: "CHAIR FILLED - Revenue active",
     
-    s3_title: "Overwhelmed Reception: The Operational Bottleneck",
-    s3_stat_title: "60% of staff time",
-    s3_stat_desc: "is consumed by manual administration and routine queries.",
-    s3_point1: "Explaining prices and state health insurance (PSD) rules over the phone.",
-    s3_point2: "Confirming appointments and manually sending reminders.",
-    s3_point3: "High-value patients calling after-hours go directly to competitors.",
-    s3_chart_label: "Administrative load",
+    s3_title: "Operational bottleneck: Overwhelmed reception",
+    s3_col1_title: "The Daytime Waste",
+    s3_col1_desc: "60% of time wasted on routine queries (PSD/state insurance, price lists, manual call coordination).",
+    s3_col2_title: "The Nighttime Loss",
+    s3_col2_desc: "High-value urgent patients (acute pain, trauma) receive no answer and choose competitors.",
+    s3_footer: "Reception burnout is expensive. Manual work during peak hours limits your clinic's growth.",
     
-    s4_title: "Marija DI: The 24/7 Smart Assistant",
-    s4_subtitle: "Scale your clinic without adding payroll or overhead.",
-    s4_feature1_title: "Autonomous operations",
-    s4_feature1_desc: "Answers patient questions 24 hours a day, 365 days a year.",
-    s4_feature2_title: "Dynamic schedule",
-    s4_feature2_desc: "Automatically fills empty slots using real-time waitlists.",
-    s4_feature3_title: "Zero friction",
-    s4_feature3_desc: "No need to change your existing medical software systems.",
+    s4_title: "Marija DI: Your 24/7 smart assistant",
+    s4_card1_title: "Always On",
+    s4_card1_desc: "24/7 Autonomous operation. Never misses a patient call or query.",
+    s4_card2_title: "Filtering",
+    s4_card2_desc: "Precise preliminary patient assessment in formal Lithuanian medical language (Jūs).",
+    s4_card3_title: "Action",
+    s4_card3_desc: "Automatic appointment confirmation and dynamic waitlist management.",
+    s4_footer: "Zero-friction IT solution. No additional headcount, only maximum utilization of existing infrastructure.",
     
-    s5_title: "Legal Security and MDR Compliance",
-    s5_badge: "MDR 2017/745 COMPLIANCE",
-    s5_header: "Preliminary Assessment (*poreikių įvertinimas*) vs. Medical Triage",
-    s5_legal_desc: "For your absolute regulatory peace of mind in Lithuania, Marija DI operates under a clear exemption:",
-    s5_point_a: "Does not perform medical diagnoses or clinical triage.",
-    s5_point_b: "Executes a strictly administrative preliminary assessment for scheduling.",
-    s5_point_c: "100% legal, fully compliant with EU MDR and Baltic sanitary regulations.",
+    s5_title: "Legal integrity and MDR compliance",
+    s5_left_title: "Strictly Forbidden / Griežtai draudžiama",
+    s5_left_p1: "Medical triage",
+    s5_left_p2: "Clinical evaluation and diagnoses",
+    s5_left_p3: "Medical advice or consulting",
+    s5_right_title: "100% Legal & Compliant",
+    s5_right_p1: "Preliminary assessment of needs",
+    s5_right_p2: "Administrative flow management",
+    s5_right_p3: "Priority setting based on keywords (pain, trauma), assigning URGENT tag.",
+    s5_footer: "Marija DI operates strictly under the EU Medical Devices Regulation (MDR 2017/745) exemptions, as a purely administrative tool.",
     
-    s6_title: "The Contract Shield: Adhesion Agreements",
-    s6_subtitle: "Digital signature before confirming any appointment.",
-    s6_desc: "Marija DI ensures every new patient digitally signs the clinic's adhesion contract before arriving:",
-    s6_benefit1: "Legal authority to apply no-show and late cancellation fees.",
-    s6_benefit2: "Prevents uncomfortable billing conversations at reception.",
+    s6_title: "Legal shield: Automated adhesion agreement",
+    s6_step1: "1. Patient inquiry is received.",
+    s6_step2: "2. Marija DI presents the digital service agreement (B2B Adhesion Contract).",
+    s6_step3: "3. Patient signs the agreement digitally and securely.",
+    s6_step4: "4. Appointment confirmed. Clinic gains the legal basis to apply no-show or late cancellation fees.",
+    s6_footer: "Legal protection and enforcement of no-show fees, without uncomfortable reception conversations.",
     s6_sign_btn: "SIGN DIGITALLY NOW",
-    s6_signed_status: "Contract signed and securely archived",
+    s6_signed_status: "Agreement signed and securely archived",
     
-    s7_title: "ROI: Chairs at 95% Capacity",
+    s7_title: "Return on investment (ROI): Chairs at 95% capacity",
+    s7_subtitle: "ROI Synthesis Dashboard",
+    s7_card1_title: "Chair occupancy",
+    s7_card1_desc: "(Reduced downtime, maximum operational capacity).",
+    s7_card2_title: "No-show reduction",
+    s7_card2_desc: "(Due to 24-hour automatic advance confirmation).",
+    s7_card3_title: "Direct revenue growth",
+    s7_card3_desc: "(Capturing lost after-hours and weekend urgent patients).",
+    s7_footer: "An investment that pays for itself with the first rescued patients of the month.",
     s7_calc_title: "Calculate your clinic's monthly recovery:",
     s7_calc_label: "Estimated monthly revenue (€):",
+    music_toggle: "Background Music (Soft)",
     s7_recovery_lbl: "Saved by reducing no-shows (-45%):",
     s7_efficiency_lbl: "Extra income from reassigned slots (+5%):",
     s7_total_lbl: "Total monthly benefit for the clinic:",
-    s7_roi_desc: "By cutting no-shows by 45%, the investment pays for itself with the first rescued patients.",
     
-    s8_title: "Zero-Friction Activation: Start Today",
-    s8_step1: "1. Setup",
-    s8_step1_desc: "We configure the system for your procedures and fees within 24 hours.",
-    s8_step2: "2. Integration",
-    s8_step2_desc: "Quick 10-minute setup on your website or messaging channels.",
-    s8_step3: "3. Results",
-    s8_step3_desc: "Your dental chairs start filling autonomously from night one.",
-    s8_contact: "Contact us for a free demonstration: antonio@procdi.com",
+    s8_title: "Zero setup: Start operating today",
+    s8_card1_title: "1. 10-Minute Integration",
+    s8_card1_desc: "No complex changes to your IT systems. SImple <script> code insertion into your website.",
+    s8_card2_title: "2. Customized Clone",
+    s8_card2_desc: "Marija DI is trained with your clinic's fees, logo, and health insurance (PSD) policies.",
+    s8_card3_title: "3. Hybrid Operations",
+    s8_card3_desc: "Get pre-filtered, urgent pre-registration requests directly in your inbox.",
+    s8_footer: "Try your clinic's interactive demonstration right now.",
+    s8_contact: "Contact: MB PROCDI | +370 689 41110 | antonio@procdi.com | www.procdi.com",
     
     continue: "CONTINUE",
     back: "BACK",
@@ -274,6 +313,108 @@ const ProcdiLogo = ({ className = "w-12 h-12" }: { className?: string }) => (
   </svg>
 );
 
+// Ambient Audio Synthesizer playing soft clinical relaxation music loops in F Major
+class AmbientSynth {
+  private ctx: any = null;
+  private oscillators: any[] = [];
+  private gainNodes: any[] = [];
+  private mainGain: any = null;
+  private filter: any = null;
+  private isPlaying = false;
+  private chordInterval: any = null;
+
+  start() {
+    if (typeof window === 'undefined' || this.isPlaying) return;
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      this.ctx = new AudioCtx();
+      this.isPlaying = true;
+
+      // Lowpass filter to keep sound warm and relaxing (no harsh highs)
+      this.filter = this.ctx.createBiquadFilter();
+      this.filter.type = 'lowpass';
+      this.filter.frequency.setValueAtTime(250, this.ctx.currentTime);
+      this.filter.Q.setValueAtTime(1, this.ctx.currentTime);
+
+      this.mainGain = this.ctx.createGain();
+      this.mainGain.gain.setValueAtTime(0.04, this.ctx.currentTime); // Soft 4% volume
+
+      this.filter.connect(this.mainGain);
+      this.mainGain.connect(this.ctx.destination);
+
+      // Relaxing clinical chord progression: Fmaj7 -> Cmaj7 -> Am7 -> Gsus4
+      const chords = [
+        [174.61, 220.00, 261.63, 329.63], // Fmaj7 (F3, A3, C4, E4)
+        [130.81, 196.00, 261.63, 329.63], // Cmaj7 (C3, G3, C4, E4)
+        [110.00, 164.81, 220.00, 261.63], // Am7 (A2, E3, A3, C4)
+        [146.83, 196.00, 293.66, 392.00]  // Gsus4 (D3, G3, D4, G4)
+      ];
+
+      let chordIndex = 0;
+      const playChord = () => {
+        if (!this.isPlaying || !this.ctx) return;
+        
+        this.oscillators.forEach(osc => {
+          try { osc.stop(); } catch(e) {}
+        });
+        this.oscillators = [];
+        this.gainNodes = [];
+
+        const now = this.ctx.currentTime;
+        const freqs = chords[chordIndex];
+        chordIndex = (chordIndex + 1) % chords.length;
+
+        freqs.forEach(freq => {
+          if (!this.ctx || !this.filter) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine'; // Super-soft sine waveform
+          osc.frequency.setValueAtTime(freq, now);
+
+          // Very slow, dreamy ambient attack and release envelopes
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.25, now + 2); // 2s attack
+          gain.gain.setValueAtTime(0.25, now + 6);
+          gain.gain.linearRampToValueAtTime(0, now + 8); // 2s release
+
+          osc.connect(gain);
+          gain.connect(this.filter);
+
+          osc.start(now);
+          osc.stop(now + 8.1);
+
+          this.oscillators.push(osc);
+          this.gainNodes.push(gain);
+        });
+      };
+
+      playChord();
+      this.chordInterval = setInterval(playChord, 8000);
+
+    } catch (e) {
+      console.error("Web Audio API error:", e);
+    }
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.chordInterval) {
+      clearInterval(this.chordInterval);
+      this.chordInterval = null;
+    }
+    this.oscillators.forEach(osc => {
+      try { osc.stop(); } catch(e) {}
+    });
+    this.oscillators = [];
+    if (this.ctx) {
+      try { this.ctx.close(); } catch(e) {}
+      this.ctx = null;
+    }
+  }
+}
+
 export default function PresentationMarija() {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [currentLang, setCurrentLang] = useState('lt'); // Default to Lithuanian
@@ -288,6 +429,24 @@ export default function PresentationMarija() {
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [audioObj, setAudioObj] = useState<HTMLAudioElement | null>(null);
   const [isRecordingFinished, setIsRecordingFinished] = useState(false);
+  
+  // Ambient Music hooks
+  const [musicEnabled, setMusicEnabled] = useState(false);
+  const synth = React.useMemo(() => new AmbientSynth(), []);
+
+  useEffect(() => {
+    if (musicEnabled && (isPlaying || isCountingDown)) {
+      synth.start();
+    } else {
+      synth.stop();
+    }
+  }, [musicEnabled, isPlaying, isCountingDown, synth]);
+
+  useEffect(() => {
+    return () => {
+      synth.stop();
+    };
+  }, [synth]);
 
   // Navigation key listeners for clinical presentation mode
   useEffect(() => {
