@@ -44,14 +44,14 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 ### DIAPOSITIVA 5: Integridad Legal - Evaluación Administrativa vs. Triaje Médico
 * **Objetivo Visual:** Fondo Blanco (#FFFFFF). Un escudo de cumplimiento o check-mark estilizado en Cian Eléctrico (#008DDA) que representa la rigurosidad sanitaria europea. Texto sólido en Azul Cobalto (#0B192C).
 * **Guion Narrativo (Presentador):** 
-  > *"Para su total tranquilidad regulatoria y en estricto cumplimiento con el reglamento europeo MDR 2017/745 y las leyes de salud de Lituania, Marija DI actúa bajo una exención expresa de responsabilidad médica. No realizamos diagnósticos ni triaje clínico. El sistema ejecuta una **'evaluación preliminar de necesidades del paciente'** (*poreikių įvertinimas*). Es una barrera de eficiencia puramente administrativa para clasificar urgencias de flujo de agenda de manera segura y 100% legal."*
+  > *"Para su total tranquilidad regulatoria y en estricto cumplimiento con el reglamento europeo MDR 2017/745 y las leyes de salud de Lituania, Marija DI actúa bajo una exención expresa de responsabilidad médica. No realizamos diagnósticos ni triaje clínico. El sistema ejecuta una **'evaluación preliminar de necesidades del paciente'** (*poreikių įvertinimas*). Es una barrera de eficiencia puramente administrativa para registrar el motivo de la visita indicado por el paciente y trasladarlo a la clínica de manera segura y 100% legal."*
 * **Indicadores y Puntos de Dolor que Resuelve:** Destruye cualquier objeción regulatoria o legal. Blinda a la clínica frente al ministerio de salud garantizando que la tecnología no asume riesgos ni responsabilidades clínicas reservadas a profesionales.
 
-### DIAPOSITIVA 6: El Escudo Contractual - Contrato de Adhesión Automatizado
-* **Objetivo Visual:** Fondo Gris Ultra Claro (#F8FAFC). Un diagrama de flujo minimalista que muestra la firma digital del contrato antes de confirmar la cita. Acentos en Cian Eléctrico (#008DDA).
+### DIAPOSITIVA 6: Base Jurídica - Consentimiento Transparente del Paciente
+* **Objetivo Visual:** Fondo Gris Ultra Claro (#F8FAFC). Un diagrama de flujo minimalista que muestra la aceptación digital de las condiciones antes de confirmar la cita. Acentos en Cian Eléctrico (#008DDA).
 * **Guion Narrativo (Presentador):** 
-  > *"Marija DI no solo gestiona la agenda en piloto automático, también blinda legalmente su facturación. Antes de confirmar su primera cita, el sistema asegura que cada paciente acepte y firme digitalmente el Contrato de Adhesión de su clínica. Esto le otorga al consultorio el respaldo legal inmediato para aplicar políticas y penalizaciones de cobro por inasistencias o cancelaciones tardías, todo sin someter a su personal de recepción a conversaciones incómodas."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Aplica de forma directa las directrices legales del contrato de adhesión (Doc. "260526 3"). Pone a la tecnología a ejecutar el trabajo legal y de cobro de forma transparente y sin fricciones humanas.
+  > *"Marija DI no solo gestiona la agenda en piloto automático, también blinda la operación de su consultorio. Antes de confirmar su primera cita, el sistema asegura que cada paciente acepte las condiciones de registro de visitas y el aviso de privacidad de su clínica. Esto le otorga al consultorio un respaldo documentado inmediato para aplicar una política clara de cancelación y obtener el consentimiento informado, todo sin someter a su personal de recepción a conversaciones incómodas."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Pone a la tecnología a realizar el trabajo de recolección de consentimiento y políticas de cancelación de forma transparente y sin fricciones humanas.
 
 ### DIAPOSITIVA 7: Retorno de Inversión (ROI) - Sillones al 95% de Capacidad
 * **Objetivo Visual:** Fondo Blanco (#FFFFFF). Grandes indicadores y métricas de éxito en Azul Cobalto Profundo (#0B192C) destacando "-45% No-Shows" y "+5% Ingresos" en Cian Eléctrico (#008DDA).
@@ -94,7 +94,7 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 ### ESCENA 4: Cumplimiento y Seguridad Operativa (0:45 - 1:00)
 * **Visual en Pantalla:** Un gráfico clínico interactivo dibuja una línea verde protectora que separa la "Administración" del "Tratamiento Médico". Se resalta en pantalla la validación del *"poreikių įvertinimas"* (Evaluación preliminar de necesidades) y el cumplimiento de las normativas europeas MDR.
 * **Locución en Off:** 
-  > *"Diseñado bajo un estricto blindaje legal y sanitario. Marija DI realiza una 'evaluación preliminar de necesidades del paciente' de carácter estrictamente administrativo, identificando urgencias de flujo y garantizando la firma digital del contrato de adhesión antes de su llegada."*
+  > *"Diseñado bajo un estricto blindaje legal y sanitario. Marija DI realiza una 'evaluación preliminar de necesidades del paciente' de carácter estrictamente administrativo, registrando el motivo de visita y garantizando la aceptación digital de las condiciones de registro de citas antes de su llegada."*
 * **Textos en Pantalla:** "POREIKIŲ ĮVERTINIMAS | 100% LEGAL & CONFORME" (Cian #008DDA).
 * **Efectos de Sonido y Pausa:** Un pulso acústico suave y seguro que transmite invulnerabilidad legal, cumplimiento normativo y protección de datos.
 
