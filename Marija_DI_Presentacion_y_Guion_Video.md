@@ -35,35 +35,46 @@ Este documento contiene los entregables oficiales y optimizados generados por **
   > *"Actualmente, su equipo administrativo en recepción pierde hasta el 60% de su jornada laboral dictando precios de tratamientos por teléfono, explicando coberturas de la caja de salud estatal (Ligonių kasos / PSD) y lidiando manualmente con la saturación en horas pico. Esta sobrecarga no solo desgasta a su personal, sino que provoca que los pacientes de alto valor que llaman fuera de horario con dolor agudo no reciban respuesta y se vayan directamente a la competencia."*
 * **Indicadores y Puntos de Dolor que Resuelve:** Toca de forma directa la fatiga operativa de recepción en horas pico (8-11 AM y 4-6 PM) y expone la alarmante fuga de ingresos de llamadas nocturnas y fines de semana.
 
-### DIAPOSITIVA 4: Marija DI - La Asistente Administrativa Inteligente
-* **Objetivo Visual:** Fondo Blanco (#FFFFFF). Visualización limpia de una interfaz de diálogo moderna redactada en perfecto lituano formal (*Jūs*), utilizando la paleta Cian Eléctrico (#008DDA) y Azul Cobalto (#0B192C).
+### DIAPOSITIVA 4: Marija DI - Jūsų 24/7 išmanioji asistentė (La Asistente Inteligente)
+* **Objetivo Visual:** Tres pasos circulares interconectados (*Always On*, *Filtering*, *Action*) con íconos vectoriales modernos en Cian Eléctrico (#008DDA) y Azul Cobalto (#0B192C).
 * **Guion Narrativo (Presentador):** 
-  > *"La solución para escalar su clínica no es contratar más personal administrativo con más nómina; es capturar la demanda de sus pacientes en piloto automático. Para eso hemos creado a Marija DI: una asistente inteligente de fricción cero que opera 24/7. Asume el 100% de las preguntas rutinarias de los pacientes, confirma y reprograma citas de forma autónoma sin intervención humana y activa listas de espera dinámicas para garantizar que sus sillones estén siempre ocupados."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Presenta la solución tecnológica como una reducción directa de OPEX (gasto operativo) administrativo sin introducir términos de software incomprensibles.
+  > *"Marija DI gestiona la agenda en piloto automático: atiende preguntas rutinarias 24/7 en lituano formal, filtra y registra las necesidades administrativas y reasigna espacios para mantener la clínica al 95% de su capacidad."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Presenta la solución tecnológica como una reducción de OPEX y optimización de agenda sin fricción.
 
-### DIAPOSITIVA 5: Integridad Legal - Evaluación Administrativa vs. Triaje Médico
-* **Objetivo Visual:** Fondo Blanco (#FFFFFF). Un escudo de cumplimiento o check-mark estilizado en Cian Eléctrico (#008DDA) que representa la rigurosidad sanitaria europea. Texto sólido en Azul Cobalto (#0B192C).
+### DIAPOSITIVA 5: Teisinis vientisumas ir MDR atitiktis (Integridad Legal y MDR)
+* **Objetivo Visual:** Estructura comparativa de 2 columnas: Columna Roja (Draudžiama / Prohibido: Triaje, diagnósticos) y Columna Verde (100% Legal: Registro de motivos de visita, gestión de flujos administrativos, traslado sin valoración clínica).
 * **Guion Narrativo (Presentador):** 
-  > *"Para su total tranquilidad regulatoria y en estricto cumplimiento con el reglamento europeo MDR 2017/745 y las leyes de salud de Lituania, Marija DI actúa bajo una exención expresa de responsabilidad médica. No realizamos diagnósticos ni triaje clínico. El sistema ejecuta una **'evaluación preliminar de necesidades del paciente'** (*poreikių įvertinimas*). Es una barrera de eficiencia puramente administrativa para registrar el motivo de la visita indicado por el paciente y trasladarlo a la clínica de manera segura y 100% legal."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Destruye cualquier objeción regulatoria o legal. Blinda a la clínica frente al ministerio de salud garantizando que la tecnología no asume riesgos ni responsabilidades clínicas reservadas a profesionales.
+  > *"Cumplimos estrictamente con el reglamento MDR 2017/745. Marija DI realiza una 'evaluación preliminar de necesidades' de carácter puramente administrativo, sin triaje clínico ni diagnóstico médico."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Destruye objeciones regulatorias al garantizar una exención total de responsabilidad médica.
 
-### DIAPOSITIVA 6: Base Jurídica - Consentimiento Transparente del Paciente
-* **Objetivo Visual:** Fondo Gris Ultra Claro (#F8FAFC). Un diagrama de flujo minimalista que muestra la aceptación digital de las condiciones antes de confirmar la cita. Acentos en Cian Eléctrico (#008DDA).
+### DIAPOSITIVA 6: Strateginis pagrindas: ES institucinė kryptis (Marco Estratégico Europeo - NUEVA)
+* **Objetivo Visual:** Bloque superior con una cita oficial de la Comisión Europea (Estrategia "Apply AI" de 2025). Tres tarjetas inferiores que detallan la prioridad política, la alineación de Marija DI y la adopción de IA en el sector salud (94%).
 * **Guion Narrativo (Presentador):** 
-  > *"Marija DI no solo gestiona la agenda en piloto automático, también blinda la operación de su consultorio. Antes de confirmar su primera cita, el sistema asegura que cada paciente acepte las condiciones de registro de visitas y el aviso de privacidad de su clínica. Esto le otorga al consultorio un respaldo documentado inmediato para aplicar una política clara de cancelación y obtener el consentimiento informado, todo sin someter a su personal de recepción a conversaciones incómodas."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Pone a la tecnología a realizar el trabajo de recolección de consentimiento y políticas de cancelación de forma transparente y sin fricciones humanas.
+  > *"Nuestra tecnología se alinea con la directiva oficial de la Comisión Europea para reducir la carga administrativa en salud mediante IA. Es un estándar institucional europeo avalado y financiado con más de 1.000 millones de €."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Proporciona un marco institucional sólido de la UE que otorga prestigio y seguridad estratégica a los directores de clínicas.
 
-### DIAPOSITIVA 7: Retorno de Inversión (ROI) - Sillones al 95% de Capacidad
-* **Objetivo Visual:** Fondo Blanco (#FFFFFF). Grandes indicadores y métricas de éxito en Azul Cobalto Profundo (#0B192C) destacando "-45% No-Shows" y "+5% Ingresos" en Cian Eléctrico (#008DDA).
+### DIAPOSITIVA 7: Teisinis pagrindas: skaidrus paciento sutikimas (Base Jurídica y Consentimiento)
+* **Objetivo Visual:** Diagrama de flujo horizontal en 4 pasos (1. Recepción, 2. Presentación de condiciones y política de privacidad, 3. Consentimiento digital del paciente, 4. Confirmación con base documentada de política de cancelación).
 * **Guion Narrativo (Presentador):** 
-  > *"Los números del negocio dictan la decisión. Al automatizar la evaluación de necesidades y ejecutar confirmaciones dinámicas automatizadas con 24 horas de anticipación, reducimos estadísticamente el ausentismo o 'No-Show' entre un 35% y un 45%. Liberamos el 60% del tiempo de su recepción y blindamos sus ingresos con sillones ocupados al 95% de su capacidad instalada. La inversión se paga sola con los primeros pacientes recuperados del mes."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Es el caso de negocio definitivo. Convierte a Marija DI en una máquina de rentabilidad directa, eliminando la percepción de que la tecnología es un "gasto".
+  > *"Antes de la cita, Marija DI presenta de forma transparente las condiciones de registro de visitas y el aviso de privacidad de su clínica. El paciente otorga su consentimiento digital, blindando la política de cancelación de forma pacífica y 100% legal."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Resuelve la fricción en recepción al automatizar el consentimiento informado BDAR y la política de cancelaciones sin cobro de multas abusivas.
 
-### DIAPOSITIVA 8: Activación Fricción-Cero - Cero Instalación e Integración Hoy
-* **Objetivo Visual:** Fondo Blanco (#FFFFFF). Un flujo visual de 3 pasos sencillos ("Nulinė instaliacija" / Cero Instalación compleja) en Cian Eléctrico (#008DDA). Botón destacado y datos de contacto de MB PROCDI.
+### DIAPOSITIVA 8: Investicijų grąža (ROI): Pagrįsti, įrodymais paremti rodikliai (Métricas ROI)
+* **Objetivo Visual:** Tres círculos con estadísticas clave validadas por evidencia científica europea: `-34% No-shows`, `+24% Reservas de citas`, y optimización operativa con engranajes interactivos.
 * **Guion Narrativo (Presentador):** 
-  > *"Nosotros no tocamos ni alteramos sus complejos y costosos sistemas de software médico. Ofrecemos un despliegue de fricción cero mediante una instalación de 10 minutos en su sitio web o canales de chat. Recuperen el control de su agenda médica y aseguren su facturación desde esta misma noche. Hemos preparado una demostración clínica interactiva adaptada con los datos de su propia clínica. Hagamos la prueba hoy."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Elimina el pánico natural de la clínica a las migraciones tecnológicas complicadas, facilitando un cierre de venta rápido y un despliegue híbrido inmediato.
+  > *"Inversión basada en datos empíricos de la Eurozona. Reducimos el ausentismo un 34% mediante recordatorios automatizados y aumentamos un 24% las reservas fuera del horario de oficina, maximizando la facturación."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Proporciona sustento matemático riguroso basado en estudios científicos para convencer al director del retorno financiero inmediato.
+
+### DIAPOSITIVA 9: Nulinė instaliacija: Pradėkite veikti šiandien (Implementación Fricción Cero)
+* **Objetivo Visual:** Tres pasos de despliegue con íconos vectoriales: 1. Integración en 10 minutos (código script sencillo), 2. Clon personalizado (tarifas, logo y políticas de la clínica), 3. Operación híbrida (notificaciones en el correo electrónico).
+* **Guion Narrativo (Presentador):** 
+  > *"Implementación inmediata y sin riesgos de TI. Copiar y pegar un script de 10 minutos en su web, con un clon entrenado a la medida de su clínica, listo para operar en piloto automático."*
+
+### DIAPOSITIVA 10: Šaltiniai ir metodinė pastaba (Referencias y Bibliografía - NUEVA)
+* **Objetivo Visual:** Lista densa y sumamente premium de las 11 referencias bibliográficas oficiales (Comisión Europea, OMS, OCDE, Eurostat, Mayo Clinic, etc.) con sus respectivos enlaces directos a EUR-Lex, PubMed y WHO.
+* **Guion Narrativo (Presentador):** 
+  > *"Toda nuestra propuesta de valor está sustentada por datos de agencias gubernamentales y médicas de la UE y EEE, brindando total transparencia, rigor científico e institucional a su clínica."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Cierre corporativo de máxima confianza. Elimina cualquier duda comercial al demostrar que el ROI y la legalidad del sistema están 100% documentados por organismos oficiales.
 
 ---
 
