@@ -227,133 +227,133 @@ export default function RMAPage() {
             <p className="text-purple-400 text-sm font-mono tracking-wider">Internal Command Center</p>
           </div>
         </div>
-        <a href="/admin" className="px-6 py-2 border border-white/20 rounded-full hover:bg-white/5 transition-colors text-sm font-bold">
-          Back to Hub
-        </a>
+        {!finalReport && (
+          <a href="/admin" className="px-6 py-2 border border-white/20 rounded-full hover:bg-white/5 transition-colors text-sm font-bold">
+            Back to Hub
+          </a>
+        )}
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Panel de Control */}
-        <div className="glass p-8 rounded-2xl border border-white/10 relative overflow-hidden h-fit">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-          
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <ShieldAlert className="text-purple-400" /> New Forensic Analysis
-          </h2>
-
-          <div className="mb-6">
-            <label className="block text-sm font-bold text-slate-300 mb-2">Final Report Language</label>
-            <select 
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors text-white"
-            >
-              <option value="en">English</option>
-              <option value="es">Spanish</option>
-              <option value="pt">Portuguese</option>
-              <option value="ru">Russian</option>
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-sm font-bold text-slate-300 mb-2">Intelligence Context (Optional)</label>
-            <textarea 
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-              className="w-full h-24 bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors placeholder:text-slate-600"
-              placeholder="Ex: This individual contacted me via LinkedIn offering Russian petroleum products. I suspect it's a scammer."
-            />
-          </div>
-
-          <div className="mb-8">
-            <label className="block text-sm font-bold text-slate-300 mb-2">Documentary Evidence (PDF, JPG)</label>
-            <label className="w-full h-32 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-500/5 transition-colors">
-              <Upload className="w-8 h-8 text-slate-400 mb-2" />
-              <span className="text-sm text-slate-300 font-bold">Upload Documents</span>
-              <span className="text-xs text-slate-500 mt-1">{files.length > 0 ? `${files.length} file(s) selected` : 'SCO, Mandates, Passports, etc.'}</span>
-              <input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png" />
-            </label>
-          </div>
-
-          <button 
-            onClick={runAnalysis}
-            disabled={status === 'running'}
-            className="w-full py-4 bg-purple-500 hover:bg-purple-400 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
-          >
-            {status === 'running' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Cpu className="w-5 h-5" />}
-            {status === 'running' ? 'EXECUTING NEURAL NETWORK...' : 'RUN FORENSIC SCAN'}
-          </button>
-
-        </div>
-
-        {/* Panel de Nodos Visuales y Telemetría */}
-        <div className="flex flex-col gap-6">
-          <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Network className="w-4 h-4 text-purple-400" /> Agent Swarm Deployment
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <AgentNode id="ROB-9X" name="Roberto" role="Due Diligence" status={agentStatus.roberto} icon={Search} />
-              <AgentNode id="MOI-2B" name="Moisés" role="Legal" status={agentStatus.moises} icon={Scale} />
-              <AgentNode id="ALC-7V" name="Alcides" role="Tech & Chem" status={agentStatus.alcides} icon={Cpu} />
-              <AgentNode id="EXE-1A" name="Consolidator" role="Consolidator" status={agentStatus.consolidator} icon={ShieldCheck} />
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-1 bg-black/50 rounded-full overflow-hidden mb-4 border border-white/5">
-               <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
-            </div>
-
-            {/* Compact Terminal Logs */}
-            <div className="bg-black/80 rounded-xl border border-white/5 p-3 font-mono text-[10px] h-32 overflow-y-auto">
-               {logs.length === 0 && <span className="text-slate-600">{t('waiting')}</span>}
-               {logs.map((log, i) => (
-                 <div key={i} className="mb-1 text-slate-400">
-                   <span className="text-purple-400">{'>'}</span> {log}
-                 </div>
-               ))}
-            </div>
-          </div>
-
-          {/* Área de Descarga */}
-          {finalReport && (
-            <div className="glass p-6 rounded-2xl border border-green-500/30 bg-green-500/10 flex flex-col items-center justify-center text-center">
-               <CheckCircle2 className="w-12 h-12 text-green-400 mb-3" />
-               <h3 className="text-xl font-bold text-white mb-2">Analysis Completed</h3>
-               <p className="text-sm text-slate-300 mb-6">The Official PDF with the forensic report (RMA) has been generated and signed by the AI.</p>
-               
-               <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <RMAPdfGenerator finalReport={finalReport} language={language} />
-                 <RMAPdfGenerator 
-                   finalReport={finalReport} 
-                   redactOnTheFly={true}
-                   buttonText="REDACT FOR MARKETING"
-                   buttonColor="bg-slate-800 hover:bg-slate-700 text-white border border-slate-600"
-                   language={language}
-                 />
-               </div>
-               
-               <button 
-                  onClick={resetForm} 
-                  className="mt-6 px-6 py-2 border border-white/20 text-slate-300 text-sm font-bold rounded-full hover:bg-white/10 transition-colors"
-               >
-                  Start New Scan
-               </button>
-            </div>
-          )}
-
-          {status === 'error' && (
-             <div className="glass p-6 rounded-2xl border border-red-500/30 bg-red-500/10 flex flex-col items-center justify-center text-center">
-               <AlertTriangle className="w-12 h-12 text-red-400 mb-3" />
-               <h3 className="text-xl font-bold text-white mb-2">Execution Error</h3>
-               <p className="text-sm text-slate-300">A problem occurred during the scan. Please check the telemetry console.</p>
+      {finalReport ? (
+        /* Dedicated Download Screen (Other Window/View) - No back buttons */
+        <div className="w-full max-w-2xl mt-12 flex justify-center">
+          <div className="glass w-full p-10 rounded-2xl border border-green-500/30 bg-green-500/5 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.15)] transition-all duration-700">
+             <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+             <CheckCircle2 className="w-16 h-16 text-green-400 mb-4 animate-bounce" />
+             <h2 className="text-3xl font-extrabold text-white mb-3 font-montserrat uppercase tracking-wider">Analysis Completed</h2>
+             <p className="text-sm text-slate-300 max-w-md mb-8">
+               The Official PDF with the forensic report (RMA) has been generated and signed by the AI.
+             </p>
+             
+             <div className="w-full max-w-xs">
+               <RMAPdfGenerator finalReport={finalReport} language={language} />
              </div>
-          )}
-
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Original Input and Telemetry Grid */
+        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Panel de Control */}
+          <div className="glass p-8 rounded-2xl border border-white/10 relative overflow-hidden h-fit">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <ShieldAlert className="text-purple-400" /> New Forensic Analysis
+            </h2>
+
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-slate-300 mb-2">Final Report Language</label>
+              <select 
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                disabled={status === 'running'}
+                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-slate-300 mb-2">Intelligence Context (Optional)</label>
+              <textarea 
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+                disabled={status === 'running'}
+                className="w-full h-24 bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors placeholder:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Ex: This individual contacted me via LinkedIn offering Russian petroleum products. I suspect it's a scammer."
+              />
+            </div>
+
+            <div className="mb-8">
+              <label className="block text-sm font-bold text-slate-300 mb-2">Documentary Evidence (PDF, JPG)</label>
+              <label className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-colors ${
+                status === 'running'
+                  ? 'border-white/10 bg-black/20 cursor-not-allowed opacity-50'
+                  : 'border-white/20 cursor-pointer hover:border-purple-400 hover:bg-purple-500/5'
+              }`}>
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm text-slate-300 font-bold">Upload Documents</span>
+                <span className="text-xs text-slate-500 mt-1">{files.length > 0 ? `${files.length} file(s) selected` : 'SCO, Mandates, Passports, etc.'}</span>
+                <input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png" disabled={status === 'running'} />
+              </label>
+            </div>
+
+            <button 
+              onClick={runAnalysis}
+              disabled={status === 'running'}
+              className="w-full py-4 bg-purple-500 hover:bg-purple-400 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+            >
+              {status === 'running' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Cpu className="w-5 h-5" />}
+              {status === 'running' ? 'EXECUTING NEURAL NETWORK...' : 'RUN FORENSIC SCAN'}
+            </button>
+
+          </div>
+
+          {/* Panel de Nodos Visuales y Telemetría */}
+          <div className="flex flex-col gap-6">
+            <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Network className="w-4 h-4 text-purple-400" /> Agent Swarm Deployment
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <AgentNode id="ROB-9X" name="Roberto" role="Due Diligence" status={agentStatus.roberto} icon={Search} />
+                <AgentNode id="MOI-2B" name="Moisés" role="Legal" status={agentStatus.moises} icon={Scale} />
+                <AgentNode id="ALC-7V" name="Alcides" role="Tech & Chem" status={agentStatus.alcides} icon={Cpu} />
+                <AgentNode id="EXE-1A" name="Consolidator" role="Consolidator" status={agentStatus.consolidator} icon={ShieldCheck} />
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-1 bg-black/50 rounded-full overflow-hidden mb-4 border border-white/5">
+                 <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+              </div>
+
+              {/* Compact Terminal Logs */}
+              <div className="bg-black/80 rounded-xl border border-white/5 p-3 font-mono text-[10px] h-32 overflow-y-auto">
+                 {logs.length === 0 && <span className="text-slate-600">{t('waiting')}</span>}
+                 {logs.map((log, i) => (
+                   <div key={i} className="mb-1 text-slate-400">
+                     <span className="text-purple-400">{'>'}</span> {log}
+                   </div>
+                 ))}
+              </div>
+            </div>
+
+            {status === 'error' && (
+               <div className="glass p-6 rounded-2xl border border-red-500/30 bg-red-500/10 flex flex-col items-center justify-center text-center">
+                 <AlertTriangle className="w-12 h-12 text-red-400 mb-3" />
+                 <h3 className="text-xl font-bold text-white mb-2">Execution Error</h3>
+                 <p className="text-sm text-slate-300">A problem occurred during the scan. Please check the telemetry console.</p>
+               </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
