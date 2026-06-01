@@ -48,14 +48,8 @@ export default function RMAPdfGenerator({
       const blob = await pdf(<SureReportTemplate data={reportToCompile} reportId={reportId} language={language} />).toBlob();
       const url = URL.createObjectURL(blob);
       
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Abrir el PDF directamente en una nueva pestaña para que se muestre en pantalla y sea capturado por OBS
+      window.open(url, '_blank');
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Hubo un error al compilar el PDF. Por favor intenta de nuevo.");
