@@ -22,6 +22,14 @@ export default function AdminHubPage() {
       if (!session) {
         router.replace('/login');
       } else {
+        // Redirección inmediata a carga de documentos (RMA) tras pago exitoso
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('success') === 'true') {
+            router.replace('/admin/rma');
+            return;
+          }
+        }
         setLoading(false);
       }
     };
