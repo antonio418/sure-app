@@ -483,7 +483,7 @@ export default function IntakePortal() {
                 <Key className="w-4 h-4" /> VIP Access Token
               </label>
               <input 
-                type="text" 
+                type="password" 
                 name="client_vip_token_secure"
                 required
                 value={vipToken}
