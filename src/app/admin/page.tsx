@@ -18,18 +18,20 @@ export default function AdminHubPage() {
         return;
       }
 
+      // Redirección inmediata a carga de documentos (RMA) tras pago exitoso
+      // Se evalúa ANTES de la sesión para evitar bloqueos en modo Incógnito
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === 'true') {
+          router.replace('/admin/rma');
+          return;
+        }
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.replace('/login');
       } else {
-        // Redirección inmediata a carga de documentos (RMA) tras pago exitoso
-        if (typeof window !== 'undefined') {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get('success') === 'true') {
-            router.replace('/admin/rma');
-            return;
-          }
-        }
         setLoading(false);
       }
     };
