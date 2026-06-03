@@ -516,6 +516,18 @@ export default function PresentationMarija() {
   const [autoplayActive, setAutoplayActive] = useState(false);
   const [autoplayTimeLeft, setAutoplayTimeLeft] = useState(8); // 8 seconds per slide
   
+  // Voiceover Audio synchronization states
+  const [voiceoverPlaying, setVoiceoverPlaying] = useState(false);
+  const [voiceoverTime, setVoiceoverTime] = useState(0);
+  const [voiceoverDuration, setVoiceoverDuration] = useState(113); // Default to LT duration
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  // Hidden developer tool states for timing synchronization adjustments
+  const [devMode, setDevMode] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [slideTimingsEs, setSlideTimingsEs] = useState<number[]>([0, 11, 24, 38, 51, 62, 71, 80, 92, 101]);
+  const [slideTimingsLt, setSlideTimingsLt] = useState<number[]>([0, 12, 26, 40, 54, 65, 75, 84, 96, 105]);
+
   // Ambient Music hooks
   const [musicEnabled, setMusicEnabled] = useState(false);
   const synth = React.useMemo(() => new AmbientSynth(), []);
@@ -534,6 +546,23 @@ export default function PresentationMarija() {
     };
   }, [synth]);
 
+  // Pause music if voiceover starts, and pause voiceover if autoplay starts
+  useEffect(() => {
+    if (voiceoverPlaying && musicEnabled) {
+      setMusicEnabled(false);
+    }
+  }, [voiceoverPlaying]);
+
+  // Handle language change: pause and reload audio
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.load();
+      setVoiceoverPlaying(false);
+      setVoiceoverTime(0);
+    }
+  }, [currentLang]);
+
   // Navigation key listeners for clinical presentation mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -545,9 +574,55 @@ export default function PresentationMarija() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, autoplayActive]);
+  }, [currentSlide, autoplayActive, voiceoverPlaying]);
 
-  // Automatic clean slide progression in Autoplay Video Mode
+  // Voiceover Audio synchronization and slide switching
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      const time = audio.currentTime;
+      setVoiceoverTime(time);
+
+      const timings = currentLang === 'lt' ? slideTimingsLt : slideTimingsEs;
+      let activeSlide = 1;
+
+      for (let i = 0; i < timings.length; i++) {
+        if (time >= timings[i]) {
+          activeSlide = i + 1;
+        }
+      }
+
+      if (activeSlide !== currentSlide) {
+        setCurrentSlide(activeSlide);
+      }
+    };
+
+    const handleDurationChange = () => {
+      if (audio.duration) {
+        setVoiceoverDuration(audio.duration);
+      }
+    };
+
+    const handleEnded = () => {
+      setVoiceoverPlaying(false);
+      setVoiceoverTime(0);
+      setCurrentSlide(1);
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [currentSlide, currentLang, slideTimingsEs, slideTimingsLt]);
+
+  // Automatic clean slide progression in Autoplay Video Mode (Silent)
   useEffect(() => {
     if (!autoplayActive) return;
 
@@ -585,6 +660,12 @@ export default function PresentationMarija() {
   }, [currentSlide]);
 
   const toggleAutoplay = () => {
+    // Turn off voiceover if active
+    if (voiceoverPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setVoiceoverPlaying(false);
+    }
+    
     if (autoplayActive) {
       setAutoplayActive(false);
     } else {
@@ -596,14 +677,58 @@ export default function PresentationMarija() {
     }
   };
 
+  const toggleVoiceover = () => {
+    // Turn off silent autoplay if active
+    if (autoplayActive) {
+      setAutoplayActive(false);
+    }
+
+    if (!audioRef.current) return;
+    if (voiceoverPlaying) {
+      audioRef.current.pause();
+      setVoiceoverPlaying(false);
+    } else {
+      // Set to beginning if it was finished
+      if (audioRef.current.ended || audioRef.current.currentTime >= audioRef.current.duration - 0.2) {
+        audioRef.current.currentTime = 0;
+      }
+      audioRef.current.play().then(() => {
+        setVoiceoverPlaying(true);
+      }).catch(err => {
+        console.error("Audio playback error:", err);
+      });
+    }
+  };
+
   const nextSlide = () => {
     if (autoplayActive) setAutoplayActive(false);
-    if (currentSlide < 10) setCurrentSlide(prev => prev + 1);
+    if (voiceoverPlaying && audioRef.current) {
+      // Advance audio position to the next slide timing threshold
+      const timings = currentLang === 'lt' ? slideTimingsLt : slideTimingsEs;
+      if (currentSlide < 10) {
+        audioRef.current.currentTime = timings[currentSlide];
+      } else {
+        audioRef.current.pause();
+        setVoiceoverPlaying(false);
+      }
+    } else {
+      if (currentSlide < 10) setCurrentSlide(prev => prev + 1);
+    }
   };
 
   const prevSlide = () => {
     if (autoplayActive) setAutoplayActive(false);
-    if (currentSlide > 1) setCurrentSlide(prev => prev - 1);
+    if (voiceoverPlaying && audioRef.current) {
+      // Regress audio position to the previous slide timing threshold
+      const timings = currentLang === 'lt' ? slideTimingsLt : slideTimingsEs;
+      if (currentSlide > 1) {
+        audioRef.current.currentTime = timings[currentSlide - 2];
+      } else {
+        audioRef.current.currentTime = 0;
+      }
+    } else {
+      if (currentSlide > 1) setCurrentSlide(prev => prev - 1);
+    }
   };
 
   const t = (key: string) => {
@@ -643,7 +768,19 @@ export default function PresentationMarija() {
         {/* Top Bar / Slide Header - Premium Light Theme */}
         <header className="w-full flex justify-between items-center z-20 pb-4 border-b border-[#0B192C]/10 relative">
           <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center justify-center border border-slate-200 bg-white rounded-xl p-2 w-16 h-16 shadow-sm shrink-0">
+            <div 
+              onClick={() => {
+                setLogoClicks(prev => {
+                  if (prev + 1 >= 5) {
+                    setDevMode(d => !d);
+                    return 0;
+                  }
+                  return prev + 1;
+                });
+              }}
+              className="flex flex-col items-center justify-center border border-slate-200 bg-white rounded-xl p-2 w-16 h-16 shadow-sm shrink-0 cursor-pointer hover:border-[#008DDA] transition-all"
+              title="Click 5 veces para Modo Desarrollador de Tiempos"
+            >
               <ProcdiLogo className="w-10 h-10 shrink-0" />
             </div>
             <div className="flex flex-col">
@@ -662,6 +799,13 @@ export default function PresentationMarija() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Hidden Audio Player for Voiceover Sync */}
+            <audio 
+              ref={audioRef}
+              src={currentLang === 'lt' ? '/voiceover_marija_lt.mp3' : '/voiceover_marija.mp3'}
+              preload="auto"
+            />
+
             {/* Background Music Toggle */}
             <button 
               onClick={() => setMusicEnabled(!musicEnabled)}
@@ -671,7 +815,25 @@ export default function PresentationMarija() {
               <span>{t('music_toggle')}</span>
             </button>
 
-            {/* Play/Sync Autoplay Video Mode Button */}
+            {/* New Voiceover Mode Button */}
+            <button 
+              onClick={toggleVoiceover}
+              className={`flex items-center gap-2 px-5 py-2.5 text-xs md:text-sm font-bold rounded-full border transition-all duration-300 tracking-wider ${voiceoverPlaying ? 'bg-cyan-600 border-cyan-500 text-white shadow-[0_0_15px_rgba(0,141,218,0.4)]' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800'}`}
+            >
+              {voiceoverPlaying ? (
+                <>
+                  <Square className="w-3.5 h-3.5 fill-current mr-1 text-cyan-200" />
+                  <span>{currentLang === 'lt' ? `BALSAS AKTYVUS` : `LOCUCIÓN ACTIVA`}</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-current mr-1" />
+                  <span>{currentLang === 'lt' ? 'KLAUSYTIS LOCUCIJĄ' : 'REPRODUCIR CON VOZ'}</span>
+                </>
+              )}
+            </button>
+
+            {/* Play/Sync Autoplay Video Mode Button (Silent) */}
             <button 
               onClick={toggleAutoplay}
               className={`flex items-center gap-2 px-5 py-2.5 text-xs md:text-sm font-bold rounded-full border transition-all duration-300 tracking-wider ${autoplayActive ? 'bg-emerald-600 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-[#0B192C] border-[#0B192C] text-white hover:bg-[#008DDA] hover:border-[#008DDA] shadow-md'}`}
@@ -1355,6 +1517,90 @@ export default function PresentationMarija() {
         </footer>
 
       </div>
+
+      {/* Developer Audio Timing Sync Tool (Hidden by default, click Logo 5 times to toggle) */}
+      {devMode && (
+        <div className="fixed bottom-6 right-6 w-96 bg-[#0B192C] border-2 border-[#008DDA] rounded-2xl p-4 shadow-[0_10px_35px_rgba(0,0,0,0.5)] z-50 text-white font-mono text-xs flex flex-col gap-3">
+          <div className="flex justify-between items-center border-b border-white/10 pb-2">
+            <span className="font-bold text-[#00E5FF]">⏱️ MARIJA DI - TIMING SYNC TOOL</span>
+            <button onClick={() => setDevMode(false)} className="text-white hover:text-red-400 font-bold">✕</button>
+          </div>
+          
+          <div className="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-white/5">
+            <div>
+              <span className="text-[#94a3b8]">Audio:</span>{' '}
+              <strong className="text-white">
+                {voiceoverTime.toFixed(1)}s
+              </strong>{' '}
+              / {voiceoverDuration.toFixed(1)}s
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] bg-[#008DDA] px-2 py-0.5 rounded font-black uppercase">
+                {currentLang.toUpperCase()}
+              </span>
+              <button 
+                onClick={toggleVoiceover}
+                className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded font-bold"
+              >
+                {voiceoverPlaying ? 'Pause' : 'Play'}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto max-h-48 pr-1 space-y-1">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((slideNum) => {
+              const timings = currentLang === 'lt' ? slideTimingsLt : slideTimingsEs;
+              const setTimings = currentLang === 'lt' ? setSlideTimingsLt : setSlideTimingsEs;
+              const threshold = timings[slideNum - 1];
+
+              return (
+                <div key={slideNum} className="flex justify-between items-center bg-white/5 p-1.5 rounded hover:bg-white/10 transition-all">
+                  <span>Slide {slideNum}: <strong>{threshold.toFixed(1)}s</strong></span>
+                  <button 
+                    onClick={() => {
+                      if (audioRef.current) {
+                        const newTimings = [...timings];
+                        newTimings[slideNum - 1] = Math.round(audioRef.current.currentTime * 10) / 10;
+                        // Sort timings to prevent chronologically incorrect order
+                        newTimings.sort((a, b) => a - b);
+                        setTimings(newTimings);
+                      }
+                    }}
+                    className="px-2 py-0.5 bg-[#008DDA]/20 hover:bg-[#008DDA] text-[#00E5FF] hover:text-white rounded border border-[#008DDA]/30 font-bold"
+                  >
+                    Fijar
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-2 border-t border-white/10 pt-2.5">
+            <button 
+              onClick={() => {
+                const timings = currentLang === 'lt' ? slideTimingsLt : slideTimingsEs;
+                navigator.clipboard.writeText(JSON.stringify(timings));
+                alert(`Copiado al portapapeles: \n${JSON.stringify(timings)}`);
+              }}
+              className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-center"
+            >
+              📋 Copiar Timings
+            </button>
+            <button 
+              onClick={() => {
+                if (currentLang === 'lt') {
+                  setSlideTimingsLt([0, 12, 26, 40, 54, 65, 75, 84, 96, 105]);
+                } else {
+                  setSlideTimingsEs([0, 11, 24, 38, 51, 62, 71, 80, 92, 101]);
+                }
+              }}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded font-bold text-center"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
