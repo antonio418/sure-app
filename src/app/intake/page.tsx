@@ -1,690 +1,348 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { ShieldCheck, UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Network, Search, Scale, Cpu, Key, Copy, Check, AlertTriangle, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { useLanguage } from '@/context/LanguageContext';
-import dynamic from 'next/dynamic';
-import { msaTranslations } from '@/lib/msaTranslations';
-import LanguageSelector from '@/components/ui/LanguageSelector';
-import { extractAndParseJSON } from '@/lib/jsonParser';
+import { 
+  ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Loader2, 
+  Sparkles, Globe, User, Mail, Phone, Link2, Send, Check
+} from 'lucide-react';
 
-const RMAPdfGenerator = dynamic(
-  () => import('@/components/pdf/RMAPdfGenerator'),
-  { ssr: false, loading: () => <div className="text-sm text-slate-400">Preparando motor PDF...</div> }
-);
-
-const AgentNode = ({ id, name, role, status, icon: Icon }: any) => {
-  const { t } = useLanguage();
-  const isRunning = status === 'running';
-  const isSuccess = status === 'success';
-
-  return (
-    <div className={`p-4 rounded-xl border relative overflow-hidden transition-all duration-500 ${
-      isRunning ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]' :
-      isSuccess ? 'border-emerald-500 bg-emerald-500/10' :
-      'border-white/10 bg-slate-900'
-    }`}>
-      {isRunning && <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/30 blur-2xl animate-pulse"></div>}
-      <div className="flex items-start justify-between mb-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-          isRunning ? 'border-emerald-500/50 text-emerald-400' :
-          isSuccess ? 'border-emerald-500/50 text-emerald-400' :
-          'border-white/10 text-slate-500'
-        }`}>
-          {isRunning ? <Loader2 className="w-5 h-5 animate-spin" /> : 
-           isSuccess ? <CheckCircle2 className="w-5 h-5" /> : 
-           <Icon className="w-5 h-5" />}
-        </div>
-        <div className="text-right">
-          <div className="text-xs font-mono text-slate-500">NODE: {id}</div>
-          <div className={`text-[10px] font-mono font-bold uppercase ${
-            isRunning ? 'text-emerald-400 animate-pulse' :
-            isSuccess ? 'text-emerald-400' : 'text-slate-600'
-          }`}>
-            {isRunning ? t('ui.agent_proc') : isSuccess ? t('ui.agent_done') : t('ui.agent_standby')}
-          </div>
-        </div>
-      </div>
-      <div>
-        <h4 className={`text-sm font-bold ${isRunning || isSuccess ? 'text-white' : 'text-slate-400'}`}>{name}</h4>
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{role}</p>
-      </div>
-    </div>
-  );
-};
-
-export default function IntakePortal() {
-  const { t, language: uiLanguage } = useLanguage();
+export default function MarijaIntakePortal() {
+  const [clinicName, setClinicName] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
-  const [emailConfirm, setEmailConfirm] = useState('');
   const [phone, setPhone] = useState('');
-  const [company, setCompany] = useState('');
-  const [reportLanguage, setReportLanguage] = useState(uiLanguage || 'en');
-  const [userContext, setUserContext] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [website, setWebsite] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [vipToken, setVipToken] = useState('');
   
-  const [status, setStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  
-  const [progress, setProgress] = useState(0);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [finalReport, setFinalReport] = useState<any | null>(null);
-  const [rawReport, setRawReport] = useState<string | null>(null);
-  const [parseError, setParseError] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [agentStatus, setAgentStatus] = useState<Record<string, 'idle'|'running'|'success'|'error'>>({
-    roberto: 'idle', moises: 'idle', alcides: 'idle', consolidator: 'idle'
-  });
-  const [session, setSession] = useState<any>(null);
-
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const handleAbort = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      addLog("Análisis cancelado por el usuario.");
-      setStatus('idle');
-      setProgress(0);
-      setErrorMessage("El análisis fue cancelado por el usuario.");
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
-    }
-  };
-
-  const handleCopy = () => {
-    if (rawReport) {
-      navigator.clipboard.writeText(rawReport);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const addLog = (msg: string) => setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  const [loadingStep, setLoadingStep] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const hasFiles = files.length > 0;
-    const hasContext = userContext.trim().length > 0;
+    if (!clinicName || !contactPerson || !email || !phone) {
+      setErrorMessage("Prašome užpildyti visus privalomus laukus.");
+      return;
+    }
 
-    if (!email || !emailConfirm || !phone) {
-      setErrorMessage("Por favor llena los campos obligatorios.");
-      return;
-    }
-    if (!hasFiles && !hasContext) {
-      setErrorMessage("Por favor sube al menos un documento o introduce el sitio web o detalles del proveedor en la caja de contexto.");
-      return;
-    }
-    if (email !== emailConfirm) {
-      setErrorMessage("Los correos electrónicos no coinciden.");
+    if (!acceptedTerms) {
+      setErrorMessage("Prašome sutikti su privatumo politika ir sąlygomis.");
       return;
     }
 
     try {
-      setStatus('uploading');
+      setStatus('submitting');
       setErrorMessage('');
-      setProgress(5);
-
-      // Initialize AbortController
-      abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
-
-      // 0. Validar Cupón VIP
-      if (!vipToken.trim()) {
-        throw new Error("Se requiere un código de acceso VIP válido.");
-      }
       
-      addLog("Validando credenciales VIP...");
-      const tokenRes = await fetch('/api/validate-token', {
+      // Visual steps for premium feel
+      setLoadingStep(1); // Connecting...
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep(2); // Saving...
+      const response = await fetch('/api/marija-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: vipToken, email: email }),
-        signal
+        body: JSON.stringify({
+          clinicName,
+          contactPerson,
+          email,
+          phone,
+          website
+        })
       });
-      
-      if (!tokenRes.ok) {
-        const errData = await tokenRes.json();
-        
-        let errorMsg = errData.error || t('ui.intake_err_validation');
-        if (errData.error === 'Cupón VIP inválido o no existe.') {
-          errorMsg = t('ui.intake_err_invalid_token');
-        } else if (errData.error === 'Este Cupón VIP ya ha sido utilizado o está expirado.') {
-          errorMsg = t('ui.intake_err_used_token');
-        }
-        
-        throw new Error(errorMsg);
-      }
-      const tokenData = await tokenRes.json();
-      addLog(`Acceso concedido para: ${tokenData.company}`);
 
-      const safeEmail = email.replace(/[^a-zA-Z0-9]/g, '_');
-      const safePhone = phone.replace(/[^a-zA-Z0-9+]/g, '');
-      
-      const uploadedPaths: string[] = [];
-      if (hasFiles) {
-        addLog("Subiendo documentos de evidencia de forma segura...");
-        for (const file of files) {
-          const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          const filePath = `intake_${safeEmail}_TEL_${safePhone}/${Date.now()}_${cleanFileName}`;
-          const { error } = await supabase.storage.from('temp_dossiers').upload(filePath, file);
-          if (error) throw error;
-          uploadedPaths.push(filePath);
-        }
-      } else {
-        addLog("Iniciando análisis a partir de la URL del proveedor o contexto suministrado...");
+      setLoadingStep(3); // Notifying...
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Nepavyko išsiųsti užklausos. Pabandykite vėliau.");
       }
 
-      setStatus('analyzing');
-      setProgress(10);
-      addLog(t('ui.log_secured'));
-
-      const subordinateAgents = ['roberto', 'moises', 'alcides'];
-      const subordinateNames = [t('ui.agent1_name'), t('ui.agent2_name'), t('ui.agent3_name')];
-
-      const fetchAgent = async (agent: string, name: string) => {
-        setAgentStatus(prev => ({ ...prev, [agent]: 'running' }));
-        const formData = new FormData();
-        uploadedPaths.forEach(path => formData.append('filePath', path));
-        formData.append('agent', agent);
-        formData.append('targetLanguage', reportLanguage);
-        if (userContext.trim()) {
-           formData.append('userContext', userContext.trim());
-        }
-        
-        try {
-          const response = await fetch('/api/analyze', { 
-            method: 'POST', 
-            body: formData,
-            signal
-          });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.error || `El agente ${name} reportó un error.`);
-          
-          setAgentStatus(prev => ({ ...prev, [agent]: 'success' }));
-          addLog(`${name} completed analysis successfully.`);
-          return `\n\n--- REPORTE DE ${name.toUpperCase()} ---\n${data.report}`;
-        } catch (agentErr: any) {
-          if (agentErr.name === 'AbortError') throw agentErr; // bubble aborts
-          
-          console.warn(`Error in agent ${name}:`, agentErr);
-          setAgentStatus(prev => ({ ...prev, [agent]: 'error' }));
-          addLog(`⚠️ ${name} encountered an issue: ${agentErr.message || agentErr}. Sourcing general public/domain context...`);
-          return `\n\n--- REPORTE DE ${name.toUpperCase()} (DEGRADADO) ---\nEl agente no pudo completar el análisis detallado: ${agentErr.message || agentErr}. Se procedió a consolidar los datos de riesgo con el contexto alternativo provisto.`;
-        }
-      };
-
-      const subordinateReports = [];
-      for (let i = 0; i < subordinateAgents.length; i++) {
-        const report = await fetchAgent(subordinateAgents[i], subordinateNames[i]);
-        subordinateReports.push(report);
-        setProgress(20 + (i * 20)); // 20 -> 40 -> 60
-      }
-
-      setProgress(75);
-      addLog(t('ui.log_deploy_exec'));
-      setAgentStatus(prev => ({ ...prev, consolidator: 'running' }));
-
-      const consolidatorFormData = new FormData();
-      uploadedPaths.forEach(path => consolidatorFormData.append('filePath', path));
-      consolidatorFormData.append('agent', 'consolidator');
-      consolidatorFormData.append('targetLanguage', reportLanguage);
-      consolidatorFormData.append('previousReports', subordinateReports.join('\n'));
-      if (userContext.trim()) {
-         consolidatorFormData.append('userContext', userContext.trim());
-      }
-      consolidatorFormData.append('email', email); // Sends copy to client via Resend
-      
-      try {
-        const consolidatorResponse = await fetch('/api/analyze', { 
-          method: 'POST', 
-          body: consolidatorFormData,
-          signal
-        });
-        const consolidatorData = await consolidatorResponse.json();
-        
-        if (!consolidatorResponse.ok) throw new Error(consolidatorData.error || `Error en Consolidador.`);
-        
-        setAgentStatus(prev => ({ ...prev, consolidator: 'success' }));
-        addLog(`${t('ui.log_dossier_done')} ${email}`);
-        setProgress(90);
-
-        if (consolidatorData.report) {
-           setRawReport(consolidatorData.report);
-        }
-
-        try {
-           const parsedReport = extractAndParseJSON(consolidatorData.report);
-           parsedReport.dateGenerated = new Date().toLocaleDateString();
-           setFinalReport(parsedReport);
-           setParseError(false);
-        } catch (e) {
-           addLog(t('ui.log_error_pdf'));
-           console.error("Error al parsear el reporte en frontend:", e);
-           setParseError(true);
-           setFinalReport(null);
-        }
-      } catch (consolidatorErr: any) {
-        if (consolidatorErr.name === 'AbortError') throw consolidatorErr;
-        
-        console.error("Consolidator error:", consolidatorErr);
-        setAgentStatus(prev => ({ ...prev, consolidator: 'error' }));
-        addLog(`⚠️ Synthesis failed: ${consolidatorErr.message || consolidatorErr}. Generating fallback dossier from raw logs...`);
-        
-        const fallbackReport = `
-        {
-          "companyName": "${company || 'Supplier'} (Context-Only Audit)",
-          "riskScore": 50,
-          "recommendations": "A direct automated synthesis was degraded. Supplier Due Diligence completed to the best depth possible using context: ${userContext.replace(/"/g, '\\"')}",
-          "anomalies": [
-            {
-              "title": "Subordinate Analysis Degraded",
-              "description": "One or more risk vectors were analyzed with partial information. Manual review is suggested for this supplier."
-            }
-          ]
-        }
-        `;
-        setRawReport(fallbackReport);
-        const parsedFallback = JSON.parse(fallbackReport);
-        parsedFallback.dateGenerated = new Date().toLocaleDateString();
-        setFinalReport(parsedFallback);
-      }
-
-      setProgress(100);
       setStatus('success');
-
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        addLog("Análisis cancelado y detenido por el usuario.");
-        return; 
-      }
-      console.error("Error de análisis:", error);
-      setErrorMessage(error.message || "Hubo un error de conexión.");
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setErrorMessage(err.message || "Įvyko ryšio klaida. Prašome pabandyti dar kartą.");
       setStatus('error');
-    } finally {
-      abortControllerRef.current = null;
     }
   };
 
-  if (status === 'analyzing' || status === 'success') {
-    return (
-      <div className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center justify-center p-6 font-sans">
-        <div className="w-full max-w-4xl bg-[#1e293b] rounded-3xl border border-white/10 p-8 shadow-2xl relative overflow-hidden">
-           
-           {status === 'analyzing' && (
-             <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-sm text-center font-bold mb-6 animate-pulse">
-               {t('ui.intake_warn_stay')}
-             </div>
-           )}
-
-           <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-6">
-              <div>
-                <h1 className="text-2xl font-black mb-1">{t('ui.intake_process_title')}</h1>
-                <p className="text-slate-400 text-sm">{t('ui.intake_process_sub')}</p>
-              </div>
-              <Image src="/logo-sure.png" alt="SURE Logo" width={40} height={40} className="object-contain opacity-50" />
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <AgentNode id="ROB-9X" name={t('ui.agent1_name')} role={t('ui.agent1_role2')} status={agentStatus.roberto} icon={Search} />
-              <AgentNode id="MOI-2B" name={t('ui.agent2_name')} role={t('ui.agent2_role2')} status={agentStatus.moises} icon={Scale} />
-              <AgentNode id="ALC-7V" name={t('ui.agent3_name')} role={t('ui.agent3_role2')} status={agentStatus.alcides} icon={Cpu} />
-              <AgentNode id="EXE-1A" name={t('ui.agent4_name2')} role={t('ui.agent4_role2')} status={agentStatus.consolidator} icon={ShieldCheck} />
-           </div>
-
-           <div className="mb-6">
-             <div className="flex justify-between items-center mb-2">
-               <div className="flex-1">
-                 <div className="flex justify-between text-xs text-slate-400 font-bold mb-1">
-                   <span>{t('ui.intake_progress')}</span>
-                   <span>{progress}%</span>
-                 </div>
-                 <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-                    <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
-                 </div>
-               </div>
-               {status === 'analyzing' && (
-                 <button
-                   type="button"
-                   onClick={handleAbort}
-                   className="ml-6 px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 shrink-0"
-                 >
-                   <XCircle className="w-4 h-4" /> Abort Analysis
-                 </button>
-               )}
-             </div>
-           </div>
-
-           <div className="bg-slate-900 rounded-xl border border-slate-700 p-4 font-mono text-[11px] h-32 overflow-y-auto">
-              {logs.length === 0 && <span className="text-slate-600">{t('ui.intake_connecting')}</span>}
-              {logs.map((log, i) => (
-                <div key={i} className="mb-1 text-slate-400">
-                  <span className="text-emerald-500">{'>'}</span> {log}
-                </div>
-              ))}
-           </div>
-
-           {status === 'success' && finalReport && (
-             <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center">
-               <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4" />
-               <h2 className="text-xl font-bold mb-2">{t('ui.intake_done_title')}</h2>
-               <p className="text-slate-400 text-sm mb-6 text-center max-w-md">
-                 {t('ui.intake_done_desc')} ({email}).
-               </p>
-               <RMAPdfGenerator finalReport={finalReport} language={reportLanguage} />
-             </div>
-           )}
-
-            {status === 'success' && !finalReport && (
-              <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center w-full">
-                <div className="w-full bg-slate-950/40 rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-[60px] pointer-events-none" />
-                   
-                   <div className="flex flex-col items-center text-center mb-6">
-                      <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 mb-4 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                         <ShieldCheck className="w-8 h-8" />
-                      </div>
-                      <h2 className="text-xl font-black text-white tracking-wide">{t('ui.intake_done_title')}</h2>
-                      <p className="text-xs text-slate-400 mt-2 max-w-lg leading-relaxed">
-                         {t('ui.intake_done_desc')} ({email}). El certificado interactivo se encuentra disponible a continuación en formato de texto estructurado.
-                      </p>
-                   </div>
-
-                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 flex items-start gap-3 text-left">
-                      <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <div className="text-[11px] text-amber-200/80 leading-relaxed font-semibold">
-                         Nota: Los hallazgos del análisis son 100% íntegros y legibles. El formato interactivo (PDF) presentó ligeras desviaciones de formato en el estructurador, pero puedes leer, copiar y guardar la transcripción oficial directamente desde el visor.
-                      </div>
-                   </div>
-
-                   <div className="relative mb-6">
-                      <div className="absolute top-3 right-3 z-10 flex gap-2">
-                         <button 
-                            type="button"
-                            onClick={handleCopy}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg ${
-                               copied 
-                               ? 'bg-emerald-500 text-black shadow-emerald-500/20' 
-                               : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5'
-                            }`}
-                         >
-                            {copied ? (
-                               <><Check className="w-3 h-3" /> ¡Copiado!</>
-                            ) : (
-                               <><Copy className="w-3 h-3" /> Copiar Texto</>
-                            )}
-                         </button>
-                      </div>
-                      
-                      <div className="w-full bg-slate-950/90 rounded-2xl border border-white/5 p-6 font-mono text-[11px] text-slate-300 leading-relaxed max-h-[320px] overflow-y-auto whitespace-pre-wrap select-all shadow-inner">
-                         {rawReport || "No se ha recibido el texto del reporte del consolidador."}
-                      </div>
-                   </div>
-
-                   <div className="flex flex-col items-center">
-                      <p className="text-[11px] text-emerald-400/80 font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                         <CheckCircle2 className="w-3.5 h-3.5" /> {t('ui.intake_done_success')}
-                      </p>
-                      <p className="text-[10px] text-slate-500 italic">SURE Forensics Ecosystem &copy; {new Date().getFullYear()}</p>
-                   </div>
-                </div>
-              </div>
-            )}
-
-        </div>
-      </div>
-    );
-  }
+  const ProcdiLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="15,35 50,52 50,90 15,73" fill="#0B192C" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+      <polygon points="50,52 85,35 85,73 50,90" fill="#050D1A" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+      <polygon points="50,15 85,35 50,52 15,35" fill="#0E1E38" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+      <line x1="50" y1="23" x2="68" y2="31" stroke="#008DDA" strokeWidth="1.5" strokeDasharray="3 1.5" />
+      <line x1="50" y1="23" x2="32" y2="31" stroke="#008DDA" strokeWidth="1.5" strokeDasharray="3 1.5" />
+      <line x1="50" y1="44" x2="50" y2="23" stroke="#008DDA" strokeWidth="1.5" />
+      <circle cx="50" cy="15" r="4" fill="#008DDA" />
+      <circle cx="85" cy="35" r="4" fill="#008DDA" />
+      <circle cx="15" cy="35" r="4" fill="#008DDA" />
+      <circle cx="50" cy="52" r="4" fill="#008DDA" />
+      <circle cx="50" cy="90" r="4" fill="#008DDA" />
+    </svg>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center py-20 px-6 font-open-sans relative">
-      
-      <div className="absolute top-6 right-6 z-50">
-        <LanguageSelector />
-      </div>
+    <div className="min-h-screen bg-[#0B192C] text-white flex flex-col justify-between font-montserrat relative selection:bg-[#008DDA]/20 overflow-x-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+        .font-montserrat {
+          font-family: 'Montserrat', sans-serif !important;
+        }
+      `}</style>
 
-      <div className="mb-12 text-center">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <Image src="/logo-sure.png" alt="SURE Logo" width={40} height={40} className="object-contain" />
-          <span className="font-montserrat font-black text-2xl tracking-widest uppercase">
-            SURE<span className="text-emerald-500">.</span>
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-[#008DDA]/5 rounded-full blur-[160px] pointer-events-none z-0" />
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#008DDA]/3 rounded-full blur-[140px] pointer-events-none z-0" />
+
+      {/* Header */}
+      <nav className="w-full px-6 md:px-12 py-6 flex justify-between items-center bg-[#0B192C]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <ProcdiLogo className="w-9 h-9" />
+          <div className="flex flex-col">
+            <span className="font-black text-lg tracking-[0.05em] text-white leading-none">PRÓCDI</span>
+            <span className="text-[8px] text-[#008DDA] font-extrabold uppercase tracking-wider mt-1">Medical AI Systems</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+          Marija DI Demo Portal
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center py-16 px-6 relative z-10 max-w-4xl mx-auto w-full">
+        
+        {status === 'success' ? (
+          <div className="w-full max-w-xl bg-[#0e1f35]/60 backdrop-blur-xl border-2 border-[#008DDA]/30 rounded-3xl p-8 md:p-12 shadow-[0_20px_50px_rgba(0,141,218,0.1)] text-center relative overflow-hidden animate-fadeIn">
+            {/* Cyber bracket decoration */}
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-[#008DDA] rounded-tl-lg pointer-events-none" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-[#008DDA] rounded-tr-lg pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-[#008DDA] rounded-bl-lg pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-[#008DDA] rounded-br-lg pointer-events-none" />
+
+            <div className="w-20 h-20 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mx-auto mb-6 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+            
+            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-4 uppercase tracking-wider">
+              Užklausa gauta sėkmingai!
+            </h2>
+            
+            <p className="text-slate-300 text-sm md:text-base font-medium leading-relaxed mb-8">
+              Ačiū už Jūsų susidomėjimą <strong>Marija DI</strong> asistentu. Gavome Jūsų kontaktinius duomenis ir pradėjome demo versijos ruošimą.
+            </p>
+
+            <div className="bg-[#0B192C]/80 border border-white/5 rounded-2xl p-6 text-left space-y-3 mb-8">
+              <h3 className="text-xs font-bold text-[#008DDA] uppercase tracking-wider">Kas vyks toliau?</h3>
+              <ul className="space-y-2.5 text-xs text-slate-400">
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 bg-[#008DDA] rounded-full mt-1.5 shrink-0" />
+                  <span>Mūsų komanda išanalizuos Jūsų nurodytą svetainę (jei nurodėte) bei kainyną.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 bg-[#008DDA] rounded-full mt-1.5 shrink-0" />
+                  <span>Sukurti interaktyvų demonstracinį kloną su Jūsų klinikos logotipu užtruks apie 24-48 val.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 bg-[#008DDA] rounded-full mt-1.5 shrink-0" />
+                  <span>Direktorius <strong>Antonio Baronas (MB PROCDI)</strong> susisieks su Jumis el. paštu arba telefonu ir pateiks nuorodą išbandymui.</span>
+                </li>
+              </ul>
+            </div>
+
+            <button 
+              onClick={() => {
+                setStatus('idle');
+                setClinicName('');
+                setContactPerson('');
+                setEmail('');
+                setPhone('');
+                setWebsite('');
+                setAcceptedTerms(false);
+              }}
+              className="px-8 py-3.5 bg-transparent hover:bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold text-xs rounded-xl transition-all tracking-widest uppercase"
+            >
+              Užregistruoti kitą kliniką
+            </button>
+          </div>
+        ) : (
+          <div className="w-full">
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#008DDA]/10 border border-[#008DDA]/30 text-[#008DDA] text-[10px] font-black tracking-widest uppercase mb-4 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" />
+                Interaktyvus demonstracinis klonas
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4 uppercase tracking-tight">
+                Išbandykite Marija DI <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#008DDA]">
+                  Savo klinikoje
+                </span>
+              </h1>
+              <p className="text-slate-400 text-xs md:text-sm font-semibold leading-relaxed">
+                Užpildykite kontaktinius duomenis. Mes sukursime demonstracinį AI asistento kloną, apmokytą pagal Jūsų klinikos paslaugas, kad patys įvertintumėte jos darbą.
+              </p>
+            </div>
+
+            <div className="bg-[#0e1f35]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#008DDA]/5 rounded-bl-full pointer-events-none" />
+
+              {status === 'submitting' ? (
+                <div className="py-20 flex flex-col items-center justify-center space-y-6 animate-pulse">
+                  <Loader2 className="w-12 h-12 text-[#008DDA] animate-spin" />
+                  <div className="text-center">
+                    <p className="font-extrabold text-white text-base tracking-wider uppercase">
+                      {loadingStep === 1 && "Jungiamasi su saugiu serveriu..."}
+                      {loadingStep === 2 && "Išsaugoma užklausa sistemoje..."}
+                      {loadingStep === 3 && "Siunčiamas pranešimas Antonio Baronas..."}
+                    </p>
+                    <p className="text-slate-500 text-xs mt-2 font-medium">Prašome palaukti, tai užtruks kelias sekundes.</p>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  
+                  {errorMessage && (
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl flex items-start gap-3 text-xs font-bold leading-relaxed">
+                      <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+                      <p>{errorMessage}</p>
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-5">
+                    {/* Clinic Name */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-[#008DDA]" />
+                        Klinikos pavadinimas *
+                      </label>
+                      <input 
+                        type="text" 
+                        required
+                        value={clinicName}
+                        onChange={(e) => setClinicName(e.target.value)}
+                        placeholder="Pvz., Vilniaus Odontologijos Centras"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-[#008DDA] rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600"
+                      />
+                    </div>
+
+                    {/* Contact Person */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-[#008DDA]" />
+                        Kontaktinis asmuo *
+                      </label>
+                      <input 
+                        type="text" 
+                        required
+                        value={contactPerson}
+                        onChange={(e) => setContactPerson(e.target.value)}
+                        placeholder="Vardas, Pavardė (pvz. Jonas Jonaitis)"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-[#008DDA] rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-[#008DDA]" />
+                        El. paštas *
+                      </label>
+                      <input 
+                        type="email" 
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Pvz. jonas@klinika.lt"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-[#008DDA] rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600"
+                      />
+                    </div>
+
+                    {/* Phone */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-[#008DDA]" />
+                        Telefono numeris *
+                      </label>
+                      <input 
+                        type="tel" 
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Pvz. +370 612 34567"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-[#008DDA] rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Website */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Link2 className="w-3.5 h-3.5 text-[#008DDA]" />
+                      Klinikos svetainė (neprivaloma)
+                    </label>
+                    <input 
+                      type="text" 
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="Pvz. www.klinika.lt (Naudojama AI apmokymui)"
+                      className="w-full bg-[#0B192C] border border-white/10 focus:border-[#008DDA] rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600"
+                    />
+                  </div>
+
+                  {/* Terms checkbox */}
+                  <div className="pt-2 flex items-start gap-3">
+                    <input 
+                      type="checkbox" 
+                      id="terms" 
+                      required
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-900 text-[#008DDA] focus:ring-[#008DDA] cursor-pointer"
+                    />
+                    <label htmlFor="terms" className="text-xs text-slate-400 cursor-pointer select-none leading-relaxed font-semibold">
+                      Sutinku, kad MB PROCDI naudos mano pateiktus duomenis demonstracinio klono kūrimui ir susisieks su manimi dėl jo pristatymo.
+                    </label>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-4 border-t border-slate-800 flex justify-end">
+                    <button 
+                      type="submit"
+                      disabled={!clinicName || !contactPerson || !email || !phone || !acceptedTerms}
+                      className={`w-full md:w-auto px-10 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 transition-all ${
+                        (!clinicName || !contactPerson || !email || !phone || !acceptedTerms)
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5' 
+                        : 'bg-[#008DDA] hover:bg-[#00e5ff] text-white hover:text-[#0B192C] hover:scale-[1.02] shadow-[0_0_20px_rgba(0,141,218,0.2)]'
+                      }`}
+                    >
+                      <span>Siųsti užklausą demo versijai</span>
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full bg-[#07111e] text-white border-t border-slate-800 py-8 px-6 md:px-12 relative z-20">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-extrabold tracking-wider uppercase">
+            MB PROCDI • Įmonės kodas: 307515454 • Partizanų g. 61-806, LT-49282, Kaunas, Lietuva
+          </span>
+          <span className="text-[9px] md:text-[10px] text-slate-600 font-semibold uppercase">
+            &copy; {new Date().getFullYear()} MB PROCDI. Visos teisės saugomos.
           </span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-black mb-4">{t('ui.intake_title')}</h1>
-        <p className="text-slate-400 max-w-lg mx-auto">
-          {t('ui.intake_desc')}
-        </p>
-      </div>
+      </footer>
 
-      <div className="max-w-xl w-full bg-[#1e293b] border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none" />
-
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6 text-xs text-slate-300 leading-relaxed relative z-10">
-            <strong className="text-white block mb-2 uppercase tracking-wider text-[10px]">{t('ui.intake_warn_title')}</strong>
-            <ul className="list-disc pl-4 space-y-1">
-              <li>{t('ui.intake_warn_1')}</li>
-              <li>{t('ui.intake_warn_2')}</li>
-              <li>{t('ui.intake_warn_3')}</li>
-            </ul>
-          </div>
-
-        <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-          
-          <div className="space-y-4">
-            <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl mb-6 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-              <label className="block text-sm font-bold text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-2">
-                <Key className="w-4 h-4" /> VIP Access Token
-              </label>
-              <input 
-                type="password" 
-                name="client_vip_token_secure"
-                required
-                value={vipToken}
-                onChange={(e) => setVipToken(e.target.value.toUpperCase())}
-                placeholder="Enter your unique access code..."
-                autoComplete="new-password"
-                className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white font-mono font-bold tracking-widest uppercase focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all shadow-inner"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_email')}</label>
-              <input 
-                type="email" 
-                name="client_contact_email_secure"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="john.doe@company.com"
-                autoComplete="new-password"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_email_confirm')}</label>
-              <input 
-                type="email" 
-                name="client_contact_email_confirm_secure"
-                required
-                value={emailConfirm}
-                onChange={(e) => setEmailConfirm(e.target.value)}
-                placeholder="Confirm your corporate email"
-                autoComplete="new-password"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_phone')}</label>
-              <input 
-                type="tel" 
-                name="client_contact_phone_secure"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 555 123 4567"
-                autoComplete="new-password"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_company')}</label>
-              <input 
-                type="text" 
-                name="client_contact_company_secure"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="John Doe or Company (Optional)"
-                autoComplete="new-password"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_lang')}</label>
-              <select
-                value={reportLanguage}
-                onChange={(e) => setReportLanguage(e.target.value as any)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
-              >
-                <option value="en">English (Inglés)</option>
-                <option value="es">Español</option>
-                <option value="pt">Português (Portugués)</option>
-                <option value="fr">Français (Francés)</option>
-                <option value="de">Deutsch (Alemán)</option>
-                <option value="zh">中文 (Chino)</option>
-                <option value="ru">Русский (Ruso)</option>
-                <option value="ar">العربية (Árabe)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="pt-4">
-             <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_lbl_evidence')}</label>
-             <div className="border-2 border-dashed border-slate-700 rounded-2xl p-8 text-center hover:bg-slate-800/50 transition-colors cursor-pointer relative">
-               <input 
-                 type="file" 
-                 multiple 
-                 onChange={handleFileChange}
-                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
-               />
-               <UploadCloud className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
-               <p className="text-sm font-bold mb-1">{t('ui.intake_drop')}</p>
-               <p className="text-xs text-slate-500">{t('ui.intake_drop_sub')}</p>
-             </div>
-             
-             {files.length > 0 && (
-               <div className="mt-4 space-y-2">
-                 {files.map((f, i) => (
-                   <div key={i} className="flex items-center gap-3 bg-slate-900 px-4 py-3 rounded-lg border border-slate-700">
-                     <FileText className="w-5 h-5 text-emerald-400" />
-                     <span className="text-sm truncate flex-1">{f.name}</span>
-                     <span className="text-xs text-slate-500">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
-                   </div>
-                 ))}
-               </div>
-             )}
-          </div>
-
-          <div className="pt-2">
-            <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">{t('ui.intake_context_title')}</label>
-            <p className="text-xs text-slate-500 mb-3">{t('ui.intake_context_sub')}</p>
-            <textarea
-              value={userContext}
-              onChange={(e) => setUserContext(e.target.value)}
-              placeholder={t('ui.intake_context_placeholder')}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors h-28 resize-none shadow-inner"
-            ></textarea>
-          </div>
-
-          {errorMessage && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl flex items-center gap-2 text-sm">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p>{errorMessage}</p>
-            </div>
-          )}
-
-          <div className="pt-6">
-            <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">
-              {msaTranslations[uiLanguage]?.title || msaTranslations['en'].title}
-            </label>
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 h-48 overflow-y-auto text-xs text-slate-400 space-y-3 leading-relaxed shadow-inner">
-               <p className="whitespace-pre-line font-semibold text-emerald-400">
-                 {(msaTranslations[uiLanguage]?.parties || msaTranslations['en'].parties).replace('{{CLIENT}}', company || email || '___________________')}
-               </p>
-               <p>{msaTranslations[uiLanguage]?.p1 || msaTranslations['en'].p1}</p>
-               
-               <div>
-                 <p className="whitespace-pre-line mb-2">{msaTranslations[uiLanguage]?.p2 || msaTranslations['en'].p2}</p>
-                 <p className="font-semibold text-slate-300 mb-2">{msaTranslations[uiLanguage]?.p2_intro || msaTranslations['en'].p2_intro}</p>
-                 <ul className="list-disc pl-5 space-y-1 mb-2">
-                   {(msaTranslations[uiLanguage]?.bullets || msaTranslations['en'].bullets).map((bullet: string, idx: number) => (
-                     <li key={idx}>{bullet}</li>
-                   ))}
-                 </ul>
-               </div>
-
-               <p>{msaTranslations[uiLanguage]?.p3 || msaTranslations['en'].p3}</p>
-               <p>{msaTranslations[uiLanguage]?.p4 || msaTranslations['en'].p4}</p>
-               <p>{msaTranslations[uiLanguage]?.p5 || msaTranslations['en'].p5}</p>
-            </div>
-          </div>
-
-          <div className="pt-2 flex items-start gap-3">
-            <input 
-              type="checkbox" 
-              id="terms" 
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
-            />
-            <label htmlFor="terms" className="text-sm text-slate-400 cursor-pointer select-none">
-              {t('ui.intake_terms')}
-            </label>
-          </div>
-
-          <div className="pt-4 border-t border-slate-800">
-             {/* SOFT LIMIT WARNING - Mocked state, connect to actual Stripe usage backend when ready */}
-             {false && (
-               <div className="mb-6 bg-amber-500/10 border border-amber-500/50 text-amber-400 p-4 rounded-xl flex items-start gap-3 text-sm shadow-inner">
-                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                 <p className="leading-relaxed font-medium">
-                   {t('ui.intake_overage_warn')}
-                 </p>
-               </div>
-             )}
-
-             {status === 'uploading' ? (
-                <button 
-                  type="button"
-                  onClick={handleAbort}
-                  className="w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/50"
-                >
-                  <XCircle className="w-5 h-5" /> Abort Uploading / Analysis
-                </button>
-             ) : (
-                <button 
-                  type="submit"
-                  disabled={(files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken}
-                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${(files.length === 0 && !userContext.trim()) || !email || !emailConfirm || !phone || !acceptedTerms || !vipToken ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
-                >
-                  <Network className="w-5 h-5" /> {t('ui.intake_btn_start')}
-                </button>
-             )}
-             {!session && (
-               <p className="text-center text-xs text-slate-500 mt-4">
-                 {t('ui.intake_disclaimer')}
-               </p>
-             )}
-          </div>
-        </form>
-      </div>
     </div>
   );
 }

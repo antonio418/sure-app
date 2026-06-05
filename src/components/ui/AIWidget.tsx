@@ -13,8 +13,18 @@ interface Message {
 }
 
 export default function AIWidget() {
-  const { t } = useLanguage();
   const pathname = usePathname();
+
+  // Suppress SURE AI support widget on Marija DI and PROCDI paths to avoid brand mix-up
+  if (pathname && (
+    pathname.includes('/intake') || 
+    pathname.includes('/presentation-marija') || 
+    pathname.includes('/procdi')
+  )) {
+    return null;
+  }
+
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
