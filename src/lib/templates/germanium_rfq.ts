@@ -242,7 +242,7 @@ For clarifications, please contact: <a href="mailto:antonio@procdi.com" style="c
     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eaeaea;">
       <p style="margin: 0; font-size: 12px; color: #888;">
         <em>Secured and Verified by:</em><br>
-        <strong style="color: #1e3a8a; font-size: 14px;"><a href="https://sure-platform.vercel.app/" style="color: #1e3a8a; text-decoration: none;">SURE Ecosystem</a></strong><br>
+        <strong style="color: #1e3a8a; font-size: 14px;"><a href="https://sure-app-nine.vercel.app/" style="color: #1e3a8a; text-decoration: none;">SURE Ecosystem</a></strong><br>
         Global Procurement Division
       </p>
     </div>
