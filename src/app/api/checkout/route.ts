@@ -83,9 +83,9 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { priceId, successUrl, cancelUrl } = body;
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const defaultSuccessUrl = `${baseUrl}/intake`;
-    const defaultCancelUrl = `${baseUrl}/rma`;
+    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'https://sureforensic.com';
+    const defaultSuccessUrl = `${origin}/intake`;
+    const defaultCancelUrl = `${origin}/rma`;
 
     let sessionConfig: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       payment_method_types: ['card'],
@@ -142,8 +142,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ];
-      sessionConfig.success_url = `${baseUrl}/admin?success=true&full_pipeline=true&session_id={CHECKOUT_SESSION_ID}`;
-      sessionConfig.cancel_url = `${baseUrl}/admin?canceled=true`;
+      sessionConfig.success_url = `${origin}/admin?success=true&full_pipeline=true&session_id={CHECKOUT_SESSION_ID}`;
+      sessionConfig.cancel_url = `${origin}/admin?canceled=true`;
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
