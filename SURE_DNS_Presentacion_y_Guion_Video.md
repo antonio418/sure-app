@@ -43,10 +43,10 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Indicadores y Puntos de Dolor que Resuelve:** Normaliza la vulnerabilidad con datos empíricos. Protege el ego del Director de TI (CISO) para evitar que bloquee la venta por orgullo profesional.
 
 ### DIAPOSITIVA 5: El Informe Forense de Riesgo y el Escudo SURE
-* **Objetivo Visual:** Fondo #0B192C. Cuadros comparativos sencillos y minimalistas resaltando el precio de **"$70 USD / mes"** en color Verde Esmeralda (#10B981).
+* **Objetivo Visual:** Fondo #0B192C. Cuadros comparativos sencillos y minimalistas resaltando el precio de **"$70 USD / mes"** y la leyenda **"100% SaaS / Cero Licencia"** en color Verde Esmeralda (#10B981).
 * **Guion Narrativo (Presentador):** 
-  > *"La solución toma días, no años. SURE despliega un cierre técnico inmediato. Monitoreamos y mitigamos las suplantaciones de manera continua, manteniendo sus defensas fiduciarias activas por exactamente 70 dólares mensuales por dominio. A cambio, entregamos Informes Forenses de Riesgo inmutables que prueban su debida diligencia y defensa proactiva ante cualquier tribunal o entidad bancaria en el futuro."*
-* **Indicadores y Puntos de Dolor que Resuelve:** Ancla el retorno de inversión masivo de la oferta: $70 USD mensuales frente a una factura desviada de cientos de miles de dólares. Dibuja a la ciberseguridad como un costo marginal.
+  > *"La solución toma minutos, no meses. SURE no es un software tradicional en caja; no requiere comprar licencias costosas de miles de dólares, ni desplegar servidores locales, ni asumir contratos de mantenimiento complejos. SURE opera como un servicio SaaS 100% administrado en la nube: todas las actualizaciones del motor forense y el soporte ocurren de forma transparente para ustedes. Mitigamos las suplantaciones DNS de manera continua por exactamente 70 dólares mensuales por dominio. Un costo operativo (OPEX) marginal para proteger transacciones de cientos de miles de dólares."*
+* **Indicadores y Puntos de Dolor que Resuelve:** Elimina objeciones de costo de licenciamiento tradicional y sobrecarga de mantenimiento de IT. Demuestra el ROI inmediato y fricción cero de un modelo SaaS.
 
 ### DIAPOSITIVA 6: Roberto y Moisés en la Seguridad de Infraestructura
 * **Objetivo Visual:** Fondo #0B192C. Dos bloques paralelos en Slate Silver (#CBD5E1) detallando a los agentes. Acentos de flujo en Verde Esmeralda (#10B981).
@@ -93,10 +93,10 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Efectos de Sonido / Pausa:** Pulsaciones electrónicas de escaneo limpio y rítmico, que resuelven en un tono armónico de autenticación exitosa.
 
 ### ESCENA 4: El Valor Fricción-Cero de la Ciberdefensa (0:45 - 1:00)
-* **Visual en Pantalla:** Se dibuja en la pantalla de forma minimalista el texto **"$70 USD / mes"** en color **Verde Esmeralda (#10B981)**. Al lado, una representación infográfica de cómo una red de proveedores bulk enteros es cubierta por el paraguas de protección de SURE.
+* **Visual en Pantalla:** Se dibuja en la pantalla de forma minimalista el precio **"$70 USD / mes"** y el texto **"SaaS: MANTENIMIENTO E INFRAESTRUCTURA INCLUIDOS"** en color **Verde Esmeralda (#10B981)**. Al lado, una representación infográfica de cómo una red de proveedores bulk enteros es cubierta por el paraguas de protección de SURE.
 * **Locución en Off:** 
-  > *"Ciberseguridad del más alto rigor forense a un costo de fricción cero. Solamente setenta dólares mensuales por dominio protegido. Un blindaje continuo y autónomo que detiene pérdidas de cientos de miles de dólares antes de que la transferencia se apruebe."*
-* **Textos en Pantalla:** "$70 USD MENSUALES | BLINDAJE LEGAL INMEDIATO" (Verde #10B981).
+  > *"Ciberseguridad del más alto rigor forense en modelo SaaS. Sin compra de licencias tradicionales ni gastos de instalación. Olvídese de servidores y mantenimiento técnico: nos encargamos de todo de forma automática y transparente en la nube, por solo setenta dólares mensuales por dominio protegido. Un blindaje continuo que protege su caja."*
+* **Textos en Pantalla:** "$70 USD/MES POR DOMINIO | 100% SAAS SIN COSTO DE LICENCIA" (Verde #10B981).
 * **Efectos de Sonido / Pausa:** El sonido acústico nítido de una moneda impactando en una bóveda metálica, simbolizando protección de caja inmediata.
 
 ### ESCENA 5: El Diagnóstico Sin Costo (1:00 - 1:30)

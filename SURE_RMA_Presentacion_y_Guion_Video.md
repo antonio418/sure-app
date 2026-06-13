@@ -37,10 +37,10 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Dolor que Resuelve:** Neutraliza la objeción más común ("Ya uso inspectores tradicionales") y expone las graves brechas documentales y financieras del proceso de carga.
 
 ### DIAPOSITIVA 4: La Arquitectura Quad-Shield - Defensa Autónoma en 7 Minutos
-* **Objetivo Visual:** Fondo #0B192C. Iconografía de escudo en Plata Pizarra. Indicadores de tiempo **"7 MINUTOS"** y costo **"$50 USD"** destacados agresivamente en Verde Esmeralda (#10B981).
+* **Objetivo Visual:** Fondo #0B192C. Iconografía de escudo en Plata Pizarra. Indicadores de tiempo **"7 MINUTOS"**, costo **"$50 USD"** y etiqueta **"100% SaaS / CERO LICENCIA"** destacados agresivamente en Verde Esmeralda (#10B981).
 * **Guion Narrativo (Presentador):** 
-  > *"Frente a este vacío operativo, hemos desarrollado SURE: un ecosistema de defensa autónoma que cruza leyes, finanzas e ingeniería aplicada en paralelo. Lo que a los costosos despachos de due diligence tradicionales les toma semanas de análisis manual, SURE lo ejecuta de forma digital en exactamente 7 minutos, emitiendo un Reporte Transaccional de Riesgo con dictamen binario, por un costo operativo fijo de tan solo 50 dólares."*
-* **Dolor que Resuelve:** Contraste radical de costos y tiempos. Demuestra al CFO que la herramienta se paga sola al primer análisis y frena el riesgo antes de liberar cualquier transferencia de fondos.
+  > *"Frente a este vacío operativo, hemos desarrollado SURE: un ecosistema de defensa autónoma que cruza leyes, finanzas e ingeniería aplicada en paralelo. Olvídense de comprar licencias costosas de 20,000 dólares o asumir contratos anuales de mantenimiento. SURE es una plataforma SaaS en la nube de despliegue instantáneo: todo el soporte, actualizaciones e infraestructura son transparentes para ustedes y corren por nuestra cuenta. Cada análisis cuesta exactamente 50 dólares, convirtiendo un gasto de inversión pesado (CAPEX) en un costo operativo mínimo (OPEX) y bajo demanda."*
+* **Dolor que Resuelve:** Contraste radical de costos y tiempos. Elimina de raíz la objeción del CAPEX y el temor de comprar licencias tradicionales y asumir sobrecarga de infraestructura o mantenimiento de IT.
 
 ### DIAPOSITIVA 5: Los Tres Pilares Operativos - Roberto, Moisés y Alcides
 * **Objetivo Visual:** Fondo #0B192C. Estructura limpia de 3 columnas con títulos en Slate Silver y acentos en Verde Esmeralda (#10B981).
@@ -65,6 +65,12 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Guion Narrativo (Presentador):** 
   > *"Operamos con fricción cero. No requieren instalar software complejo en sus servidores ni modificar su ERP de facturación. Su equipo de finanzas o compras solo nos envía la documentación de la transacción por correo electrónico, y en exactamente 7 minutos reciben su Reporte Transaccional de Riesgo de forma autónoma. La protección blindada de su cadena de suministro empieza hoy. Quedamos a su disposición para procesar su primera muestra retrospectiva del 2025."*
 * **Dolor que Resuelve:** Remueve el bloqueo común de "dificultad de implementación de TI" o curvas de aprendizaje lentas para los empleados.
+
+### DIAPOSITIVA 9: Anexo - Hoja de Transparencia Operativa y Financiera
+* **Objetivo Visual:** Fondo #0B192C. Diseño de tabla o matriz de dos columnas en Plata Pizarra (#CBD5E1) con acentos en Verde Esmeralda (#10B981) y firmas legales discretas.
+* **Guion Narrativo (Presentador):** 
+  > *"Para su total tranquilidad, les presentamos nuestro anexo de transparencia operativa y financiera. SURE no vende software en caja, no exige licencias de adquisición ni contratos mínimos. Toda nuestra infraestructura, actualizaciones continuas, parches de seguridad y mantenimiento preventivo ocurren en nuestra nube segura de forma automática y transparente para ustedes. Esto garantiza que siempre operen con la versión más avanzada del sistema sin un solo centavo de costo adicional o intervención de su equipo de IT. Pagas únicamente $50 USD por reporte generado: transparencia absoluta, sin letra pequeña."*
+* **Dolor que Resuelve:** Neutraliza las dudas del comité de compras o IT sobre los costos ocultos de mantenimiento, integraciones y actualizaciones del software. Define un modelo fiduciario transparente y sin sorpresas.
 
 ---
 
@@ -93,10 +99,10 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Efectos de Sonido / Pausa:** Tres sonidos continuos de activación electrónica ("pulsos de escudo") sincronizados con la aparición e iluminación de cada agente.
 
 ### ESCENA 4: Velocidad y Costo Fricción-Cero (0:45 - 1:00)
-* **Visual en Pantalla:** Un cronómetro digital en alta resolución avanza velozmente hasta detenerse en seco en la marca **"07:00"**. A su lado, el documento transaccional se sella con el sello oficial de SURE que marca el precio **"$50 USD"** iluminado en **Verde Esmeralda (#10B981)**.
+* **Visual en Pantalla:** Un cronómetro digital en alta resolución avanza velozmente hasta detenerse en seco en la marca **"07:00"**. A su lado, el documento transaccional se sella con el sello oficial de SURE que marca el precio **"$50 USD"** iluminado en **Verde Esmeralda (#10B981)**, junto con un banner translúcido que lee **"SaaS: MANTENIMIENTO Y ACTUALIZACIONES INCLUIDOS"**.
 * **Locución en Off:** 
-  > *"Sin cuotas de configuración. Sin instalaciones de software. Un Reporte Transaccional de Riesgo con dictamen binario en exactamente 7 minutos, por solo 50 dólares la transacción. Su equipo de finanzas envía el archivo por e-mail, SURE hace el resto."*
-* **Textos en Pantalla:** "$50 USD POR INFORME | 7 MINUTOS DE PROCESAMIENTO" (Verde #10B981).
+  > *"Sin cuotas de configuración. Sin adquisición de costosas licencias ni cobros por mantenimiento de IT. SURE opera como un SaaS en la nube con actualizaciones automáticas y transparentes. Reciba su Reporte Transaccional de Riesgo en solo 7 minutos por exactamente 50 dólares la transacción. Su equipo financiero envía el correo, SURE hace el resto."*
+* **Textos en Pantalla:** "$50 USD POR INFORME | 100% SAAS SIN COSTO DE LICENCIA" (Verde #10B981).
 * **Efectos de Sonido / Pausa:** El tic-tac acelerado de un cronómetro digital de precisión que se detiene con el golpe seco y autoritario de un sello digital.
 
 ### ESCENA 5: El Desafío y Llamado a la Acción (1:00 - 1:30)
