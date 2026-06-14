@@ -69,8 +69,8 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 ### DIAPOSITIVA 9: Anexo - Hoja de Transparencia Operativa y Financiera
 * **Objetivo Visual:** Fondo #0B192C. Diseño de tabla o matriz de dos columnas en Plata Pizarra (#CBD5E1) con acentos en Verde Esmeralda (#10B981) y firmas legales discretas.
 * **Guion Narrativo (Presentador):** 
-  > *"Para su total tranquilidad, les presentamos nuestro anexo de transparencia operativa y financiera. SURE no vende software en caja, no exige licencias de adquisición ni contratos mínimos. Toda nuestra infraestructura, actualizaciones continuas, parches de seguridad y mantenimiento preventivo ocurren en nuestra nube segura de forma automática y transparente para ustedes. Esto garantiza que siempre operen con la versión más avanzada del sistema sin un solo centavo de costo adicional o intervención de su equipo de IT. Pagas únicamente $50 USD por reporte generado: transparencia absoluta, sin letra pequeña."*
-* **Dolor que Resuelve:** Neutraliza las dudas del comité de compras o IT sobre los costos ocultos de mantenimiento, integraciones y actualizaciones del software. Define un modelo fiduciario transparente y sin sorpresas.
+  > *"Para su total tranquilidad, les presentamos nuestro anexo de transparencia operativa y financiera. SURE no vende software en caja, no exige licencias de adquisición ni contratos mínimos. Toda nuestra infraestructura, actualizaciones continuas, parches de seguridad y mantenimiento preventivo ocurren en nuestra nube segura de forma automática y transparente para ustedes. Pagas una tarifa de $50 USD por reporte transaccional generado, la cual se reduce de forma progresiva hasta $37.50 USD por dictamen de acuerdo con el volumen de análisis del plan contratado. Transparencia absoluta, sin letra pequeña."*
+* **Dolor que Resuelve:** Neutraliza las dudas del comité de compras o IT sobre los costos ocultos de mantenimiento, integraciones y actualizaciones del software. Define un modelo fiduciario transparente, flexible y con un rango de precio predecible de $50 a $37.50 USD por análisis transaccional.
 
 ---
 
