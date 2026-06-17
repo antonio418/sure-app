@@ -93,3 +93,13 @@ Puedes visualizar las plantillas A4 a resolución completa y proporciones reales
     [procdi_letterhead_page1.png](file:///C:/Users/anton_mn7up/Downloads/IADIRECTO/sure-app/procdi_letterhead_page1.png)
 2.  **Plantilla Página 2 (Minimalista con Bloque de Firmas):** 
     [procdi_letterhead_page2.png](file:///C:/Users/anton_mn7up/Downloads/IADIRECTO/sure-app/procdi_letterhead_page2.png)
+
+---
+
+## 📄 DIRECTIVA DE LEGIBILIDAD DE INTERFAZ B2B (SURE FORENSIC & PROCDI)
+
+A petición de dirección, se establece un requerimiento corporativo estricto de legibilidad visual:
+*   **Tamaño Mínimo de Texto**: En todas las interfaces web y documentación corporativa, se prohíbe el uso de fuentes pequeñas de difícil visualización (menores a `14px` en web o `10.5pt` en contratos impresos).
+*   **Negritas Obligatorias**: Los elementos críticos de control y títulos de sección secundaria deben estar en negritas (`font-bold`, `font-extrabold` o `font-black`) para facilitar una rápida visualización.
+*   **Espaciado Agradable**: Relleno amplio en cajas interactivas y listados de datos para una visualización holgada y de calidad B2B premium.
+

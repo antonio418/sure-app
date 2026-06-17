@@ -74,6 +74,18 @@ Para que los descargos médicos (Cláusulas 1.3.1 - 1.3.3.bis) no pasen desaperc
 
 ### Paso D: Formato de la Tabla del Anexo 1 (Sub-procesadores)
 1.  Inserta una tabla de **4 columnas**.
-2.  Selecciona la fila del encabezado y ve a **Propiedades de la tabla**. En *Color de fondo de celda, elige tu **Azul Cobalto Profundo (`#0B192C`)** y pon el texto de los encabezados en **color blanco y negrita**.
+2.  Selecciona la fila del encabezado y ve a **Propiedades de la tabla**. En *Color de fondo de celda*, elige tu **Azul Cobalto Profundo (`#0B192C`)** y pon el texto de los encabezados en **color blanco y negrita**.
 3.  Pon el borde de la tabla en un gris muy claro (`#CBD5E1`) de **1pt** de grosor.
 4.  Pinta las celdas alternas con un fondo gris extremadamente claro (`#F8FAFC`) para dar el efecto de "cebra" que facilita enormemente la lectura de datos.
+
+---
+
+## 4. DIRECTRICES DE LEGIBILIDAD Y DISEÑO DE INTERFAZ WEB (SURE FORENSIC & PROCDI)
+
+Para evitar la fatiga visual del usuario ejecutivo B2B (CFO, CPO, Directores), se establecen las siguientes reglas de legibilidad obligatorias para todas las pantallas del ecosistema SURE y la marca PROCDI:
+
+*   **Evitar Fuentes Pequeñas (`text-xs` o menores)**: Ningún texto explicativo o etiqueta de control principal debe estar por debajo de **14px** (`text-sm` o superior, recomendado `text-base` de 16px).
+*   **Contraste y Color de Texto**: El texto sobre fondos oscuros debe utilizar tonos claros de alto contraste (`slate-200` o `slate-300`, nunca tonos apagados o de bajo contraste sobre fondo oscuro).
+*   **Énfasis en Negritas (Bold/Black)**: Los nombres de archivo, etiquetas de estado, contadores, botones principales y cabeceras deben usar pesos tipográficos altos (`font-bold`, `font-extrabold` o `font-black`) para captar la atención de inmediato y permitir el escaneo visual rápido de la página.
+*   **Amplitud en Contenedores**: Las áreas interactivas (como las zonas de arrastre y soltar) deben diseñarse con rellenos amplios (`p-10` a `p-14`) y tipografía grande (`text-xl` a `text-2xl` en títulos) para verse despejadas y profesionales.
+
