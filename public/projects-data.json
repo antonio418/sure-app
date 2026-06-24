@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ecuador-petro-boscan-2026",
+    "name": "Proyecto Petro-Boscan (Oferta Ecuador)",
+    "projectNumber": "PB-74-2026",
+    "stage": "oferta",
+    "client": "Ministerio de Hidrocarburos de Ecuador",
+    "participant": "Consorcio M-89",
+    "block": "Modulo Bloque B-74",
+    "reference": "instalación de tres pozos de extracción de petróleo llave en mano",
+    "amount": "150",
+    "currency": "MUSD",
+    "instructions": "Verificar el estricto cumplimiento de especificaciones técnicas para tuberías de alta resistencia en la oferta de Chevron y validar que no existan inhabilitaciones por deudas fiscales o litigios coactivos para el Consorcio M-89 bajo la Ley de Hidrocarburos de Ecuador.",
+    "referenceFiles": [
+      {
+        "id": "ref-1",
+        "name": "Especificaciones técnico-comerciales.pdf",
+        "size": "2.4 MB",
+        "status": "success",
+        "markdown": "# Especificaciones Técnico-Comerciales\n\nEste documento establece los requerimientos para el diseño, procura, transporte, construcción, instalación y pruebas de tres pozos de extracción de petróleo en el Bloque B-74 bajo la modalidad llave en mano.\n\n## Requisitos Técnicos Principales\n* Profundidad promedio por pozo: 12,000 pies.\n* Tasa de producción esperada: 5,000 bpd por pozo.\n* Presión nominal del cabezal: 5,000 psi.\n* Cumplimiento estricto con las normas API y ASME aplicables."
+      },
+      {
+        "id": "ref-2",
+        "name": "Condiciones legales, países elegibles.pdf",
+        "size": "1.1 MB",
+        "status": "success",
+        "markdown": "# Condiciones Legales y Elegibilidad de Países\n\nRequisitos de elegibilidad para licitantes en el Bloque B-74:\n\n1. Las empresas deben estar constituidas en países que mantengan relaciones diplomáticas y comerciales plenas con la República de Ecuador.\n2. No se admitirán ofertas de entidades bajo sanciones comerciales directas del Banco Central o del gobierno.\n3. Se requiere un historial comprobado de cero incidentes ambientales graves en los últimos 5 años."
+      },
+      {
+        "id": "ref-3",
+        "name": "Ley de hidrocarburos.pdf",
+        "size": "3.8 MB",
+        "status": "success",
+        "markdown": "# Ley de Hidrocarburos de la República del Ecuador\n\nResumen de artículos clave aplicables a contratistas de pozos:\n\n* **Artículo 24:** Propiedad inalienable de los yacimientos por parte del Estado.\n* **Artículo 35:** Régimen de regalías y participación del Estado en la producción excedente.\n* **Artículo 52:** Requisitos ambientales y de remediación obligatoria para operaciones de perforación."
+      },
+      {
+        "id": "ref-4",
+        "name": "Autorizacion OFAC.pdf",
+        "size": "850 KB",
+        "status": "success",
+        "markdown": "# Autorización de la Oficina de Control de Activos Extranjeros (OFAC)\n\nDocumento que certifica que las transacciones y las empresas del Consorcio M-89 no infringen las regulaciones de la OFAC para operaciones en la región.\n\n* **Estatus:** Aprobado y Vigente.\n* **Restricciones:** Ninguna aplicable para este proyecto específico."
+      },
+      {
+        "id": "ref-5",
+        "name": "Documento consorcial M-89.pdf",
+        "size": "1.5 MB",
+        "status": "success",
+        "markdown": "# Documento Consorcial - Consorcio M-89\n\nAcuerdo de consorcio para la licitación del Bloque B-74:\n\n* **Líder del Consorcio:** Empresa A (55% participación).\n* **Miembro Tecnológico:** Empresa B (45% participación).\n* **Razón Social Registrada:** Consorcio M-89 Asociados.\n* **Objeto:** Licitación, ejecución y puesta en marcha de los tres pozos de extracción llave en mano."
+      },
+      {
+        "id": "ref-6",
+        "name": "Información a solicitar (luego del pago).pdf",
+        "size": "620 KB",
+        "status": "success",
+        "markdown": "# Información a Solicitar Post-Pago\n\nLista de requisitos documentales a exigir al licitante ganador tras el pago de la garantía de seriedad de la oferta:\n\n1. Pólizas de seguro contra todo riesgo de construcción (CAR).\n2. Cronograma detallado de perforación (Gantt) firmado por ingenieros certificados.\n3. Certificados de origen de las tuberías de revestimiento (casing) y cabezales de pozo."
+      }
+    ],
+    "evaluationFiles": [
+      {
+        "id": "eval-1",
+        "name": "Oferta de Chevron.pdf",
+        "size": "4.2 MB",
+        "status": "success",
+        "markdown": "# Propuesta Técnico-Comercial - Chevron\n\nPropuesta presentada para el desarrollo del Bloque B-74.\n\n* **Monto Propuesto:** 148 MUSD\n* **Alcance:** Instalación llave en mano de 3 pozos de extracción.\n* **Desviaciones Técnicas:** Chevron propone utilizar tuberías de especificación estándar en lugar de la especificación de alta resistencia a la corrosión recomendada en las bases comerciales."
+      },
+      {
+        "id": "eval-2",
+        "name": "Carta a Chevron para revisar oferta.pdf",
+        "size": "450 KB",
+        "status": "success",
+        "markdown": "# Comunicación Oficial: Solicitud de Revisión de Oferta\n\n**Para:** Chevron Global Exploration\n**De:** Comité de Licitación Bloque B-74\n\nSe solicita formalmente a Chevron aclarar las desviaciones detectadas en su oferta técnica, específicamente respecto a la especificación de los materiales de tubería y las garantías de remediación ambiental."
+      },
+      {
+        "id": "eval-3",
+        "name": "Chevron aclaratorias a revisión de oferta.pdf",
+        "size": "950 KB",
+        "status": "success",
+        "markdown": "# Respuesta de Chevron a Solicitud de Aclaraciones\n\nChevron aclara que su especificación de tubería propuesta cumple con los estándares mínimos API, pero acepta actualizar a la especificación de alta resistencia si se ajusta el presupuesto base en un +1.5%."
+      },
+      {
+        "id": "eval-4",
+        "name": "Permisos y licencias.pdf",
+        "size": "2.1 MB",
+        "status": "success",
+        "markdown": "# Registro de Permisos Ambientales y Licencias de Operación\n\n* **Licencia Ambiental Previa:** Emitida por el Ministerio del Ambiente (Vigente).\n* **Permiso de Uso de Agua:** Aprobado para actividades de perforación.\n* **Licencia Social:** Acta de acuerdo con las comunidades locales del área de influencia del Bloque B-74."
+      }
+    ]
+  },
+  {
+    "id": "germanio-legacy",
+    "name": "Germanio / Proyecto Legacy",
+    "projectNumber": "GER-0092",
+    "stage": "Precalificación",
+    "client": "Corporación Minera Nacional",
+    "participant": "Grupo Minero del Sur",
+    "block": "Fase I - Exploración",
+    "reference": "Estudios geológicos y mapeo geofísico de reservas de germanio",
+    "amount": "25",
+    "currency": "MUSD",
+    "instructions": "Enfocarse en la validez y alcance de los estudios geofísicos iniciales para la Fase I de exploración de Germanio.",
+    "referenceFiles": [
+      {
+        "id": "ref-g1",
+        "name": "Especificaciones Técnicas Exploración Germanio.pdf",
+        "size": "1.8 MB",
+        "status": "success",
+        "markdown": "# Especificaciones Técnicas - Exploración Germanio\n\nEstudios geológicos mínimos para identificar vetas comercializables de Germanio."
+      }
+    ],
+    "evaluationFiles": [
+      {
+        "id": "eval-g1",
+        "name": "Propuesta Técnica Mapeo Geofísico.pdf",
+        "size": "1.2 MB",
+        "status": "success",
+        "markdown": "# Propuesta Técnica Mapeo Geofísico\n\nDetalles del plan de prospección del Grupo Minero del Sur."
+      }
+    ]
+  },
+  {
+    "id": "azucar-icumsa",
+    "name": "Azucar icumsa 45 2026/04/30 Shamim",
+    "projectNumber": "AZ-ICUMSA-45",
+    "stage": "Ejecución de proyecto",
+    "client": "Shamim Trading Corp",
+    "participant": "Azucarera del Caribe S.A.",
+    "block": "Lote 3 - Suministro y transporte",
+    "reference": "Suministro de 50,000 toneladas de azúcar refinada grado 45",
+    "amount": "18.5",
+    "currency": "EUR",
+    "instructions": "Comprobar que el lote cumpla con los estándares internacionales de pureza Icumsa 45 y los plazos estipulados de transporte marítimo.",
+    "referenceFiles": [
+      {
+        "id": "ref-a1",
+        "name": "Contrato Suministro Azúcar Refinada.pdf",
+        "size": "3.1 MB",
+        "status": "success",
+        "markdown": "# Contrato de Suministro de Azúcar\n\nRequerimientos de pureza Icumsa 45 y plazos de entrega en puerto destino."
+      }
+    ],
+    "evaluationFiles": [
+      {
+        "id": "eval-a1",
+        "name": "Dossier de Calidad e Inspección Lote 3.pdf",
+        "size": "2.5 MB",
+        "status": "success",
+        "markdown": "# Dossier de Calidad e Inspección\n\nCertificado de laboratorio y origen para el Lote 3."
+      }
+    ]
+  },
+  {
+    "id": "auditoria-dns",
+    "name": "Auditoria DNS B2B - Cold Outreach",
+    "projectNumber": "DNS-B2B-2026",
+    "stage": "Post-venta",
+    "client": "SURE Clients Global",
+    "participant": "SURE Marketing Div",
+    "block": "Campaña Europa",
+    "reference": "Auditoría integral de vulnerabilidades DNS y seguridad perimetral",
+    "amount": "5",
+    "currency": "USD",
+    "instructions": "Revisar vulnerabilidades perimetrales críticas y cumplimiento del alcance de seguridad perimetral pactado para la campaña en Europa.",
+    "referenceFiles": [
+      {
+        "id": "ref-d1",
+        "name": "Términos de Referencia Seguridad DNS.pdf",
+        "size": "980 KB",
+        "status": "success",
+        "markdown": "# Términos de Referencia - Seguridad DNS\n\nDetalles del alcance del servicio de auditoría perimetral y DNS."
+      }
+    ],
+    "evaluationFiles": [
+      {
+        "id": "eval-d1",
+        "name": "Reporte Final de Vulnerabilidades Detectadas.pdf",
+        "size": "1.4 MB",
+        "status": "success",
+        "markdown": "# Reporte de Vulnerabilidades DNS\n\nResultados finales de la auditoría B2B."
+      }
+    ]
+  }
+]

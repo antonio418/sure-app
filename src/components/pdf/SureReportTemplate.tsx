@@ -1103,17 +1103,12 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
           <Text style={{ fontSize: 9, color: slateText, marginBottom: 2, marginLeft: 10 }}>{t.msa2Bullet3}</Text>
           <Text style={{ fontSize: 9, color: slateText, marginBottom: 12, marginLeft: 10, lineHeight: 1.4 }}>{t.msa2Bullet4}</Text>
 
-          <Text style={{ fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 }}>{t.msa3Title}</Text>
-          <Text style={{ fontSize: 9, color: slateText, marginBottom: 12, lineHeight: 1.5 }}>
-            {t.msa3Desc}
-          </Text>
-
-          <Text style={{ fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 }}>{t.msa4Title}</Text>
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 }}>{t.msa4Title.replace(/^\d+/, "3")}</Text>
           <Text style={{ fontSize: 9, color: slateText, marginBottom: 12, lineHeight: 1.5 }}>
             {t.msa4Desc}
           </Text>
 
-          <Text style={{ fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 }}>{t.msa5Title}</Text>
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: slateDark, marginBottom: 4 }}>{t.msa5Title.replace(/^\d+/, "4")}</Text>
           <Text style={{ fontSize: 9, color: slateText, marginBottom: 12, lineHeight: 1.5 }}>
             {t.msa5Desc}
           </Text>

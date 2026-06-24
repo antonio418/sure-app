@@ -60,11 +60,11 @@ Este documento contiene los entregables oficiales y optimizados generados por **
   > *"Este es el punto más crítico para ustedes como administradores de capital: la jurisprudencia actual en tribunales internacionales dicta que el 100% de la responsabilidad civil y financiera ante un fraude transaccional recae sobre la empresa por negligencia en ciberseguridad y debida diligencia básica. Si su equipo aprueba una transferencia millonaria sobre un contrato con firmas manipuladas que SURE pudo haber detectado y bloqueado por 50 dólares en 7 minutos, ustedes asumen la responsabilidad fiduciaria directa de esa pérdida corporativa ante su junta directiva."*
 * **Dolor que Resuelve:** Fuerza la conversión atacando la responsabilidad legal y de carrera de los propios tomadores de decisiones corporativas. La debida diligencia ya no es una sugerencia tecnológica, es su escudo legal.
 
-### DIAPOSITIVA 8: Despliegue Fricción-Cero - Su Primer Análisis Hoy
-* **Objetivo Visual:** Fondo #0B192C. Un llamado a la acción (CTA) limpio y centrado en Verde Esmeralda (#10B981) con el logo de SURE. Indicaciones de canales de entrada (integración rápida vía Email y API corporativa).
+### DIAPOSITIVA 8: Despliegue Fricción-Cero - Portal de Ingreso e Integración
+* **Objetivo Visual:** Fondo #0B192C. Mockup de alta fidelidad del *Portal de Ingreso de Datos Interactivos* mostrando los 5 selectores de etapa (Precalificación a Post-venta) y el formulario editable de metadatos del contrato. Un llamado a la acción (CTA) limpio y centrado en Verde Esmeralda (#10B981) con el logo de SURE.
 * **Guion Narrativo (Presentador):** 
-  > *"Operamos con fricción cero. No requieren instalar software complejo en sus servidores ni modificar su ERP de facturación. Su equipo de finanzas o compras solo nos envía la documentación de la transacción por correo electrónico, y en exactamente 7 minutos reciben su Reporte Transaccional de Riesgo de forma autónoma. La protección blindada de su cadena de suministro empieza hoy. Quedamos a su disposición para procesar su primera muestra retrospectiva del 2025."*
-* **Dolor que Resuelve:** Remueve el bloqueo común de "dificultad de implementación de TI" o curvas de aprendizaje lentas para los empleados.
+  > *"Operamos con fricción cero y de forma totalmente flexible. Su equipo puede acceder a nuestro portal seguro en la nube, seleccionar la etapa de auditoría —desde la Precalificación hasta la Post-venta— y completar los metadatos básicos, o simplemente arrastrar y soltar el archivo en el área de carga directa. Sin instalaciones de software complejas ni intervenciones de TI. En solo 7 minutos, SURE procesará el lote de forma autónoma y generará su Reporte de Riesgos Transaccionales de forma instantánea."*
+* **Dolor que Resuelve:** Remueve la fricción técnica y de implementación al ofrecer un portal web interactivo listo para usar en 3 clics o mediante carga directa de archivos.
 
 ### DIAPOSITIVA 9: Anexo - Hoja de Transparencia Operativa y Financiera
 * **Objetivo Visual:** Fondo #0B192C. Diseño de tabla o matriz de dos columnas en Plata Pizarra (#CBD5E1) con acentos en Verde Esmeralda (#10B981) y firmas legales discretas.
@@ -99,11 +99,11 @@ Este documento contiene los entregables oficiales y optimizados generados por **
 * **Efectos de Sonido / Pausa:** Tres sonidos continuos de activación electrónica ("pulsos de escudo") sincronizados con la aparición e iluminación de cada agente.
 
 ### ESCENA 4: Velocidad y Costo Fricción-Cero (0:45 - 1:00)
-* **Visual en Pantalla:** Un cronómetro digital en alta resolución avanza velozmente hasta detenerse en seco en la marca **"07:00"**. A su lado, el documento transaccional se sella con el sello oficial de SURE que marca el precio **"$50 USD"** iluminado en **Verde Esmeralda (#10B981)**, junto con un banner translúcido que lee **"SaaS: MANTENIMIENTO Y ACTUALIZACIONES INCLUIDOS"**.
+* **Visual en Pantalla:** Primer plano de una pantalla de laptop con la interfaz del portal de ingreso de SURE RMA. Un cursor selecciona la etapa "Oferta", arrastra un archivo de contrato y los campos de metadatos se autocompletan instantáneamente. Enseguida, un cronómetro digital avanza velozmente hasta detenerse en seco en la marca **"07:00"** y el documento se sella con el precio **"$50 USD"** en Verde Esmeralda (#10B981), junto con un banner translúcido que lee **"100% SaaS"**.
 * **Locución en Off:** 
-  > *"Sin cuotas de configuración. Sin adquisición de costosas licencias ni cobros por mantenimiento de IT. SURE opera como un SaaS en la nube con actualizaciones automáticas y transparentes. Reciba su Reporte Transaccional de Riesgo en solo 7 minutos por exactamente 50 dólares la transacción. Su equipo financiero envía el correo, SURE hace el resto."*
-* **Textos en Pantalla:** "$50 USD POR INFORME | 100% SAAS SIN COSTO DE LICENCIA" (Verde #10B981).
-* **Efectos de Sonido / Pausa:** El tic-tac acelerado de un cronómetro digital de precisión que se detiene con el golpe seco y autoritario de un sello digital.
+  > *"Sin cuotas de configuración ni adquisición de costosas licencias. Con el Portal de Ingreso de SURE, seleccione la etapa, complete los metadatos clave, o simplemente arrastre su archivo. SURE opera como un SaaS en la nube con actualizaciones automáticas y transparentes. Reciba su Reporte Transaccional de Riesgo en solo 7 minutos por exactamente 50 dólares la transacción."*
+* **Textos en Pantalla:** "$50 USD POR INFORME | PORTAL DE INGRESO INTERACTIVO" (Verde #10B981).
+* **Efectos de Sonido / Pausa:** Sonido de clic de mouse, seguido de la aceleración del cronómetro digital que se detiene con el golpe seco y autoritario de un sello digital.
 
 ### ESCENA 5: El Desafío y Llamado a la Acción (1:00 - 1:30)
 * **Visual en Pantalla:** Transición elegante a la imagen institucional "Portada_SURE_Forensic.png" con el logotipo "Logo SURE.png" centrado en el medio. Se despliega una caja interactiva de correo electrónico mostrando la dirección de contacto.
