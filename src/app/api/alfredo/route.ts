@@ -22,6 +22,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Proyecto no encontrado.' }, { status: 404 });
     }
 
+    // Obtener prospectos existentes para excluirlos del prompt
+    const { data: existingLeads } = await supabaseAdmin
+      .from('leads_campaign')
+      .select('empresa, website')
+      .eq('project_id', project_id);
+
     const ai = new GoogleGenAI({ apiKey });
     
     let searchPrompt = `Busca prospectos comerciales corporativos en la web. El objetivo principal de nuestro proyecto es: "${project.objective}".`;
@@ -31,6 +37,29 @@ export async function POST(req: NextRequest) {
     }
     if (iteration && iteration > 1) {
       searchPrompt += `\nESTRICTO: Esta es la iteración número ${iteration} de esta búsqueda. Por favor, asegúrate de devolver OTRAS empresas, NO repitas las empresas más obvias que ya me habrías dado en la primera iteración. Ve más profundo.`;
+    }
+
+    if (existingLeads && existingLeads.length > 0) {
+      const existingWebsites = existingLeads
+        .map((l: any) => {
+          if (!l.website) return '';
+          return l.website.replace(/^https?:\/\/(www\.)?/, '').trim().toLowerCase();
+        })
+        .filter((w: string) => w !== '');
+      
+      const existingNames = existingLeads
+        .map((l: any) => l.empresa.trim().toLowerCase())
+        .filter((n: string) => n !== '');
+        
+      if (existingWebsites.length > 0 || existingNames.length > 0) {
+        searchPrompt += `\n\nESTRICTO: EVITA COMPLETAMENTE las siguientes empresas y sitios web que ya tenemos registrados en nuestra base de datos (no los repitas bajo ninguna circunstancia):`;
+        if (existingNames.length > 0) {
+          searchPrompt += `\n- Nombres de empresa a evitar: ${Array.from(new Set(existingNames)).slice(0, 100).join(', ')}`;
+        }
+        if (existingWebsites.length > 0) {
+          searchPrompt += `\n- Sitios web/dominios a evitar: ${Array.from(new Set(existingWebsites)).slice(0, 100).join(', ')}`;
+        }
+      }
     }
 
     if (supplementary_info && supplementary_info.trim() !== '') {
@@ -79,23 +108,39 @@ export async function POST(req: NextRequest) {
        throw new Error("El formato devuelto no es un array de prospectos válido.");
     }
 
-    const sanitizedLeads = leads.map((lead: any) => ({
-      empresa: lead.empresa || 'Unknown',
-      nombre_oficial_empresa: lead.nombre_oficial_empresa || '',
-      direccion: lead.direccion || '',
-      nota_empresa: lead.nota_empresa || '',
-      nombre_contacto: lead.nombre_contacto || '',
-      cargo: lead.cargo || lead.position || lead.rol || '',
-      nota_contacto: lead.nota_contacto || '',
-      email: lead.email || '',
-      telefono: lead.telefono || lead.phone || '',
-      pais: lead.pais || lead.country || '',
-      sector: lead.sector || '',
-      linkedin: lead.linkedin || '',
-      website: lead.website || '',
-      status: 'NEW',
-      project_id: project_id || null
-    })).filter((lead: any) => lead.website && lead.website.trim() !== ''); // Filtro estricto anti-alucinaciones
+    const sanitizedLeads = leads.map((lead: any) => {
+      const rawEmail = lead.email || '';
+      let email = rawEmail;
+      let status = 'NEW';
+
+      const cleanWebsite = (lead.website || 'unknown.com')
+        .replace(/^https?:\/\/(www\.)?/, '')
+        .split('/')[0];
+
+      if (!rawEmail || rawEmail.trim() === '') {
+        const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
+        email = `no-email-${uniqueId}@${cleanWebsite}`;
+        status = 'PARKED';
+      }
+
+      return {
+        empresa: lead.empresa || 'Unknown',
+        nombre_oficial_empresa: lead.nombre_oficial_empresa || '',
+        direccion: lead.direccion || '',
+        nota_empresa: lead.nota_empresa || '',
+        nombre_contacto: lead.nombre_contacto || '',
+        cargo: lead.cargo || lead.position || lead.rol || '',
+        nota_contacto: lead.nota_contacto || '',
+        email: email,
+        telefono: lead.telefono || lead.phone || '',
+        pais: lead.pais || lead.country || '',
+        sector: lead.sector || '',
+        linkedin: lead.linkedin || '',
+        website: lead.website || '',
+        status: status,
+        project_id: project_id || null
+      };
+    }).filter((lead: any) => lead.website && lead.website.trim() !== ''); // Filtro estricto anti-alucinaciones
 
     // Insert into Supabase directly
     if (sanitizedLeads.length > 0) {
@@ -107,23 +152,37 @@ export async function POST(req: NextRequest) {
           console.log("Iniciando verificación con Hunter.io...");
           verifiedLeads = [];
           for (const lead of sanitizedLeads) {
-             if (!lead.email) {
-                verifiedLeads.push(lead); // Conservamos el lead para contacto por LinkedIn aunque no tenga email
+             // Si el correo ya es autogenerado por no tener email, lo dejamos en PARKED y continuamos
+             if (lead.email.startsWith('no-email-')) {
+                verifiedLeads.push(lead);
                 continue;
              }
+
              try {
                 const res = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
                 const data = await res.json();
                 if (data && data.data && data.data.status) {
                    const status = data.data.status;
-                   // accept_all and valid are generally safe to send
+                   // accept_all y valid son seguros para envío de correos
                    if (status === 'valid' || status === 'accept_all') {
                       verifiedLeads.push(lead);
                    } else {
-                      console.log(`Hunter.io descartó: ${lead.email} (Status: ${status})`);
+                      console.log(`Hunter.io detectó correo inválido: ${lead.email} (Status: ${status}). Guardando como PARKED.`);
+                      const cleanWebsite = (lead.website || 'unknown.com')
+                        .replace(/^https?:\/\/(www\.)?/, '')
+                        .split('/')[0];
+                      const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
+                      const originalEmail = lead.email;
+                      
+                      verifiedLeads.push({
+                         ...lead,
+                         email: `no-email-${uniqueId}@${cleanWebsite}`,
+                         status: 'PARKED',
+                         nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo original no verificado: ${originalEmail}`
+                      });
                    }
                 } else {
-                   // Si hay un error con Hunter, lo guardamos por si acaso (para no perder el lead)
+                   // Si hay un error con Hunter, lo guardamos por si acaso
                    verifiedLeads.push(lead);
                 }
              } catch (err) {
@@ -136,19 +195,21 @@ export async function POST(req: NextRequest) {
        }
 
        if (verifiedLeads.length === 0) {
-           return NextResponse.json({ success: true, count: 0, leads: [], message: 'Todos los correos fueron descartados por Hunter.io.' });
+           return NextResponse.json({ success: true, count: 0, leads: [], message: 'Todos los leads fueron filtrados/procesados.' });
        }
 
-       const { error: insertError } = await supabaseAdmin
+       const { data: insertedData, error: insertError } = await supabaseAdmin
          .from('leads_campaign')
-         .upsert(verifiedLeads, { onConflict: 'email', ignoreDuplicates: true });
+         .upsert(verifiedLeads, { onConflict: 'email', ignoreDuplicates: true })
+         .select();
          
        if (insertError) {
          console.error("Supabase insert error:", insertError);
          return NextResponse.json({ error: `Error DB: ${insertError.message}` }, { status: 500 });
        }
        
-       return NextResponse.json({ success: true, count: verifiedLeads.length, leads: verifiedLeads });
+       const newLeadsInserted = insertedData || [];
+       return NextResponse.json({ success: true, count: newLeadsInserted.length, leads: newLeadsInserted });
     }
 
     return NextResponse.json({ success: true, count: 0, leads: [] });

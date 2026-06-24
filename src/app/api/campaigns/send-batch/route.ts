@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { GoogleGenAI } from '@google/genai';
 import { Resend } from 'resend';
-import { generateGermaniumRFQHtml } from '@/lib/templates/germanium_rfq';
 import { generateImportDiligenceHtml } from '@/lib/templates/import_diligence_campaign';
 
 // Configure this to true if deploying to Vercel and you want this to run longer
@@ -62,9 +61,11 @@ export async function POST(req: NextRequest) {
       const isPortuguese = /portugués|portugues|portuguese/i.test(campaignGoal || '');
       const isLithuanian = /gerb|laba diena|marija ai|odontologijos|klinika|šypsenos/i.test(campaignGoal || '');
       
-      const isGermaniumRFQ = /germanio|germanium|geo2/i.test(campaignGoal || '');
       const isImportDiligence = !isLithuanian && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
       const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
+      const isProcdiProject = 
+        /clinica|clínica|medical|kaun|vilniu|marija|procdi|odontolog|dant|lietuva/i.test(projectName || '') ||
+        /clinica|clínica|medical|kaun|vilniu|marija|procdi|odontolog|dant|lietuva|antonio@procdi\.com/i.test(campaignGoal || '');
       
       const languageCode = isSpanish ? 'es' : (isPortuguese ? 'pt' : (isLithuanian ? 'lt' : 'en'));
       const languageName = isSpanish ? 'ESPAÑOL' : (isPortuguese ? 'PORTUGUÉS' : (isLithuanian ? 'LITUANO' : 'INGLÉS'));
@@ -78,37 +79,7 @@ export async function POST(req: NextRequest) {
 
       try {
          let promptText = "";
-         if (isGermaniumRFQ) {
-             promptText = `
-            You are an expert B2B procurement consultant acting on behalf of an end client. We are sending an official Request for Quotation (RFQ) requesting that the company ${cleanEmpresaName} supply Germanium materials to our client.
-            
-            STRICT WRITING RULES:
-            1. ACT AS AN INTERMEDIARY: You are sourcing material for YOUR CLIENT, not for yourself.
-            2. NEVER mention your own agency name or use placeholders like "[Your Company]". Always speak on behalf of "our client".
-            3. FOCUS ON THE SELLER: The compliment must be directed entirely to them. Example: "Given ${cleanEmpresaName}'s excellent reputation as a leading supplier of..."
-            4. FORBIDDEN to say "we need this for our factories" (you do not manufacture anything).
-            5. LANGUAGE: The generated subjects and contents must be strictly in ENGLISH.
-            
-            Supplier Info:
-            - Company Name: ${cleanEmpresaName}
-            - Contact Person: ${lead.nombre_contacto || 'Procurement Team'}
-            - Contact Details/Notes: ${lead.nota_contacto || 'N/A'}
-            - Company Achievements: ${lead.nota_empresa || 'N/A'}
-
-            Your task is to generate the base structure for a 3-step B2B Drip Campaign in ENGLISH.
-            Return ONLY a valid JSON object, without markdown formatting (\`\`\`), with no extra conversational text.
-            
-            Required strict JSON structure:
-            {
-               "email_1_subject": "Request for Quotation (RFQ) – High-Purity Germanium Materials (Ge / GeO2)",
-               "email_1_content": "A single, highly professional ice-breaker sentence in English praising the solid reputation or expertise of ${cleanEmpresaName} in the semiconductor/optics industry. Remember: you are sourcing for YOUR CLIENT, not yourself.",
-               "email_2_subject": "Re: Request for Quotation (RFQ) – High-Purity Germanium Materials (Ge / GeO2)",
-               "email_2_content": "A very short follow-up (2 lines) asking politely if they had a chance to review the RFQ sent a few days ago.",
-               "email_3_subject": "Update: Request for Quotation (RFQ) – Germanium Materials",
-               "email_3_content": "A professional break-up email indicating that we will proceed with other refineries, but keeping the door open for future partnerships."
-            }
-            `;
-         } else if (isImportDiligence) {
+         if (isImportDiligence) {
             promptText = `
             Eres el Director de Riesgo Forense. Estamos automatizando nuestro acercamiento a la empresa ${cleanEmpresaName}.
             Ellos son importadores o distribuidores del sector ${lead.sector}.
@@ -202,17 +173,7 @@ export async function POST(req: NextRequest) {
              };
          }
          
-         if (isGermaniumRFQ) {
-            subject = parsedEmails.email_1_subject || "Request for Quotation (RFQ)";
-            const ice_breaker = parsedEmails.email_1_content || "We look forward to establishing a mutually beneficial commercial partnership.";
-            htmlBody = generateGermaniumRFQHtml({
-                nombre_contacto: lead.nombre_contacto || 'Team',
-                nombre_empresa: cleanEmpresaName,
-                ice_breaker: ice_breaker,
-                language: 'en'
-            });
-            emailContentText = htmlBody; 
-         } else if (isImportDiligence) {
+         if (isImportDiligence) {
             subject = parsedEmails.email_1_subject || "SURE: Cadena de Suministro";
             const ice_breaker = parsedEmails.email_1_content || "Le escribo por su volumen de importaciones.";
             htmlBody = generateImportDiligenceHtml({
@@ -220,12 +181,20 @@ export async function POST(req: NextRequest) {
                 nombre_empresa: cleanEmpresaName,
                 productos_importados: parsedEmails.translated_sector || lead.sector || 'bienes internacionales',
                 ice_breaker: ice_breaker,
-                language: languageCode as 'es'|'pt'|'en'
+                language: languageCode as 'es'|'pt'|'en',
+                isProcdi: isProcdiProject
             });
             emailContentText = htmlBody;
          } else {
             subject = parsedEmails.email_1_subject || "SURE: Oportunidad";
-            emailContentText = parsedEmails.email_1_content || "Cuerpo vacío.";
+            let emailContentTextRaw = parsedEmails.email_1_content || "Cuerpo vacío.";
+            if (isProcdiProject) {
+               const signature = `\n\nBest regards,\n\nAntonio Baronas\nSourcing Integration Team | PROCDI\nPh: +37068941110\ne-mail: antonio@procdi.com\n\nCompany code: 307515454\nPartizanų g. 61-806, LT-49282\nKaunas, Lithuania`;
+               if (!emailContentTextRaw.includes('antonio@procdi.com') && !emailContentTextRaw.includes('Antonio Baronas')) {
+                  emailContentTextRaw = emailContentTextRaw + signature;
+               }
+            }
+            emailContentText = emailContentTextRaw;
          }
 
          // Update Lead in Supabase to DRAFT state with all 3 emails

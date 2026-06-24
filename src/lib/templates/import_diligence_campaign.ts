@@ -4,6 +4,7 @@ export interface ImportDiligenceTemplateVars {
   productos_importados: string;
   ice_breaker: string;
   language?: 'es' | 'pt' | 'en';
+  isProcdi?: boolean;
 }
 
 export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): string {
@@ -186,20 +187,39 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
   </div>
   
   <div class="signature">
-    <p style="margin-bottom: 5px;">
-      ${signoff}<br><br>
-      <strong style="font-size: 16px; color: #0f172a;">Antonio Baronas</strong><br>
-      <a href="mailto:alfredo@sure-forensic.com" style="color: #0284c7; text-decoration: none; font-size: 13px;">alfredo@sure-forensic.com</a><br>
-      <span style="color: #64748b;">Managing Director</span><br>
-    </p>
-    <p style="margin-top: 0; font-size: 13px;">
-      <a href="https://www.sureforensic.com" style="color: #0284c7; text-decoration: none; font-weight: 600;">SURE Forensics & Risk Assurance</a><br>
-      <span style="color: #94a3b8;">Kaunas, Lithuania | Global Risk Division</span>
-    </p>
-    
-    <div class="secure-badge">
-      SURE PROTECTED OUTREACH
-    </div>
+    ${vars.isProcdi ? `
+      <p style="margin-bottom: 5px;">
+        ${signoff}<br><br>
+        <strong style="font-size: 16px; color: #0f172a;">Antonio Baronas</strong><br>
+        <span style="color: #475569; font-weight: 500;">Sourcing Integration Team | PROCDI</span><br>
+        Ph: +37068941110<br>
+        e-mail: <a href="mailto:antonio@procdi.com" style="color: #0284c7; text-decoration: none;">antonio@procdi.com</a><br><br>
+        
+        <!-- PROCDI Logo -->
+        <img src="https://sure-app-nine.vercel.app/logo-procdi.svg" alt="PROCDI" style="width: 80px; height: auto; margin: 8px 0; display: block;" />
+        
+        <span style="font-size: 12px; color: #64748b; display: block; margin-top: 5px; line-height: 1.4;">
+          Company code: 307515454<br>
+          Partizanų g. 61-806, LT-49282<br>
+          Kaunas, Lithuania
+        </span>
+      </p>
+    ` : `
+      <p style="margin-bottom: 5px;">
+        ${signoff}<br><br>
+        <strong style="font-size: 16px; color: #0f172a;">Antonio Baronas</strong><br>
+        <a href="mailto:alfredo@sure-forensic.com" style="color: #0284c7; text-decoration: none; font-size: 13px;">alfredo@sure-forensic.com</a><br>
+        <span style="color: #64748b;">Managing Director</span><br>
+      </p>
+      <p style="margin-top: 0; font-size: 13px;">
+        <a href="https://www.sureforensic.com" style="color: #0284c7; text-decoration: none; font-weight: 600;">SURE Forensics & Risk Assurance</a><br>
+        <span style="color: #94a3b8;">Kaunas, Lithuania | Global Risk Division</span>
+      </p>
+      
+      <div class="secure-badge">
+        SURE PROTECTED OUTREACH
+      </div>
+    `}
   </div>
 </div>
 </body>

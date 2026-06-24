@@ -1,0 +1,16 @@
+<svg viewBox="0 0 100 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0, 0)">
+    <polygon points="15,35 50,52 50,90 15,73" fill="#0B192C" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+    <polygon points="50,52 85,35 85,73 50,90" fill="#050D1A" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+    <polygon points="50,15 85,35 50,52 15,35" fill="#0E1E38" stroke="#008DDA" strokeWidth="2.5" strokeLinejoin="round" />
+    <line x1="50" y1="23" x2="68" y2="31" stroke="#008DDA" strokeWidth="1.5" strokeDasharray="3 1.5" />
+    <line x1="50" y1="23" x2="32" y2="31" stroke="#008DDA" strokeWidth="1.5" strokeDasharray="3 1.5" />
+    <line x1="50" y1="44" x2="50" y2="23" stroke="#008DDA" strokeWidth="1.5" />
+    <circle cx="50" cy="15" r="4" fill="#008DDA" />
+    <circle cx="85" cy="35" r="4" fill="#008DDA" />
+    <circle cx="15" cy="35" r="4" fill="#008DDA" />
+    <circle cx="50" cy="52" r="4" fill="#008DDA" />
+    <circle cx="50" cy="90" r="4" fill="#008DDA" />
+  </g>
+  <text x="50" y="115" font-family="'Montserrat', 'Helvetica', 'Arial', sans-serif" font-size="16" font-weight="900" fill="#0F172A" text-anchor="middle" letter-spacing="1.5">PROCDI</text>
+</svg>
