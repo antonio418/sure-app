@@ -52,10 +52,14 @@ Tu comunicación debe ser binaria y aséptica. No saludes. No te despidas. No of
 Utiliza los resultados reales de Google Search Grounding para verificar la existencia de las empresas y contactos. Si Google Search no arroja resultados para empresas reales del sector con presencia web activa, devuelve un array vacío [].
 `;
 
-const searchPrompt = `Busca prospectos comerciales corporativos en la web. El objetivo principal de nuestro proyecto es: "Medidores Inteligentes CNEL EP".
-ESTRICTO: Entrega un máximo de 7 empresas reales (o menos si no existen suficientes empresas reales en la web). No intentes buscar más de 7 empresas de una sola vez para evitar truncamiento por límite de tokens de la API.
-ESTRICTO: Las descripciones en los campos 'nota_empresa' y 'nota_contacto' deben ser sumamente breves y concisas (máximo 15 palabras por campo).
-Ten en cuenta las siguientes restricciones y contexto adicional (Geografía, perfil, etc.): "Buscar proveedores de India solamente".`;
+const searchPrompt = `Busca prospectos comerciales corporativos en la web. El objetivo principal de nuestro proyecto es: "Búsqueda de proveedores y cotizaciones para 11,371 medidores inteligentes ANSI AMI para el proyecto CNEL EP Ecuador.".
+ESTRICTO: Entrega un máximo de 7 empresas reales (o menos si no existen suficientes empresas reales en la web). No intentes buscar más de 7 empresas de una sola vez para evitar truncamiento por límite de tokens de la API. Es preferible entregar pocas empresas reales de alta calidad (entre 3 y 7) y cerrar el JSON de forma válida, antes de intentar dar más y provocar un error de corte.
+ESTRICTO: Las descripciones en los campos 'nota_empresa' y 'nota_contacto' deben ser sumamente breves y concisas (máximo 15 palabras por campo) para evitar que la respuesta sea truncada por límite de tokens.
+
+ESTRICTO: EVITA las siguientes empresas y sitios web que ya tenemos registrados (no los repitas):
+- Nombres de empresa a evitar: zhejiang rifa digital meter co., ltd., zhejiang huayu electrical apparatus co., ltd., nuri flex co., ltd., zhejiang yongtai electric co., ltd., shenzhen goldcard smart group co., ltd., ningbo tech-long meter co., ltd., guangdong weiye electric co., ltd., hangzhou sanlin electronic co., ltd., p&c tech co., ltd., metron co., ltd., zhejiang chint instrument & meter co., ltd., omnisystem co., ltd., jiangsu linyang energy co., ltd., hangzhou luge electrical technology co., ltd., hangzhou sunrise technology
+- Sitios web/dominios a evitar: longsheng-meter.com, rifa-meter.com, huayuelectric.com, nuriflex.com, yongtaielectric.com, goldcard.com.cn, techlongmeter.com, weiyeelectric.com, sanlin-meter.com, pnctech.co.kr, metron.co.kr, chint.com, linyang.com, luge-electric.com, www.sunrisemeter.com
+Ten en cuenta las siguientes restricciones y contexto adicional (Geografía, perfil, etc.): "Buscar proveedores de  India solamente".`;
 
 async function testGemini(modelName) {
   console.log(`\n--- Testing Model: ${modelName} ---`);
@@ -73,20 +77,19 @@ async function testGemini(modelName) {
       }
     });
 
-    console.log("Response text:", response.text);
-    console.log("Candidate object:", JSON.stringify(response.candidates?.[0], null, 2));
-    if (response.candidates?.[0]?.groundingMetadata) {
-      console.log("Grounding Queries:", response.candidates[0].groundingMetadata.webSearchQueries);
-    }
+    console.log("Finish Reason:", response.candidates?.[0]?.finishReason);
+    console.log("Parts count:", response.candidates?.[0]?.content?.parts?.length || 0);
+    console.log("Response text length:", response.text ? response.text.length : 0);
+    console.log("Response text snippet:", response.text ? response.text.substring(0, 500) + '...' + response.text.substring(response.text.length - 200) : "empty");
   } catch (e) {
-    console.error("ERROR running Gemini test:", e);
+    console.error(`ERROR running Gemini test for ${modelName}:`, e);
   }
 }
 
 async function main() {
-  await testGemini('gemini-2.5-flash');
-  await testGemini('gemini-2.0-flash');
-  await testGemini('gemini-1.5-flash');
+  await testGemini('gemini-3.5-flash');
+  await testGemini('gemini-2.5-pro');
+  await testGemini('gemini-3.1-flash-lite');
 }
 
 main();

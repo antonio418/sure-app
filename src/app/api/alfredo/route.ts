@@ -92,21 +92,9 @@ export async function POST(req: NextRequest) {
     
     while (retries > 0) {
         console.log("Alfredo sending prompt to Gemini:", searchPrompt);
-        const originalFetch = globalThis.fetch;
         try {
-          // Wrap Next.js fetch to inject cache: 'no-store' to bypass caching in the SDK
-          const cacheBustingFetch = function(input: any, init?: any) {
-            return originalFetch(input, {
-              ...init,
-              cache: 'no-store',
-              next: { revalidate: 0 }
-            });
-          };
-          // @ts-ignore
-          globalThis.fetch = cacheBustingFetch;
-          
           response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.5-flash',
             contents: searchPrompt,
             config: {
               systemInstruction: ALFREDO_PROMPT,
@@ -165,8 +153,6 @@ export async function POST(req: NextRequest) {
              return NextResponse.json({ error: e.message || 'Google Gemini servers are overloaded. Please try again later.' }, { status: 500 });
           }
           await new Promise(resolve => setTimeout(resolve, 2000));
-        } finally {
-          globalThis.fetch = originalFetch;
         }
     }
 
