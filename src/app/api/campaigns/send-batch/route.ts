@@ -224,19 +224,35 @@ Kaunas, Lithuania`;
          const response = await ai.models.generateContent({
            model: 'gemini-3.5-flash',
            contents: [{ role: 'user', parts: [{ text: promptText }] }],
-           config: { responseMimeType: "application/json" }
+           config: {
+             responseMimeType: "application/json",
+             maxOutputTokens: 8192
+           }
          });
 
-         const text = response.text || '{}';
+         let rawText = response.text || '{}';
          let parsedEmails: any = {};
          
+         // Extracción robusta de JSON de bloques markdown
+         const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
+         if (jsonMatch) {
+           rawText = jsonMatch[1];
+         }
+
+         // Buscamos específicamente el objeto { ... }
+         const objStart = rawText.indexOf('{');
+         const objEnd = rawText.lastIndexOf('}');
+         if (objStart !== -1 && objEnd !== -1 && objEnd > objStart) {
+           rawText = rawText.substring(objStart, objEnd + 1);
+         }
+         
          try {
-             parsedEmails = JSON.parse(text);
+             parsedEmails = JSON.parse(rawText.trim());
          } catch (e) {
              console.warn("Fallo al parsear JSON, usando respaldo.");
              parsedEmails = {
                  email_1_subject: "SURE: Oportunidad Estratégica",
-                 email_1_content: text.substring(0, 200),
+                 email_1_content: rawText,
                  email_2_subject: "Re: SURE: Seguimiento",
                  email_2_content: "¿Pudo revisar mi correo anterior?",
                  email_3_subject: "Cerrando expediente",
