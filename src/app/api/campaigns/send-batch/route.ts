@@ -221,14 +221,40 @@ Kaunas, Lithuania`;
             `;
          }
 
-         const response = await ai.models.generateContent({
-           model: 'gemini-3.5-flash',
-           contents: [{ role: 'user', parts: [{ text: promptText }] }],
-           config: {
-             responseMimeType: "application/json",
-             maxOutputTokens: 8192
-           }
-         });
+          const schema: any = {
+            type: 'OBJECT',
+            properties: {
+              email_1_subject: { type: 'STRING' },
+              email_1_content: { type: 'STRING' },
+              email_2_subject: { type: 'STRING' },
+              email_2_content: { type: 'STRING' },
+              email_3_subject: { type: 'STRING' },
+              email_3_content: { type: 'STRING' }
+            },
+            required: [
+              'email_1_subject',
+              'email_1_content',
+              'email_2_subject',
+              'email_2_content',
+              'email_3_subject',
+              'email_3_content'
+            ]
+          };
+
+          if (isImportDiligence) {
+            schema.properties.translated_sector = { type: 'STRING' };
+            schema.required.push('translated_sector');
+          }
+
+          const response = await ai.models.generateContent({
+            model: 'gemini-3.5-flash',
+            contents: [{ role: 'user', parts: [{ text: promptText }] }],
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: schema,
+              maxOutputTokens: 8192
+            }
+          });
 
          let rawText = response.text || '{}';
          let parsedEmails: any = {};
