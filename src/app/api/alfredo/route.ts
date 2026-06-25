@@ -41,6 +41,8 @@ export async function POST(req: NextRequest) {
       searchPrompt += `\nESTRICTO: Esta es la iteración número ${iteration} de esta búsqueda. Por favor, asegúrate de devolver OTRAS empresas, NO repitas las empresas más obvias que ya me habrías dado en la primera iteración. Ve más profundo.`;
     }
 
+    searchPrompt += `\nESTRICTO: Las descripciones en los campos 'nota_empresa' y 'nota_contacto' deben ser sumamente breves y concisas (máximo 15 palabras por campo) para evitar que la respuesta sea truncada por límite de tokens.`;
+
     // Conjuntos para filtrado programático de duplicados al 100% de efectividad
     const existingWebsitesSet = new Set<string>();
     const existingNamesSet = new Set<string>();
@@ -85,6 +87,7 @@ export async function POST(req: NextRequest) {
     }
     
     let response;
+    let leads: any[] = [];
     let retries = 2;
     
     while (retries > 0) {
@@ -109,15 +112,53 @@ export async function POST(req: NextRequest) {
               systemInstruction: ALFREDO_PROMPT,
               temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
               tools: [{ googleSearch: {} }],
-              responseMimeType: 'text/plain'
+              responseMimeType: 'text/plain',
+              maxOutputTokens: 8192
             }
           });
-          break; 
+
+          if (!response) {
+            throw new Error("No se pudo obtener respuesta de la Inteligencia Artificial.");
+          }
+
+          console.log("Alfredo response text:", response.text);
+          console.log("Alfredo candidate object:", JSON.stringify(response.candidates?.[0], null, 2));
+
+          let rawText = response.text || '';
+          if (!rawText) throw new Error("Respuesta vacía de Gemini");
+
+          // Extracción robusta de JSON de bloques markdown
+          const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
+          if (jsonMatch) {
+            rawText = jsonMatch[1];
+          }
+
+          // Buscamos específicamente el array de objetos [ { ... } ]
+          const arrayStartMatch = rawText.match(/\[\s*\{/);
+          if (arrayStartMatch && arrayStartMatch.index !== undefined) {
+            const startIdx = arrayStartMatch.index;
+            const endIdx = rawText.lastIndexOf(']');
+            if (endIdx !== -1 && endIdx > startIdx) {
+              rawText = rawText.substring(startIdx, endIdx + 1);
+            }
+          } else {
+            const startIdx = rawText.indexOf('[');
+            const endIdx = rawText.lastIndexOf(']');
+            if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+              rawText = rawText.substring(startIdx, endIdx + 1);
+            }
+          }
+
+          leads = JSON.parse(rawText.trim());
+          if (!Array.isArray(leads)) {
+             throw new Error("El formato devuelto no es un array de prospectos válido.");
+          }
+          break; // Salir si todo es correcto
         } catch (e: any) {
           retries--;
-          console.warn(`Gemini API Error. Retries left: ${retries}`, e.message);
+          console.warn(`Error en llamada o parseo de Alfredo. Intentos restantes: ${retries}`, e.message);
           if (retries === 0) {
-             return NextResponse.json({ error: 'Google Gemini servers are overloaded. Please try again later.' }, { status: 503 });
+             return NextResponse.json({ error: e.message || 'Google Gemini servers are overloaded. Please try again later.' }, { status: 500 });
           }
           await new Promise(resolve => setTimeout(resolve, 2000));
         } finally {
@@ -125,40 +166,6 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    if (!response) {
-      throw new Error("No se pudo obtener respuesta de la Inteligencia Artificial.");
-    }
-
-    console.log("Alfredo response text:", response.text);
-    console.log("Alfredo candidate object:", JSON.stringify(response.candidates?.[0], null, 2));
-
-    let rawText = response.text || '';
-    if (!rawText) throw new Error("Respuesta vacía de Gemini");
-
-    // Extracción robusta de JSON de bloques markdown
-    const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      rawText = jsonMatch[1];
-    }
-
-    // Buscamos específicamente el array de objetos [ { ... } ]
-    const arrayStartMatch = rawText.match(/\[\s*\{/);
-    if (arrayStartMatch && arrayStartMatch.index !== undefined) {
-      const startIdx = arrayStartMatch.index;
-      const endIdx = rawText.lastIndexOf(']');
-      if (endIdx !== -1 && endIdx > startIdx) {
-        rawText = rawText.substring(startIdx, endIdx + 1);
-      }
-    } else {
-      // Fallback a '[' y ']' si por alguna razón no es un array de objetos
-      const startIdx = rawText.indexOf('[');
-      const endIdx = rawText.lastIndexOf(']');
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        rawText = rawText.substring(startIdx, endIdx + 1);
-      }
-    }
-
-    const leads = JSON.parse(rawText.trim());
 
     if (!Array.isArray(leads)) {
        throw new Error("El formato devuelto no es un array de prospectos válido.");
