@@ -4,6 +4,8 @@ import { ALFREDO_PROMPT } from '@/lib/agents/alfredo';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,25 +41,41 @@ export async function POST(req: NextRequest) {
       searchPrompt += `\nESTRICTO: Esta es la iteración número ${iteration} de esta búsqueda. Por favor, asegúrate de devolver OTRAS empresas, NO repitas las empresas más obvias que ya me habrías dado en la primera iteración. Ve más profundo.`;
     }
 
+    // Conjuntos para filtrado programático de duplicados al 100% de efectividad
+    const existingWebsitesSet = new Set<string>();
+    const existingNamesSet = new Set<string>();
+    
+    let existingWebsites: string[] = [];
+    let existingNames: string[] = [];
+
     if (existingLeads && existingLeads.length > 0) {
-      const existingWebsites = existingLeads
+      existingWebsites = existingLeads
         .map((l: any) => {
           if (!l.website) return '';
-          return l.website.replace(/^https?:\/\/(www\.)?/, '').trim().toLowerCase();
+          return l.website.replace(/^https?:\/\/(www\.)?/, '').trim().toLowerCase().split('/')[0];
         })
         .filter((w: string) => w !== '');
       
-      const existingNames = existingLeads
+      existingNames = existingLeads
         .map((l: any) => l.empresa.trim().toLowerCase())
         .filter((n: string) => n !== '');
-        
+
+      for (const w of existingWebsites) {
+        existingWebsitesSet.add(w);
+      }
+      for (const n of existingNames) {
+        existingNamesSet.add(n);
+      }
+
       if (existingWebsites.length > 0 || existingNames.length > 0) {
-        searchPrompt += `\n\nESTRICTO: EVITA COMPLETAMENTE las siguientes empresas y sitios web que ya tenemos registrados en nuestra base de datos (no los repitas bajo ninguna circunstancia):`;
+        searchPrompt += `\n\nESTRICTO: EVITA las siguientes empresas y sitios web que ya tenemos registrados (no los repitas):`;
         if (existingNames.length > 0) {
-          searchPrompt += `\n- Nombres de empresa a evitar: ${Array.from(new Set(existingNames)).slice(0, 100).join(', ')}`;
+          // Pasamos máximo 15 nombres para no sobrecargar el grounding
+          searchPrompt += `\n- Nombres de empresa a evitar: ${Array.from(new Set(existingNames)).slice(-15).join(', ')}`;
         }
         if (existingWebsites.length > 0) {
-          searchPrompt += `\n- Sitios web/dominios a evitar: ${Array.from(new Set(existingWebsites)).slice(0, 100).join(', ')}`;
+          // Pasamos máximo 15 sitios web/dominios para no sobrecargar el grounding
+          searchPrompt += `\n- Sitios web/dominios a evitar: ${Array.from(new Set(existingWebsites)).slice(-15).join(', ')}`;
         }
       }
     }
@@ -70,30 +88,49 @@ export async function POST(req: NextRequest) {
     let retries = 2;
     
     while (retries > 0) {
-      try {
-        response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: searchPrompt,
-          config: {
-            systemInstruction: ALFREDO_PROMPT,
-            temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
-            tools: [{ googleSearch: {} }]
+        console.log("Alfredo sending prompt to Gemini:", searchPrompt);
+        const originalFetch = globalThis.fetch;
+        try {
+          // Wrap Next.js fetch to inject cache: 'no-store' to bypass caching in the SDK
+          const cacheBustingFetch = function(input: any, init?: any) {
+            return originalFetch(input, {
+              ...init,
+              cache: 'no-store',
+              next: { revalidate: 0 }
+            });
+          };
+          // @ts-ignore
+          globalThis.fetch = cacheBustingFetch;
+          
+          response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: searchPrompt,
+            config: {
+              systemInstruction: ALFREDO_PROMPT,
+              temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
+              tools: [{ googleSearch: {} }],
+              responseMimeType: 'text/plain'
+            }
+          });
+          break; 
+        } catch (e: any) {
+          retries--;
+          console.warn(`Gemini API Error. Retries left: ${retries}`, e.message);
+          if (retries === 0) {
+             return NextResponse.json({ error: 'Google Gemini servers are overloaded. Please try again later.' }, { status: 503 });
           }
-        });
-        break; 
-      } catch (e: any) {
-        retries--;
-        console.warn(`Gemini API Error. Retries left: ${retries}`, e.message);
-        if (retries === 0) {
-           return NextResponse.json({ error: 'Google Gemini servers are overloaded. Please try again later.' }, { status: 503 });
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } finally {
+          globalThis.fetch = originalFetch;
         }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
     }
 
     if (!response) {
       throw new Error("No se pudo obtener respuesta de la Inteligencia Artificial.");
     }
+
+    console.log("Alfredo response text:", response.text);
+    console.log("Alfredo candidate object:", JSON.stringify(response.candidates?.[0], null, 2));
 
     let rawText = response.text || '';
     if (!rawText) throw new Error("Respuesta vacía de Gemini");
@@ -102,8 +139,18 @@ export async function POST(req: NextRequest) {
     const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
       rawText = jsonMatch[1];
+    }
+
+    // Buscamos específicamente el array de objetos [ { ... } ]
+    const arrayStartMatch = rawText.match(/\[\s*\{/);
+    if (arrayStartMatch && arrayStartMatch.index !== undefined) {
+      const startIdx = arrayStartMatch.index;
+      const endIdx = rawText.lastIndexOf(']');
+      if (endIdx !== -1 && endIdx > startIdx) {
+        rawText = rawText.substring(startIdx, endIdx + 1);
+      }
     } else {
-      // Si no tiene bloques markdown, buscamos el primer '[' y el último ']'
+      // Fallback a '[' y ']' si por alguna razón no es un array de objetos
       const startIdx = rawText.indexOf('[');
       const endIdx = rawText.lastIndexOf(']');
       if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
@@ -149,7 +196,23 @@ export async function POST(req: NextRequest) {
         status: status,
         project_id: project_id || null
       };
-    }).filter((lead: any) => lead.website && lead.website.trim() !== ''); // Filtro estricto anti-alucinaciones
+    })
+    .filter((lead: any) => lead.website && lead.website.trim() !== '') // Filtro estricto anti-alucinaciones
+    .filter((lead: any) => {
+      // Filtrado programático estricto contra duplicados
+      const cleanWeb = lead.website.replace(/^https?:\/\/(www\.)?/, '').trim().toLowerCase().split('/')[0];
+      const cleanName = lead.empresa.trim().toLowerCase();
+      
+      if (existingWebsitesSet.has(cleanWeb)) {
+        console.log(`[Alfredo] Filtrando duplicado por sitio web existente: ${lead.website}`);
+        return false;
+      }
+      if (existingNamesSet.has(cleanName)) {
+        console.log(`[Alfredo] Filtrando duplicado por nombre de empresa existente: ${lead.empresa}`);
+        return false;
+      }
+      return true;
+    });
 
     // Insert into Supabase directly
     if (sanitizedLeads.length > 0) {
