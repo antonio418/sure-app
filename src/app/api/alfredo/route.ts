@@ -125,7 +125,11 @@ export async function POST(req: NextRequest) {
           console.log("Alfredo candidate object:", JSON.stringify(response.candidates?.[0], null, 2));
 
           let rawText = response.text || '';
-          if (!rawText) throw new Error("Respuesta vacía de Gemini");
+          if (!rawText.trim()) {
+            console.log("[Alfredo] Gemini returned an empty text response. Treating as 0 leads found.");
+            leads = [];
+            break;
+          }
 
           // Extracción robusta de JSON de bloques markdown
           const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
