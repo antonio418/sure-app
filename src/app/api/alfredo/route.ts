@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     let searchPrompt = `Busca prospectos comerciales corporativos en la web. El objetivo principal de nuestro proyecto es: "${project.objective}".`;
     
     if (limit) {
-      searchPrompt += `\nESTRICTO: Entrega exactamente ${limit} empresas.`;
+      searchPrompt += `\nESTRICTO: Entrega un máximo de ${limit} empresas (o menos si no existen tantas empresas reales en la web que cumplan exactamente con el perfil). Es preferible entregar pocas empresas reales y existentes a inventar o rellenar con empresas irrelevantes. Cierra el JSON correctamente.`;
     }
     if (iteration && iteration > 1) {
       searchPrompt += `\nESTRICTO: Esta es la iteración número ${iteration} de esta búsqueda. Por favor, asegúrate de devolver OTRAS empresas, NO repitas las empresas más obvias que ya me habrías dado en la primera iteración. Ve más profundo.`;

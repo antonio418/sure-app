@@ -1,6 +1,6 @@
 async function test() {
   const payload = {
-    supplementary_info: "Buscar empresas de China y Corea del sur",
+    supplementary_info: "Buscar proveedores de India solamente",
     project_id: "ac1284eb-9763-48d7-9fdc-7c4d4571fd88",
     iteration: 1,
     limit: 20
