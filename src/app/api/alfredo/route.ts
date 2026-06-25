@@ -32,11 +32,11 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
     
+    const promptLimit = limit ? Math.min(limit, 7) : 5;
     let searchPrompt = `Busca prospectos comerciales corporativos en la web. El objetivo principal de nuestro proyecto es: "${project.objective}".`;
     
-    if (limit) {
-      searchPrompt += `\nESTRICTO: Entrega un máximo de ${limit} empresas (o menos si no existen tantas empresas reales en la web que cumplan exactamente con el perfil). Es preferible entregar pocas empresas reales y existentes a inventar o rellenar con empresas irrelevantes. Cierra el JSON correctamente.`;
-    }
+    searchPrompt += `\nESTRICTO: Entrega un máximo de ${promptLimit} empresas reales (o menos si no existen suficientes empresas reales en la web). No intentes buscar más de ${promptLimit} empresas de una sola vez para evitar truncamiento por límite de tokens de la API. Es preferible entregar pocas empresas reales de alta calidad (entre 3 y ${promptLimit}) y cerrar el JSON de forma válida, antes de intentar dar más y provocar un error de corte.`;
+
     if (iteration && iteration > 1) {
       searchPrompt += `\nESTRICTO: Esta es la iteración número ${iteration} de esta búsqueda. Por favor, asegúrate de devolver OTRAS empresas, NO repitas las empresas más obvias que ya me habrías dado en la primera iteración. Ve más profundo.`;
     }
