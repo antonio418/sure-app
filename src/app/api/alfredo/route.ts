@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
           contents: searchPrompt,
           config: {
             systemInstruction: ALFREDO_PROMPT,
-            temperature: 0.4, // Temperatura media para permitir recall de memoria sin alucinar en exceso
-            responseMimeType: "application/json",
+            temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
+            tools: [{ googleSearch: {} }]
           }
         });
         break; 
@@ -95,11 +95,20 @@ export async function POST(req: NextRequest) {
       throw new Error("No se pudo obtener respuesta de la Inteligencia Artificial.");
     }
 
-    let rawText = response.text;
+    let rawText = response.text || '';
     if (!rawText) throw new Error("Respuesta vacía de Gemini");
 
-    if (rawText.startsWith('```json')) {
-      rawText = rawText.replace(/```json/g, '').replace(/```/g, '');
+    // Extracción robusta de JSON de bloques markdown
+    const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/```\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      rawText = jsonMatch[1];
+    } else {
+      // Si no tiene bloques markdown, buscamos el primer '[' y el último ']'
+      const startIdx = rawText.indexOf('[');
+      const endIdx = rawText.lastIndexOf(']');
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+        rawText = rawText.substring(startIdx, endIdx + 1);
+      }
     }
 
     const leads = JSON.parse(rawText.trim());
@@ -163,22 +172,25 @@ export async function POST(req: NextRequest) {
                 const data = await res.json();
                 if (data && data.data && data.data.status) {
                    const status = data.data.status;
-                   // accept_all y valid son seguros para envío de correos
-                   if (status === 'valid' || status === 'accept_all') {
+                   // Solo los correos 100% válidos son seguros para envío automatizado.
+                   // Los catch-all (accept_all) se marcan como PARKED para verificación manual.
+                   if (status === 'valid') {
                       verifiedLeads.push(lead);
                    } else {
-                      console.log(`Hunter.io detectó correo inválido: ${lead.email} (Status: ${status}). Guardando como PARKED.`);
+                      const isCatchAll = status === 'accept_all';
+                      console.log(`Hunter.io detectó correo ${isCatchAll ? 'Catch-All' : 'inválido'}: ${lead.email} (Status: ${status}). Guardando como PARKED.`);
                       const cleanWebsite = (lead.website || 'unknown.com')
                         .replace(/^https?:\/\/(www\.)?/, '')
                         .split('/')[0];
                       const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
                       const originalEmail = lead.email;
+                      const label = isCatchAll ? 'Correo original no verificado (Catch-All)' : 'Correo original no verificado';
                       
                       verifiedLeads.push({
                          ...lead,
                          email: `no-email-${uniqueId}@${cleanWebsite}`,
                          status: 'PARKED',
-                         nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo original no verificado: ${originalEmail}`
+                         nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}${label}: ${originalEmail}`
                       });
                    }
                 } else {

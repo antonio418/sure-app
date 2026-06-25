@@ -365,6 +365,12 @@ export default function RMAPage() {
                   </tr>
                 </thead>
                 <tbody className="text-slate-300">
+                  {/* Grupo 1: SURE Transactional */}
+                  <tr className="bg-blue-500/10 border-b border-blue-500/20">
+                    <td colSpan={6} className="p-4 font-black text-blue-400 uppercase tracking-widest text-xs">
+                      {t('ui.pricing_group_transactional')}
+                    </td>
+                  </tr>
                   <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="p-6 font-bold text-white">{t('ui.plan_basic')}</td>
                     <td className="p-6">{t('ui.plan_payg')}</td>
@@ -429,12 +435,16 @@ export default function RMAPage() {
                       </button>
                     </td>
                   </tr>
+                  
+                  {/* Grupo 2: SURE Project Workspace */}
+                  <tr className="bg-emerald-500/10 border-b border-emerald-500/20">
+                    <td colSpan={6} className="p-4 font-black text-emerald-400 uppercase tracking-widest text-xs">
+                      {t('ui.pricing_group_workspace')}
+                    </td>
+                  </tr>
                   <tr className="border-b border-emerald-500/30 hover:bg-emerald-500/5 transition-colors bg-emerald-500/10">
-                    <td className="p-6 font-bold text-white flex items-center gap-3">
+                    <td className="p-6 font-bold text-white">
                       {t('ui.plan_tier3')}
-                      <span className="text-[10px] bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.5)]">
-                        {t('ui.plan_pop')}
-                      </span>
                     </td>
                     <td className="p-6 text-white font-medium">{t('ui.plan_up75')}</td>
                     <td className="p-6 font-mono text-emerald-400 font-bold text-lg">$3,375.00</td>
@@ -500,6 +510,75 @@ export default function RMAPage() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Feature comparison matrix */}
+          <div className="mt-20">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl md:text-4xl font-black text-white mb-3">
+                {t('ui.matrix_title')}
+              </h3>
+              <p className="text-lg text-slate-400">
+                {t('ui.matrix_subtitle')}
+              </p>
+            </div>
+
+            <div className="max-w-5xl mx-auto bg-[#1e293b]/30 backdrop-blur-xl rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className="bg-black/20 border-b border-white/10">
+                      <th className="p-6 font-black text-white uppercase tracking-widest text-sm w-[40%]">
+                        {t('ui.matrix_th_capability')}
+                      </th>
+                      <th className="p-6 font-black text-blue-400 uppercase tracking-widest text-sm text-center w-[30%]">
+                        {t('ui.matrix_th_group1')}
+                      </th>
+                      <th className="p-6 font-black text-emerald-400 uppercase tracking-widest text-sm text-center w-[30%]">
+                        {t('ui.matrix_th_group2')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-300">
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row1_cap')}</td>
+                      <td className="p-6 text-center">{t('ui.matrix_row1_g1')}</td>
+                      <td className="p-6 text-center text-white font-medium">{t('ui.matrix_row1_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row2_cap')}</td>
+                      <td className="p-6 text-center text-red-400">{t('ui.matrix_row2_g1')}</td>
+                      <td className="p-6 text-center text-emerald-400 font-bold">{t('ui.matrix_row2_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row3_cap')}</td>
+                      <td className="p-6 text-center text-red-400">{t('ui.matrix_row3_g1')}</td>
+                      <td className="p-6 text-center text-emerald-400 font-bold">{t('ui.matrix_row3_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row4_cap')}</td>
+                      <td className="p-6 text-center text-red-400">{t('ui.matrix_row4_g1')}</td>
+                      <td className="p-6 text-center text-emerald-400 font-bold">{t('ui.matrix_row4_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row5_cap')}</td>
+                      <td className="p-6 text-center text-slate-300">{t('ui.matrix_row5_g1')}</td>
+                      <td className="p-6 text-center text-white font-medium">{t('ui.matrix_row5_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row6_cap')}</td>
+                      <td className="p-6 text-center">{t('ui.matrix_row6_g1')}</td>
+                      <td className="p-6 text-center text-emerald-400 font-bold">{t('ui.matrix_row6_g2')}</td>
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{t('ui.matrix_row7_cap')}</td>
+                      <td className="p-6 text-center">{t('ui.matrix_row7_g1')}</td>
+                      <td className="p-6 text-center text-white font-bold">{t('ui.matrix_row7_g2')}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

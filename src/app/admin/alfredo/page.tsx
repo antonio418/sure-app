@@ -2,9 +2,36 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
-import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil } from 'lucide-react';
+import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'NEW':
+    case 'lead_nuevo':
+      return { label: '🆕 NUEVO', className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' };
+    case 'DRAFT':
+      return { label: '📝 BORRADOR', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' };
+    case 'APPROVED':
+      return { label: '⏳ APROBADO', className: 'bg-orange-500/20 text-orange-400 border border-orange-500/30' };
+    case 'PARKED':
+      return { label: '⏸️ APARCADO', className: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' };
+    case 'email_1_enviado':
+      return { label: '✉️ ENVIADO 1', className: 'bg-purple-500/20 text-purple-400 border border-purple-500/30' };
+    case 'email_2_enviado':
+      return { label: '✉️ ENVIADO 2', className: 'bg-pink-500/20 text-pink-400 border border-pink-500/30' };
+    case 'convertido':
+      return { label: '🎉 RECIBIDO', className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' };
+    case 'BOUNCED':
+      return { label: '🚨 REBOTADO', className: 'bg-red-500/20 text-red-400 border border-red-500/50' };
+    case 'REJECTED':
+    case 'cold':
+      return { label: '🗑️ DESCARTADO', className: 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30' };
+    default:
+      return { label: status || 'DESCONOCIDO', className: 'bg-gray-500/20 text-gray-400 border border-gray-500/30' };
+  }
+};
 
 export default function AlfredoAdminPage() {
   const [user, setUser] = useState<any>(null);
@@ -20,6 +47,7 @@ export default function AlfredoAdminPage() {
 
   // Leads State
   const [leads, setLeads] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [stats, setStats] = useState({ total: 0, new: 0, sent: 0, converted: 0, cold: 0 });
@@ -387,6 +415,19 @@ export default function AlfredoAdminPage() {
     return 0;
   });
 
+  const filteredLeads = sortedLeads.filter(lead => {
+    if (statusFilter === 'ALL') return true;
+    if (statusFilter === 'NEW') return lead.status === 'NEW' || lead.status === 'lead_nuevo';
+    if (statusFilter === 'PARKED') return lead.status === 'PARKED';
+    if (statusFilter === 'DRAFT') return lead.status === 'DRAFT';
+    if (statusFilter === 'APPROVED') return lead.status === 'APPROVED';
+    if (statusFilter === 'SENT') return lead.status === 'email_1_enviado' || lead.status === 'email_2_enviado';
+    if (statusFilter === 'BOUNCED') return lead.status === 'BOUNCED' || lead.resend_status === 'bounced';
+    if (statusFilter === 'REPLIED') return lead.status === 'convertido' || lead.has_replied === true;
+    if (statusFilter === 'REJECTED') return lead.status === 'REJECTED' || lead.status === 'cold';
+    return true;
+  });
+
   if (loading) return <div className="min-h-screen bg-[#050a14] flex items-center justify-center text-[var(--color-sure-accent)] font-mono">LOADING ALFREDO SECURE NODE...</div>;
 
   const activeProject = projects.find(p => p.id === activeProjectId);
@@ -427,6 +468,32 @@ export default function AlfredoAdminPage() {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
+
+              {activeProject && (
+                 <button
+                   onClick={async () => {
+                     const newStatus = activeProject.status === 'active' ? 'paused' : 'active';
+                     try {
+                       const { error } = await supabase
+                         .from('projects')
+                         .update({ status: newStatus })
+                         .eq('id', activeProject.id);
+                       if (error) throw error;
+                       setProjects(projects.map(p => p.id === activeProject.id ? { ...p, status: newStatus } : p));
+                     } catch (err: any) {
+                       alert("Error al actualizar estado: " + err.message);
+                     }
+                   }}
+                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                     activeProject.status === 'active' 
+                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
+                       : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
+                   }`}
+                   title={activeProject.status === 'active' ? 'Campaña de envío automática activa' : 'Campaña de envío automática pausada'}
+                 >
+                   {activeProject.status === 'active' ? '● Envíos Activos' : '○ Envíos Pausados'}
+                 </button>
+               )}
            </div>
            
            <div className="flex items-center gap-4 w-full md:w-auto justify-between">
@@ -505,6 +572,14 @@ export default function AlfredoAdminPage() {
                    {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
                    Reactivar
                  </button>
+                 <button 
+                    onClick={() => handleUpdateStatusBatch('REJECTED')}
+                    disabled={updatingStatus}
+                    className="bg-zinc-500/20 text-zinc-400 hover:bg-zinc-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-zinc-500/30"
+                  >
+                    {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
+                    Descartar
+                  </button>
                </>
              )}
              <label className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors">
@@ -593,10 +668,50 @@ export default function AlfredoAdminPage() {
 
         {/* Leads Table */}
         <div className="bg-black/40 border border-white/10 rounded-3xl overflow-hidden">
-          <div className="p-6 border-b border-white/5 flex justify-between items-center">
-             <h2 className="text-lg font-bold">Contactos del Proyecto</h2>
-             <div className="text-xs text-slate-500 font-mono">Mostrando registros vinculados a: {activeProject?.name}</div>
+          <div className="p-6 border-b border-white/5 flex justify-between items-center flex-wrap gap-4">
+             <div>
+                <h2 className="text-lg font-bold">Contactos del Proyecto</h2>
+                <div className="text-xs text-slate-500 font-mono">Mostrando registros vinculados a: {activeProject?.name}</div>
+             </div>
+             <div className="text-xs font-mono text-slate-400 flex gap-4">
+                <div>Total: <span className="text-white font-bold">{leads.length}</span></div>
+                <div>Filtrados: <span className="text-[var(--color-sure-accent)] font-bold">{filteredLeads.length}</span></div>
+             </div>
           </div>
+          
+          {/* Status Filter Tab Bar */}
+          <div className="p-6 border-b border-white/5 flex flex-wrap gap-2 items-center bg-white/5">
+             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Filtrar por Estado:</span>
+             {[
+               { id: 'ALL', label: 'Todos', count: leads.length },
+               { id: 'NEW', label: '🆕 Nuevos', count: leads.filter(l => l.status === 'NEW' || l.status === 'lead_nuevo').length },
+               { id: 'PARKED', label: '⏸️ Aparcados', count: leads.filter(l => l.status === 'PARKED').length },
+               { id: 'DRAFT', label: '📝 Borradores', count: leads.filter(l => l.status === 'DRAFT').length },
+               { id: 'APPROVED', label: '⏳ Aprobados', count: leads.filter(l => l.status === 'APPROVED').length },
+               { id: 'SENT', label: '✉️ Enviados', count: leads.filter(l => l.status === 'email_1_enviado' || l.status === 'email_2_enviado').length },
+               { id: 'BOUNCED', label: '🚨 Rebotados', count: leads.filter(l => l.status === 'BOUNCED' || l.resend_status === 'bounced').length },
+               { id: 'REPLIED', label: '🎉 Recibidos', count: leads.filter(l => l.status === 'convertido' || l.has_replied === true).length },
+               { id: 'REJECTED', label: '🗑️ Descartados', count: leads.filter(l => l.status === 'REJECTED' || l.status === 'cold').length },
+             ].map(tab => (
+               <button
+                 key={tab.id}
+                 onClick={() => setStatusFilter(tab.id)}
+                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                   statusFilter === tab.id
+                     ? 'bg-[var(--color-sure-accent)] text-black font-extrabold shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                     : 'bg-black/40 text-slate-400 hover:text-white border border-white/10'
+                 }`}
+               >
+                 <span>{tab.label}</span>
+                 <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${
+                   statusFilter === tab.id ? 'bg-black/20 text-black font-bold' : 'bg-white/10 text-slate-300'
+                 }`}>
+                   {tab.count}
+                 </span>
+               </button>
+             ))}
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-gray-400">
               <thead className="bg-white/5 text-xs uppercase font-mono">
@@ -605,12 +720,14 @@ export default function AlfredoAdminPage() {
                      <input 
                        type="checkbox" 
                        className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
-                       checked={leads.length > 0 && selectedLeads.length === leads.length}
+                       checked={filteredLeads.length > 0 && filteredLeads.every(l => selectedLeads.includes(l.id))}
                        onChange={(e) => {
                          if (e.target.checked) {
-                           setSelectedLeads(leads.map(l => l.id));
+                           const newSelected = Array.from(new Set([...selectedLeads, ...filteredLeads.map(l => l.id)]));
+                           setSelectedLeads(newSelected);
                          } else {
-                           setSelectedLeads([]);
+                           const filteredIds = filteredLeads.map(l => l.id);
+                           setSelectedLeads(selectedLeads.filter(id => !filteredIds.includes(id)));
                          }
                        }}
                      />
@@ -637,25 +754,25 @@ export default function AlfredoAdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedLeads.length === 0 ? (
-                  <tr><td colSpan={8} className="px-6 py-10 text-center font-mono">No hay contactos en este proyecto.</td></tr>
+                {filteredLeads.length === 0 ? (
+                   <tr><td colSpan={8} className="px-6 py-10 text-center font-mono font-bold text-slate-500">No hay contactos {statusFilter !== 'ALL' ? 'con este estado' : ''} en este proyecto.</td></tr>
                 ) : (
-                  sortedLeads.map(lead => (
-                    <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="px-6 py-4">
-                         <input 
-                           type="checkbox" 
-                           className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
-                           checked={selectedLeads.includes(lead.id)}
-                           onChange={(e) => {
-                             if (e.target.checked) {
-                               setSelectedLeads([...selectedLeads, lead.id]);
-                             } else {
-                               setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
-                             }
-                           }}
-                         />
-                      </td>
+                   filteredLeads.map(lead => (
+                     <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
+                       <td className="px-6 py-4">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
+                            checked={selectedLeads.includes(lead.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedLeads([...selectedLeads, lead.id]);
+                              } else {
+                                setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
+                              }
+                            }}
+                          />
+                       </td>
                       <td className="px-6 py-4 font-bold text-white">
                         <div className="flex items-center gap-2">
                           <span>{lead.empresa}</span>
@@ -704,44 +821,39 @@ export default function AlfredoAdminPage() {
                          {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4">
-                        {lead.status === 'DRAFT' ? (
-                          <button 
-                            onClick={() => setActiveDraft(lead)}
-                            className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-colors cursor-pointer border border-yellow-500/30"
-                          >
-                            REVISAR DRAFT
-                          </button>
-                         ) : (
-                          <div className="flex flex-col gap-2 items-start">
-                            <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
-                               (lead.status === 'lead_nuevo' || lead.status === 'NEW') ? 'bg-blue-500/20 text-blue-400' :
-                               lead.status === 'APPROVED' ? 'bg-orange-500/20 text-orange-400' :
-                               lead.status === 'PARKED' ? 'bg-cyan-500/20 text-cyan-400' :
-                               lead.status === 'email_1_enviado' ? 'bg-purple-500/20 text-purple-400' :
-                               lead.status === 'convertido' ? 'bg-green-500/20 text-green-400' :
-                               lead.status === 'BOUNCED' ? 'bg-red-500/20 text-red-500 border border-red-500/50' :
-                               'bg-gray-500/20 text-gray-400'
-                            }`}>
-                              {lead.status ? lead.status.replace('_', ' ') : 'UNKNOWN'}
-                            </span>
-                            
-                            {lead.resend_status && lead.resend_status !== 'pending' && (
-                               <span className={`px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border ${
-                                  lead.resend_status === 'delivered' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                                  lead.resend_status === 'bounced' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                                  lead.resend_status === 'opened' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                                  lead.resend_status === 'clicked' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' :
-                                  lead.resend_status === 'complained' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' :
-                                  'bg-gray-500/10 text-gray-400 border-gray-500/30'
-                               }`}>
-                                 {lead.resend_status === 'opened' && lead.has_opened ? '👀 OPENED' : 
-                                  lead.resend_status === 'delivered' ? '✓ DELIVERED' : 
-                                  lead.resend_status.toUpperCase()}
+                        <div className="flex flex-col gap-2 items-start">
+                          {lead.status === 'DRAFT' ? (
+                            <button 
+                              onClick={() => setActiveDraft(lead)}
+                              className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-colors cursor-pointer border border-yellow-500/30"
+                            >
+                              REVISAR DRAFT
+                            </button>
+                           ) : (() => {
+                             const badge = getStatusBadge(lead.status);
+                             return (
+                               <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${badge.className}`}>
+                                 {badge.label}
                                </span>
-                            )}
-                          </div>
-                         )}
-                       </td>
+                             );
+                           })()}
+                           
+                           {lead.resend_status && lead.resend_status !== 'pending' && (
+                              <span className={`px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border ${
+                                 lead.resend_status === 'delivered' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                 lead.resend_status === 'bounced' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                 lead.resend_status === 'opened' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                 lead.resend_status === 'clicked' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' :
+                                 lead.resend_status === 'complained' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' :
+                                 'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                              }`}>
+                                {lead.resend_status === 'opened' && lead.has_opened ? '👀 OPENED' : 
+                                 lead.resend_status === 'delivered' ? '✓ DELIVERED' : 
+                                 lead.resend_status.toUpperCase()}
+                              </span>
+                           )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-xs font-mono">
                         {lead.status === 'email_1_enviado' && lead.email_1_enviado_at ? new Date(lead.email_1_enviado_at).toLocaleDateString() : '-'}
                       </td>
@@ -856,44 +968,79 @@ export default function AlfredoAdminPage() {
 
                  {/* Pestañas (o apilado) para ver Email vs LinkedIn */}
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {(() => {
+{(() => {
                        const contentStr = (activeDraft.email_1_content || '').toLowerCase();
                        const isPortuguese = contentStr.includes('atenciosamente') || contentStr.includes('segurança') || contentStr.includes('bom dia');
                        const isSpanish = contentStr.includes('saludos') || contentStr.includes('estimado') || contentStr.includes('buenos días');
                        const isLithuanian = contentStr.includes('gerb') || contentStr.includes('laba diena') || contentStr.includes('marija ai') || contentStr.includes('odontologijos') || contentStr.includes('klinika') || contentStr.includes('šypsenos');
-                       // Por defecto a Inglés si no detecta explícitamente español, portugués o lituano
                        const isEnglish = !isPortuguese && !isSpanish && !isLithuanian;
+                       const isNoName = !activeDraft.nombre_contacto || activeDraft.nombre_contacto.toLowerCase().includes('vacío') || activeDraft.nombre_contacto.toLowerCase().includes('vacio') || activeDraft.nombre_contacto.trim().length <= 2;
+                       const lastName = isNoName ? '' : (activeDraft.nombre_contacto?.trim().split(' ').pop() || '');
+
+                       const isMeters = activeProject?.name?.toLowerCase().includes('medidor') || 
+                                        activeProject?.name?.toLowerCase().includes('meter') || 
+                                        activeProject?.name?.toLowerCase().includes('cnel') || 
+                                        activeProject?.name?.toLowerCase().includes('ecuador') || 
+                                        activeProject?.objective?.toLowerCase().includes('medidor') || 
+                                        activeProject?.objective?.toLowerCase().includes('meter') || 
+                                        activeProject?.objective?.toLowerCase().includes('cnel') || 
+                                        activeProject?.objective?.toLowerCase().includes('ecuador');
+
+                       const lnShortEs = isMeters 
+                         ? (isNoName 
+                             ? `Estimado Proveedor, un placer. Gestiono el abastecimiento para un proyecto de 12k medidores inteligentes ANSI en Sudamérica. Vi su catálogo de medidores y me gustaría conectar.`
+                             : `Estimado Sr. ${lastName}, un placer. Gestiono el abastecimiento para un proyecto de 12k medidores inteligentes ANSI en Sudamérica. Vi su catálogo de medidores y me gustaría conectar.`)
+                         : `Dear Mr. ${lastName || 'Partner'}, un honor. He desarrollado una IA que detecta estafadores de comercio exterior con 90% de precisión. Quisiera conectar.`;
+
+                       const lnShortEn = isMeters
+                         ? (isNoName
+                             ? `Dear Sales Manager, I'm managing sourcing for a major 12k ANSI smart meter grid project in South America. I noticed your ANSI portfolio and would love to connect. Best regards, Antonio`
+                             : `Dear Mr. ${lastName}, I'm managing sourcing for a major 12k ANSI smart meter grid project in South America. I noticed your ANSI portfolio and would love to connect. Best regards, Antonio`)
+                         : `Filtering fake buyers & sellers with 90% accuracy. I developed a forensic AI for international trade. I'd love to connect, Mr. ${lastName || 'Partner'}.`;
+
+                       const lnShortPt = isMeters
+                         ? (isNoName
+                             ? `Prezado Fornecedor, prazer. Gerencio o fornecimento para um projeto de 12k medidores inteligentes ANSI na América do Sul. Vi seu portfólio de medidores e gostaria de conectar.`
+                             : `Prezado Sr. ${lastName}, prazer. Gerencio o fornecimento para um projeto de 12k medidores inteligentes ANSI na América do Sul. Vi seu portfólio de medidores e gostaria de conectar.`)
+                         : `Dear Mr. ${lastName || 'Partner'}, uma honra. Desenvolvi uma IA que detecta fraudadores no comércio internacional com 90% de precisão. Gostaria de conectar.`;
+
+                       const lnShortLt = isMeters
+                         ? (isNoName
+                             ? `Gerb. Pardavimų Vadove, malonu susisiekti. Valdau 12 tūkst. ANSI išmaniųjų skaitiklių pirkimo paketą Pietų Amerikoje. Pastebėjau jūsų gaminamus ANSI skaitiklius ir norėčiau susisiekti.`
+                             : `Gerb. ${lastName}, malonu susisiekti. Valdau 12 tūkst. ANSI išmaniųjų skaitiklių pirkimo paketą Pietų Amerikoje. Pastebėjau jūsų gaminamus ANSI skaitiklius ir norėčiau susisiekti.`)
+                         : `Sveiki, malonu susisiekti. Sukūriau specializuotą medicinos DI asistentą „Marija AI“, kuris padeda odontologijos klinikoms pritraukti 15-20% daugiau pacientų ne darbo valandomis.`;
                        
-                       const lastName = activeDraft.nombre_contacto?.split(' ').pop() || 'kolega';
-                       
-                       const lnShortEs = `Dear Mr. ${lastName}, un honor. He desarrollado una IA que detecta estafadores de comercio exterior con 90% de precisión. Quisiera conectar.`;
-                       const lnShortEn = `Filtering fake buyers & sellers with 90% accuracy. I developed a forensic AI for international trade. I'd love to connect, Mr. ${lastName}.`;
-                       const lnShortPt = `Dear Mr. ${lastName}, uma honra. Desenvolvi uma IA que detecta fraudadores no comércio internacional com 90% de precisão. Gostaria de conectar.`;
-                       const lnShortLt = `Sveiki, malonu susisiekti. Sukūriau specializuotą medicinos DI asistentą „Marija AI“, kuris padeda odontologijos klinikoms pritraukti 15-20% daugiau pacientų ne darbo valandomis.`;
-                       
-                       const lnLongEs = `¿Es posible detectar a un estafador internacional con un 90% de precisión antes de firmar?
-He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados KEMA hasta supuestas garantías bancarias.
-Incluso hay proveedores reales falseando documentos para cumplir con requisitos de los cuales carecen.
-En esta industria, un comprador o vendedor auténtico es un tesoro. Pero basta una sola operación fallida para perderlo todo. La reputación y la confianza se evaporan en un segundo. Ante este terror, las empresas han reaccionado creando listas de requisitos casi abusivos, lo que ha generado una paranoia que termina bloqueando operaciones 100% legítimas. La desconfianza reina.
-El problema de la debida diligencia tradicional es la fragilidad humana. Un analista lee una línea a la vez y debe confiar en su memoria para recordar lo que leyó hace tres horas o varios días atrás. El ojo humano se cansa después de 40 páginas y se distrae inevitablemente con lo que ocurre a su alrededor en la oficina.
-Un detalle pasado por alto puede costar millones. Y lo que es peor: acarrea la pérdida de reputación, la destrucción de la confianza y el despido de trabajadores valiosos y honestos por culpa de errores que, humanamente, eran casi imposibles de detectar.
-La Inteligencia Artificial no opera así. La IA lee múltiples documentos en paralelo. Analiza matemáticas, leyes y química simultáneamente. No tiene viernes por la tarde, no se cansa, y cruza patrones a una velocidad inhumana sin distraerse jamás.
-¿Cómo desbloqueamos esta parálisis en la industria?
-Imagínate esto por un segundo:
-1. ¿Y si tuviéramos una tecnología que detecte a un Scammer en minutos y a un costo accesible?
-2. ¿Y si nos diera instrucciones precisas sobre qué exigirle a la contraparte para desarmar su trampa?
-3. ¿Y si cruzara datos de sanciones internacionales e imposibilidades técnicas geográficas en tiempo real?
-Lo tenemos, así nació SURE FORENSICS (Proyecto RMA).
-Contratar una Due Diligence tradicional puede costar decenas de miles de dólares y paralizar un negocio durante semanas. SURE hace el trabajo de un equipo de 20 analistas en exactamente 7 minutos.
-Además, para la adquisición de productos tecnológicos, complementamos este blindaje algorítmico con una auditoría profunda de derechos de propiedad intelectual y especialmente si existen patentes vigentes y en cuales países. Para ello, contamos con un equipo humano élite conformado por ex-directores de patentes e investigadores de reconocidas universidades europeas.
-Para comprobarlo, hace poco quise jugar a poner a prueba nuestra nueva arquitectura tecnológica. Empecé a lanzarle expedientes antiguos de mis propios archivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
-Lo que descubrí fue aterrador. La tasa de falsedades indetectables que habían pasado desapercibidas ante el ojo humano era inmensa.
-¿Es la Inteligencia Artificial infalible? Rotundamente NO. Pero al entregarte un 90% de certeza con evidencia objetivamente comprobable y matemática, derrumba cualquier defensa narrativa del transgresor.
-El pragmatismo es simple: Supongamos que recibes ofertas de 20 proveedores distintos para una adquisición crítica. En lugar de gastar semanas analizando a ciegas, pasas los expedientes por SURE FORENSIC. El sistema detecta anomalías y asigna un Nivel de Riesgo Crítico a 17 de ellos.
-Acabas de salvar tu capital (y los empleos de tu equipo). Ahora, tu personal puede dedicar su energía y talento exclusivamente a negociar con los 3 proveedores reales, apalancados en un reporte forense que les dice exactamente qué terreno pisan.
-La confianza en el comercio internacional estaba rota. Acabamos de repararla.
-👇 Si tu mesa de trading tiene una operación en curso, envíame un mensaje directo. Pasemos esos documentos por la bóveda de SURE antes de que firmes.`;
-                       const lnLongEn = `Is it possible to detect an international scammer with 90% precision before signing?
+                       const lnLongEn = isMeters
+                         ? `Dear ${isNoName ? 'LATAM Sales Manager' : activeDraft.nombre_contacto},
+I hope this email finds you well.
+
+Our company is currently managing the technical integration and sourcing package for a bidding consortium preparing a turnkey proposal for a major smart grid expansion project for a leading utility in South America, encompassing the supply of approx. 12,000 advanced ANSI smart electricity meters with integrated 4G LTE telemetry.
+
+We are conducting a preliminary sourcing process to select a reliable technology partner/manufacturer to supply the meters and provide technical backing for our bid. We are looking to establish an exclusive partnership for this specific opportunity with a manufacturer that can comply with the following critical requirements:
+
+1. ANSI Standard Portfolio: Full compliance with ANSI C12.1, C12.10, C12.18, and C12.19. We require Form 2S (with disconnect), Form 3S, Form 4S, Form 9S, Form 12S (with disconnect), and Form 16S.
+2. Telecommunications: Integrated 4G LTE communication module supporting bands compatible with South American carriers (including B2, B4, B8, and B28) concurrently, with fallback to 3G/2G. Fully internal antenna with gain >= +3 dBi and efficiency > 60%.
+3. Interoperability: Willingness to support and certify compatibility with major HES platforms (including Trilliant and Honeywell NetSense).
+4. Physical Design: 3.6 V Lithium battery for RTC, which must be fully accessible and replaceable from an external socket/compartment without breaking the main metrological enclosure seals.
+5. Commercial & Logistics: 60-month factory warranty and standard industrial palletization.
+
+Please note that to protect our bidding consortium's position, the exact name of the utility, country coordinates, and detailed bill of quantities will only be disclosed under a mutual Non-Disclosure and Non-Circumvention Agreement (NDA/NCND).
+
+Please let us know if your company has ANSI C12 certified models that meet these requirements and if you are interested in discussing an exclusive partnership and price quotation under NDA.
+
+We look forward to your prompt response.
+
+Best regards,
+
+Antonio Baronas
+Sourcing Integration Team | PROCDI
+Ph: +37068941110
+e-mail: antonio@procdi.com
+
+Company code: 307515454
+Partizanų g. 61-806, LT-49282
+Kaunas, Lithuania`
+                         : `Is it possible to detect an international scammer with 90% precision before signing?
 I have worked for years in international trade and dealt with hundreds of fake sellers and buyers. Today, scammers are not novices. They are extremely convincing, know the technical jargon perfectly, and present masterfully forged documents: from fake KEMA certificates to supposed bank guarantees.
 There are even real suppliers faking documents to meet requirements they lack.
 In this industry, an authentic buyer or seller is a treasure. But a single failed operation is enough to lose it all. Reputation and trust evaporate in a second. Faced with this terror, companies have reacted by creating lists of almost abusive requirements, generating a paranoia that ends up blocking 100% legitimate operations. Distrust reigns.
@@ -915,7 +1062,35 @@ The pragmatism is simple: Suppose you receive offers from 20 different suppliers
 You just saved your capital (and your team's jobs). Now, your staff can dedicate their energy and talent exclusively to negotiating with the 3 real suppliers, leveraged on a forensic report that tells them exactly where they stand.
 Trust in international trade was broken. We just repaired it.
 👇 If your trading desk has an ongoing operation, send me a direct message. Let's pass those documents through the SURE vault before you sign.`;
-                       const lnLongPt = `É possível detectar um fraudador internacional com 90% de precisão antes de assinar?
+
+                       const lnLongEs = isMeters
+                         ? lnLongEn
+                         : `¿Es posible detectar a un estafador internacional con un 90% de precisión antes de firmar?
+He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados KEMA hasta supuestas garantías bancarias.
+Incluso hay proveedores reales falseando documentos para cumplir con requisitos de los cuales carecen.
+En esta industria, un comprador o vendedor auténtico es un tesoro. Pero basta una sola operación fallida para perderlo todo. La reputación y la confianza se evaporan en un segundo. Ante este terror, las empresas han reaccionado creando listas de requisitos casi abusivos, lo que ha generado una paranoia que termina bloqueando operaciones 100% legítimas. La desconfianza reina.
+El problema de la debida diligencia tradicional es la fragilidad humana. Un analista lee una línea a la vez y debe confiar en su memoria para recordar lo que leyó hace tres horas o varios días atrás. El ojo humano se cansa después de 40 páginas y se distrae inevitablemente con lo que ocurre a su alrededor en la oficina.
+Un detalle pasado por alto puede costar millones. Y lo que es peor: acarrea la pérdida de reputación, la destrucción de la confianza y el despido de trabajadores valiosos y honestos por culpa de errores que, humanamente, eran casi imposibles de detectar.
+La Inteligencia Artificial no opera así. La IA lee múltiples documentos en paralelo. Analiza matemáticas, leyes y química simultáneamente. No tiene viernes por la tarde, no se cansa, y cruza patrones a una velocidad inhumana sin distraerse jamás.
+¿Cómo desbloqueamos esta parálisis en la industria?
+Imagínate esto por un segundo:
+1. ¿Y si tuviéramos una tecnología que detecte a un Scammer en minutos y a un costo accesible?
+2. ¿Y si nos diera instrucciones precisas sobre qué exigirle a la contraparte para desarmar su trampa?
+3. ¿Y si cruzara datos de sanciones internacionales e imposibilidades técnicas geográficas en tiempo real?
+Lo tenemos, así nació SURE FORENSICS (Proyecto RMA).
+Contratar una Due Diligence tradicional puede costar decenas de miles de dólares y paralizar un negocio durante semanas. SURE hace el trabajo de un equipo de 20 analistas en exactamente 7 minutos.
+Además, para la adquisición de productos tecnológicos, complementamos este blindaje algorítmico con una auditoría profunda de derechos de propiedad intelectual y especialmente si existen patentes vigentes y en cuales países. Para ello, contamos con un equipo humano élite conformado por ex-directores de patentes e investigadores de reconocidas universidades europeas.
+Para comprobarlo, hace poco quise jugar a poner a prueba nuestra nueva arquitectura tecnológica. Empecé a lanzarle expedientes antiguos de mis propios archivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
+Lo que descubrí fue aterrador. La tasa de falsedades indetectables que habían pasado desapercibidas ante el ojo humano era inmensa.
+¿Es la Inteligencia Artificial infalible? Rotundamente NO. Pero al entregarte un 90% de certeza con evidencia objetivamente comprobable y matemática, derrumba cualquier defensa narrativa del transgresor.
+El pragmatismo es simple: Supongamos que recibes ofertas de 20 proveedores distintos para una adquisición crítica. En lugar de gastar semanas analizando a ciegas, pasas los expedientes por SURE FORENSIC. El sistema detecta anomalías y asigna un Nivel de Risco Crítico a 17 de ellos.
+Acabas de salvar tu capital (y los empleos de tu equipo). Ahora, tu personal puede dedicar su energía y talento exclusivamente a negociar con los 3 proveedores reales, apalancados en un reporte forense que les dice exactamente qué terreno pisan.
+La confianza en el comercio internacional estaba rota. Acabamos de repararla.
+👇 Si tu mesa de trading tiene una operación en curso, envíame un mensaje directo. Pasemos esos documentos por la bóveda de SURE antes de que firmes.`;
+
+                       const lnLongPt = isMeters
+                         ? lnLongEn
+                         : `É possível detectar um fraudador internacional com 90% de precisão antes de assinar?
 Trabalho há anos no comércio exterior e lidei com centenas de falsos vendedores e compradores. Hoje em dia, os fraudadores não são novatos. São extremamente convincentes, conhecem o jargão técnico com perfeição e apresentam documentos magistralmente falsificados: de falsos certificados KEMA a supostas garantias bancárias.
 Existem até fornecedores reais falsificando documentos para cumprir requisitos que não possuem.
 Nesta indústria, um comprador ou vendedor autêntico é um tesouro. Mas basta uma única operação falha para perder tudo. A reputação e a confiança evaporam num segundo. Diante desse terror, as empresas reagiram criando listas de requisitos quase abusivos, gerando uma paranoia que acaba bloqueando operações 100% legítimas. A desconfiança reina.
@@ -933,11 +1108,14 @@ Além disso, para a aquisição de produtos tecnológicos, complementamos esta b
 Para comprovar, recentemente quis brincar de testar nossa nova arquitetura tecnológica. Comecei a enviar arquivos antigos dos meus próprios arquivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
 O que descobri foi assustador. A taxa de falsidades indetectáveis que passaram despercebidas pelo olho humano era imensa.
 A Inteligência Artificial é infalível? Rotundamente NÃO. Mas ao entregar 90% de certeza com evidências objetivamente comprováveis e matemáticas, derruba qualquer defesa narrativa do transgressor.
-O pragmatismo é simples: Suponha que você receba ofertas de 20 fornecedores diferentes para uma aquisição crítica. Em vez de passar semanas analisando às cegas, você passa os arquivos pelo SURE FORENSIC. O sistema detecta anomalias e atribui um Nível de Risco Crítico a 17 deles.
+O pragmatismo é simples: Suponha que você receba ofertas de 20 fornecedores diferentes para uma aquisição crítica. Em vez de passar semanas analisando às cegas, você passa os arquivos pelo SURE FORENSIC. O sistema detecta anomalias e atribui um Nivel de Risco Crítico a 17 de eles.
 Você acabou de salvar seu capital (e os empregos de sua equipe). Agora, sua equipe pode dedicar energia e talento exclusivamente a negociar com os 3 fornecedores reais, alavancados em um relatório forense que diz exatamente onde estão pisando.
 A confiança no comércio internacional estava quebrada. Acabamos de consertá-la.
 👇 Se sua mesa de trading tem uma operação em andamento, envie-me uma mensagem direta. Vamos passar esses documentos pelo cofre do SURE antes que você assine.`;
-                       const lnLongLt = `Laba diena, gerb. ${lastName},
+
+                       const lnLongLt = isMeters
+                          ? lnLongEn
+                          : `Laba diena, gerb. ${lastName},
 
 Kreipiuosi, nes pastebėjau Jūsų sėkmingą veiklą odontologijos srityje Kaune.
 

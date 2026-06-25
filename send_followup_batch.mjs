@@ -60,13 +60,14 @@ async function runFollowupBatch() {
   console.log(`📋 Config: Max ${BATCH_LIMIT} follow-ups | Interval: ${DELAY_MINUTES} minutes`);
   console.log("=========================================================================\n");
 
-  const CLINIC_PROJECT_ID = 'f588b680-816b-4bfe-99dd-18e81fbf2752'; // Kaunas dental project
-  
-  // 1. Fetch leads that have already received Email 1 (status = 'email_1_enviado') and haven't replied
+  // 1. Fetch leads that have already received Email 1 (status = 'email_1_enviado') and haven't replied for a specific project
+  const projectId = process.argv[2] || 'ac1284eb-9763-48d7-9fdc-7c4d4571fd88';
+  console.log(`🎯 Filtering follow-ups for Project ID: ${projectId}\n`);
+
   const { data: leads, error } = await supabase
     .from('leads_campaign')
     .select('*')
-    .eq('project_id', CLINIC_PROJECT_ID)
+    .eq('project_id', projectId)
     .eq('status', 'email_1_enviado')
     .eq('has_replied', false)
     .order('created_at', { ascending: true }) // Oldest first
@@ -103,12 +104,48 @@ async function runFollowupBatch() {
 
       console.log(`[${leadNum}/${leads.length}] Sending follow-up to: \x1b[33m${cleanEmail}\x1b[0m (${lead.empresa || 'Unnamed Clinic'})`);
       
-      // Fixed subject with ONLY the clinic name changing
-      const subject = `Kaip užkirsti kelią praleistoms užklausoms klinikoje „${lead.empresa}“? (Marija DI demo)`;
+      // Fetch project context to determine fromEmail, bccEmail and project name
+      let projectName = '';
+      if (lead.project_id) {
+        const { data: project } = await supabase.from('projects').select('name').eq('id', lead.project_id).single();
+        if (project) projectName = project.name;
+      }
+
+      const nameLower = (projectName || '').toLowerCase();
       
-      // Body content in Lithuanian using formal "Jūs" and greeting the specific contact person if available
-      const contactGreeting = lead.nombre_contacto ? `gerb. ${lead.nombre_contacto}` : 'gerb. vadove';
-      const body = `Laba diena, ${contactGreeting},
+      // Check if body or project belongs to PROCDI / Medidores / Clinics
+      const isProcdiProject = 
+        nameLower.includes('clinica') || 
+        nameLower.includes('clínica') ||
+        nameLower.includes('medical') || 
+        nameLower.includes('kaun') || 
+        nameLower.includes('vilniu') ||
+        nameLower.includes('marija') ||
+        nameLower.includes('procdi') ||
+        nameLower.includes('odontolog') ||
+        nameLower.includes('dant') ||
+        nameLower.includes('lietuva') ||
+        nameLower.includes('medidor') ||
+        nameLower.includes('meter') ||
+        nameLower.includes('cnel') ||
+        nameLower.includes('ecuador') ||
+        nameLower.includes('ansi');
+
+      let fromEmail = 'Alfredo - SURE Forensics <alfredo@sure-forensic.com>';
+      let bccEmail = 'alfredo@sure-forensic.com';
+
+      if (isProcdiProject) {
+        fromEmail = 'Antonio Baronas - MB PROCDI <antonio@procdi.com>';
+        bccEmail = 'antonio@procdi.com';
+      }
+
+      // Determine subject and body content (use database-stored email_2 if available, fallback to Lithuanian)
+      const subject = lead.email_2_subject || `Kaip užkirsti kelią praleistoms užklausoms klinikoje „${lead.empresa}“? (Marija DI demo)`;
+      
+      let body = lead.email_2_content;
+      if (!body) {
+        const contactGreeting = lead.nombre_contacto ? `gerb. ${lead.nombre_contacto}` : 'gerb. vadove';
+        body = `Laba diena, ${contactGreeting},
 
 Neseniai siuntėme Jums pristatymą apie „Marija DI“ – autonominę asistentę, sukurtą specialiai Lietuvos klinikoms.
 
@@ -131,17 +168,20 @@ Su pagarba,
 Antonio Baronas
 Direktorius, MB PROCDI
 Tel. +37068941110 | antonio@procdi.com`;
-
-      const fromEmail = 'Antonio Baronas - MB PROCDI <antonio@procdi.com>';
-      const bccEmail = 'antonio@procdi.com';
+      }
 
       const sendPayload = {
         from: fromEmail,
         to: cleanEmail,
         subject: subject,
-        text: body,
         bcc: bccEmail
       };
+
+      if (body.includes('<html') || body.includes('<!DOCTYPE html>')) {
+        sendPayload.html = body;
+      } else {
+        sendPayload.text = body;
+      }
 
       // Send the email via Resend
       const { error: resendError } = await resend.emails.send(sendPayload);

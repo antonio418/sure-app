@@ -143,12 +143,25 @@ async function handleDispatch(req: NextRequest) {
       return null;
     };
 
+    // Fetch active project IDs (status = 'active')
+    const { data: activeProjects } = await supabaseAdmin
+      .from('projects')
+      .select('id')
+      .eq('status', 'active');
+    
+    const activeProjectIds = (activeProjects || []).map(p => p.id);
+
+    if (activeProjectIds.length === 0) {
+      return NextResponse.json({ success: true, message: 'No hay campañas activas configuradas para envíos automáticos (todos los proyectos están pausados).', dispatched: 0 });
+    }
+
     // 1. Check for leads ready for Email 1
     const { data: leads1 } = await supabaseAdmin
       .from('leads_campaign')
       .select('*')
       .eq('status', 'APPROVED')
       .eq('has_replied', false)
+      .in('project_id', activeProjectIds)
       .limit(20);
 
     if (leads1 && leads1.length > 0) {
@@ -169,6 +182,7 @@ async function handleDispatch(req: NextRequest) {
         .eq('status', 'email_1_enviado')
         .eq('has_replied', false)
         .eq('drip_step', 1)
+        .in('project_id', activeProjectIds)
         .order('email_1_enviado_at', { ascending: true }) // Oldest first
         .limit(50);
 
@@ -193,6 +207,7 @@ async function handleDispatch(req: NextRequest) {
         .eq('status', 'email_2_enviado')
         .eq('has_replied', false)
         .eq('drip_step', 2)
+        .in('project_id', activeProjectIds)
         .order('email_2_enviado_at', { ascending: true }) // Oldest first
         .limit(50);
 

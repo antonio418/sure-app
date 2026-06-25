@@ -61,12 +61,14 @@ async function runDripBatch() {
   console.log(`📋 Configuración: Máximo ${BATCH_LIMIT} correos | Intervalo: ${DELAY_MINUTES} minutos`);
   console.log("=========================================================================\n");
 
-  // 1. Obtener leads aprobados del proyecto específico de Clínicas de Kaunas ('Clinicas od. Kauna')
-  const CLINIC_PROJECT_ID = 'f588b680-816b-4bfe-99dd-18e81fbf2752';
+  // 1. Obtener el ID del proyecto desde los argumentos o usar por defecto el de Medidores
+  const projectId = process.argv[2] || 'ac1284eb-9763-48d7-9fdc-7c4d4571fd88';
+  console.log(`🎯 Filtrando envíos para el Proyecto ID: ${projectId}\n`);
+
   const { data: leads, error } = await supabase
     .from('leads_campaign')
     .select('*')
-    .eq('project_id', CLINIC_PROJECT_ID)
+    .eq('project_id', projectId)
     .eq('status', 'APPROVED')
     .eq('has_replied', false)
     .order('created_at', { ascending: true }) // Los más antiguos primero
@@ -134,6 +136,11 @@ async function runDripBatch() {
         nameLower.includes('odontolog') ||
         nameLower.includes('dant') ||
         nameLower.includes('lietuva') ||
+        nameLower.includes('medidor') ||
+        nameLower.includes('meter') ||
+        nameLower.includes('cnel') ||
+        nameLower.includes('ecuador') ||
+        nameLower.includes('ansi') ||
         bodyLower.includes('procdi') ||
         bodyLower.includes('antonio@procdi.com') ||
         bodyLower.includes('marija');
