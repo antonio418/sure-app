@@ -69,7 +69,7 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 ## 4. Plazos de Conciliación y Vigencia (Análisis de Tiempos)
 
 > [!IMPORTANT]
-> **Racional de Plazos:** Los límites de tiempo y carga están diseñados para proteger el modelo de negocio transaccional de SURE. Sin un límite en el Caso Tipo 1, un cliente podría usar una sola transacción de USD 50 para auditar secuencialmente a múltiples proveedores distintos a lo largo de un mes.
+> **Política de Retención y Purgado de Datos:** Por motivos de seguridad de la información, confidencialidad estricta y protección de datos comerciales, el Caso Tipo 1 (Auditoría Transaccional) utiliza memoria efímera. La sesión y el acceso a los archivos auditados se mantendrán activos únicamente durante **1 minuto** después de haberse generado y descargado el *Informe de Riesgo Transaccional*, procediendo inmediatamente al borrado automático e irreversible en nuestros servidores.
 
 ### 4.1 Ejecución Única y Resiliencia ante Fallas Técnicas (Caso Tipo 1)
 *   **Modelo de Ejecución Única (One-Shot):** El Caso Tipo 1 es transaccional y directo. No dispone de una ventana de conciliación interactiva ni admite la carga de documentos de subsanación (Cargas Delta). El crédito de transacción (token) se consume de manera definitiva e irreversible al momento de procesarse el caso y emitirse el *Informe de Riesgo Transaccional*.
@@ -104,7 +104,7 @@ Para evitar que un cliente evada la suscripción individual por proyecto y utili
 2.  **Carga de Documentos:** El usuario accede con su correo, visualiza su "Token disponible", y procede a cargar el lote de documentos base (contratos, fichas técnicas o cartas de crédito). 
     *   *Nota de Resiliencia:* Si ocurre una desconexión o fallo eléctrico antes del siguiente paso, el usuario regresa desde el área de pago ingresando su correo para continuar con el mismo token disponible.
 3.  **Análisis y Procesamiento:** Al hacer clic en procesar, los agentes autónomos de SURE RMA realizan el cruce de información en un lapso estimado de 7 minutos.
-4.  **Entrega y Purga:** La plataforma genera y muestra el *Informe de Riesgo Transaccional Definitivo* con firma digital SHA-256. En ese instante, el token de transacción se consume e inactiva de manera irreversible, y se **purgan permanentemente** todos los documentos y registros cargados de la memoria del servidor (Memoria Efímera).
+4.  **Entrega y Purga:** La plataforma genera y muestra el *Informe de Riesgo Transaccional Definitivo* con firma digital SHA-256. En ese instante, el token de transacción se consume e inactiva de manera irreversible. El usuario dispone de **1 minuto** para descargar o guardar el reporte antes de que el sistema **purgue permanentemente** todos los documentos y registros del servidor por motivos de privacidad (Memoria Efímera).
 
 ### 5.2 Workflow del Caso Tipo 2: Workspace de Proyecto (Gestión Continua)
 
