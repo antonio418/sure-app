@@ -155,3 +155,43 @@ Dado que tus contactos actuales **ya tienen el token VIP asignado** de tu mensaj
 2. **Envía el token como código (` `[TOKEN_ID]` `)**: En WhatsApp, rodear el texto con comillas simples invertidas (backticks) hace que se renderice como código monospace. En dispositivos móviles, esto permite al usuario copiar el token con **un solo toque** sobre la pantalla, reduciendo aún más la fricción de uso.
 3. **Seguimiento informal a los 3 días**: Si no usaron el token, no les envíes otro copy largo. Escríbeles algo súper corto: 
    *"Hey [Nombre], did you get a chance to run that test document? Let me know if you need any help!"*
+
+---
+
+## 🌟 Modelo Oficial del Usuario (SURE RMA - Caso Perú/Desarrolladores)
+*Este es el modelo de mensaje de referencia redactado por el usuario para empresas de infraestructura, construcción o servicios en Perú, detallando adecuadamente el alcance amplio de los agentes autónomos:*
+
+```text
+Hola Josué, 
+
+Buenos días, un gusto de saludarte, espero te encuentres bien.
+
+Te escribe Antonio Baronas, tu contacto me lo facilitó amablemente el Ingeniero Dany Huaman, con quien hemos completado varios proyectos hace ya varios años.
+
+En el desarrollo de proyectos de infraestructura, construcción o servicio, la fatiga de revisar contratos extensos de Clientes, proveedores, Commodities, suele generar cuellos de botella o riesgos de fraude imperceptibles. 
+
+Desarrollamos una IA Forense que audita contratos, cartas de crédito, fichas técnicas de Commodities, entre centenares de otras opciones, en solo 7 minutos, con un costo marginal (100% SaaS, sin licencias anuales ni costos de TI).
+
+La aplicación cuenta con 3 agentes autónomos:
+
+Roberto: Analiza riesgo legal,  sanciones internacionales, licencias, propiedad intelectual, etc.
+Moisés: Detecta cláusulas predatorias, valida bancos emisores de LC´s, etc.
+Alcides: Audita la parte técnica, calidad, reportes técnicos, datos de seguridad, especificaciones del material del material, detecta información incoherente o adulterada, etc.
+
+Esta aplicación tiene dos modalidades: 
+1.-Compras simples donde quieres evaluar al proveedor (una Due Diligence, entre otros análisis).
+2.-Administración de información de proyectos
+
+En el modo 2, por darte un ejemplos, 
+
+1.-Se cargan los pliegos de un proyecto, el contrato firmado, minutas de arranque, etc como información base, y luego se van cargando los diferentes documentos que se van generando en el desarrollo del proyecto y la aplicación irá comentando las diferencias, discrepancias, las banderas rojas y otros detalles que “se encuentre en el camino”.
+2.- Tienes un contrato extenso y recibes de vuelta un documento modificado: colocas el documento original como documento base y cargas el documento modificado para comparar, igualmente hará las mismas acciones.
+3.- NO hay límite para la variedad de revisiones que se pueden hacer.
+
+Espero poder contar un espacio tiempo para conversar y aclararte cualquier duda que puedas tener
+
+Un saludo, 
+Antonio Baronas 
+MB PROCDI
+Proyecto SURE RMA (Risk Management Assessment) 
+```
