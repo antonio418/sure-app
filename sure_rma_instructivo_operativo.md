@@ -43,9 +43,9 @@ Diseñado para precalificar o evaluar de forma rápida a un proveedor o contrapa
 
 ### 2.2 Caso Tipo 2: Workspace de Proyecto (Administración y Conciliación de Proyectos)
 Diseñado para la administración continuada de información documental durante el desarrollo de obras de infraestructura, construcción o contratos de servicios.
-*   **Alcance:** Multidocumental y colaborativo. Permite cargar una **Información Base (Baseline)** del proyecto (pliegos de licitación, contrato inicial firmado, minutas de arranque, etc.) y posteriormente ir contrastando de forma continua los documentos del día a día (valuaciones mensuales de obra, diarios, reportes de calidad, adendas o versiones de contrato modificadas).
-*   **Retención de Datos:** **Memoria Permanente**. Almacenamiento seguro en una base de datos vectorial privada y dedicada para el proyecto, permitiendo consultas contextuales históricas a los agentes.
-*   **Gobernanza:** Workspace multi-usuario ilimitado con paneles compartidos, índices de avance y trazabilidad de acciones (*Audit Trail*).
+*   **Alcance:** Multi-caso y colaborativo. Permite cargar una **Información Base (Baseline)** del proyecto (pliegos de licitación, contrato inicial firmado, especificaciones técnicas, etc.) y gestionar de forma independiente múltiples Casos de Conciliación a lo largo de la vida del proyecto (ej. auditoría de ofertas de subcontratistas, revisión de especificaciones, variaciones de diseño o diarios de obra).
+*   **Retención de Datos:** **Memoria Permanente (Reporte Residente)**. Toda la información analizada, los borradores, los logs y los reportes finales emitidos quedan almacenados de forma permanente y segura en la base de datos del Workspace del proyecto para auditoría histórica, manteniéndose residentes para consulta de los agentes.
+*   **Gobernanza:** Panel de control de Casos interactivo que lista cada caso con su código, descripción, usuario ejecutor, logs de auditoría y estatus (Pendiente / Finalizado). Permite abrir y dejar Casos inconclusos para atender otras prioridades, reanudándolos cuando se disponga de la información.
 
 ---
 
@@ -56,11 +56,11 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 | Característica / Parámetro | Caso Tipo 1: Auditoría Transaccional | Caso Tipo 2: Workspace de Proyecto |
 | :--- | :--- | :--- |
 | **Enfoque de Negocio** | Due Diligence / Compra Única | Gestión de Proyectos / Conciliación Continua |
-| **Esquema de Memoria** | Efímera (Eliminada tras entrega del informe) | Permanente (Vector Database Privada dedicada) |
+| **Esquema de Memoria** | Efímera (Eliminada tras entrega del informe) | Permanente (Reporte Residente en Vector DB del proyecto) |
 | **Tarifa Base** | Pago por Uso (Pay-as-you-go) | Suscripción Mensual Fija (Planes Tier 3 a Tier 6) |
 | **Costo por Caso / Hito** | **USD 50.00** por Caso único (baja a USD 47.50 por volumen) | **Sin costo por uso** (Incluido en la tarifa mensual del Workspace) |
 | **Ventana de Conciliación** | **Sin ventana interactiva** (Ejecución única / One-Shot) | **Duración del Proyecto** (Mientras la suscripción esté activa) |
-| **Cargas de Subsanación** | **Sin Cargas Delta** (Permite reanudación por falla técnica antes de emitir el reporte) | **1 Carga Inicial + Cargas Delta ilimitadas** diarias |
+| **Cargas de Subsanación** | **Sin Cargas Delta** (Permite reanudación por falla técnica antes de emitir el reporte) | **Carga Inicial + Cargas Delta ilimitadas** por Caso |
 | **Usuarios Autorizados** | 1 a 5 usuarios (según plan básico) | **Ilimitados** (Acceso compartido al Workspace del proyecto) |
 | **Google Search Grounding** | Estándar (Verificación de entidades/sanciones) | Deep Grounding (Verificación exhaustiva en tiempo real) |
 
@@ -79,14 +79,15 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
     3.  **Identificación y Validación:** Al ingresar su correo electrónico, el sistema verificará el estado del pago y mostrará la información de **"Token disponible"**.
     4.  **Procesamiento:** El usuario podrá volver a cargar los documentos y procesar el caso para obtener el reporte final, consumiendo e inactivando el token en ese instante.
 
-### 4.2 Ventana de Proyecto Activo para Caso Tipo 2 (Proyectos)
-*   **¿Por qué aplica?** El desarrollo de un proyecto de infraestructura es continuo y toma meses o años. Los hitos (como las valuaciones de obra mensuales) se suceden de forma progresiva. 
-*   La Ventana de Conciliación permanece **abierta e interactiva de forma permanente** mientras la suscripción al Workspace de Proyecto esté activa. No se imponen límites de días ni de cantidad de Cargas Delta rápidas para comparar borradores en el día a día. El proceso de **Cerrar y Emitir un Informe de Riesgo Transaccional Definitivo** (p. ej. al finalizar la conciliación mensual de un hito) es un evento puramente operativo de bloqueo y archivo documental que no genera ningún cargo adicional ni consumo de créditos, estando totalmente cubierto por la tarifa plana de la suscripción.
+### 4.2 Ventana de Proyecto Activo y Gestión Flexible (Caso Tipo 2)
+*   **¿Por qué aplica?** La gestión de una obra de infraestructura requiere flexibilidad. Los casos y auditorías se abren bajo demanda (ej. evaluar una propuesta de subcontratista o certificar un lote de materiales).
+*   **Operación Flexible de Casos:** La Ventana de Conciliación permanece abierta de manera indefinida mientras la suscripción esté activa. El usuario puede abrir múltiples Casos en paralelo, dejar un Caso inconcluso (marcado como "Pendiente") para iniciar otro prioritario, y reanudarlo posteriormente cuando cuente con la información requerida.
+*   **Reporte Residente:** Al terminar la conciliación de un Caso, el usuario procesa su cierre. Esto genera un *Informe de Riesgo Transaccional Definitivo del Caso* que se archiva y queda residente de manera permanente en la base de datos del proyecto para fines de auditoría, sin costo adicional ni consumo de créditos.
 
-### 4.3 Control de Correspondencia y Protección de Evasión en Proyectos (Caso Tipo 2)
-Dado que el Workspace de Proyecto (Caso Tipo 2) opera bajo una tarifa plana mensual con Cargas Delta ilimitadas, la plataforma aplica validaciones automáticas de coherencia con el Baseline para evitar abusos:
-*   **Consistencia del Baseline:** Toda Carga Delta incremental debe referirse estrictamente al mismo alcance físico, contraparte, número de contrato o hito declarado en la Carga Inicial (Baseline).
-*   **Bloqueo por Cambio de Alcance:** Si el motor de IA de SURE detecta que el lote documental corresponde a un proyecto u obra ajena a la configurada en el Workspace, la carga se bloqueará automáticamente. Esto evita la evasión de la suscripción de múltiples proyectos bajo una misma cuenta de Workspace.
+### 4.3 Protección de Suscripción mediante Bloqueo de Identidad del Proyecto (Baseline Lock)
+Para evitar que un cliente evada la suscripción individual por proyecto y utilice un solo Workspace para múltiples obras diferentes (ej. desactivando o inhabilitando documentos del Proyecto 1 para procesar el Proyecto 2):
+*   **Baseline Lock (Bloqueo de Metadatos):** Durante la inicialización del Workspace, el cliente debe definir los metadatos de identidad del proyecto (Nombre oficial de la obra, Número de Contrato Principal, Nombre del Comitente y Ubicación). Estos datos son **inmutables** y de solo lectura.
+*   **Filtro Algorítmico de Consistencia:** Toda Carga Inicial o Delta en cualquier Caso procesado dentro de ese Workspace se valida algorítmicamente contra este Baseline Lock. Si el motor de IA de SURE detecta que los documentos subidos pertenecen a un contrato, obra o comitente diferente, la carga se bloquea automáticamente y el sistema exige la apertura de un nuevo Workspace con su respectiva suscripción.
 
 ---
 
@@ -108,18 +109,16 @@ Dado que el Workspace de Proyecto (Caso Tipo 2) opera bajo una tarifa plana mens
 ### 5.2 Workflow del Caso Tipo 2: Workspace de Proyecto (Gestión Continua)
 
 ```
-[Creación del Workspace del Proyecto (Suscripción)] ➔ [Carga del Baseline (Pliegos, Contrato original)]
-        ➔ [Cargas Incrementales y Comparativas (Día a día, ilimitadas)]
-        ➔ [Análisis Acumulativo de Desviaciones e Inconsistencias]
-        ➔ [Cierre de Hito Mensual ➔ Emisión de Informe Definitivo (Sin costo extra)]
+[Creación del Workspace / Configuración de Identidad] ➔ [Carga del Baseline Lock (Pliegos, Contrato)]
+        ➔ [Gestión Multicaso: Apertura, Pausa o Cierre de Casos]
+        ➔ [Generación de Informes por Caso (Reporte Residente)]
+        ➔ [Reporte Analítico Mensual / Consolidación de Estado del Proyecto]
 ```
 
-1.  **Establecimiento del Baseline:** Se carga el contrato original firmado, los pliegos de condiciones y las especificaciones técnicas base del proyecto. Esta información se vectoriza de forma permanente en la base de datos privada del Workspace.
-2.  **Cargas Comparativas del Día a Día:** El equipo del proyecto carga borradores modificados, minutas de obra, o reportes semanales. El motor IA de SURE contrasta de manera acumulativa y contextual estos archivos contra la información base, reportando:
-    *   Desviaciones en los materiales o especificaciones técnicas (ej. cambios no aprobados de marca en cables o zapatas).
-    *   Asimetrías contractuales introducidas en borradores modificados (cambios sutiles en penalizaciones o plazos).
-    *   Diferencias de precios o volúmenes no aprobados.
-3.  **Conciliación y Emisión de Hitos:** Al cierre del mes o del hito, el supervisor del proyecto verifica que todas las alertas críticas estén resueltas en el dashboard y procesa el cierre del hito. Esto genera el *Informe de Riesgo Transaccional Definitivo del Hito* firmado digitalmente, bloqueando el expediente para su archivo histórico de auditoría sin ningún costo de transacción adicional ni consumo de créditos.
+1.  **Establecimiento de Identidad y Baseline:** Se configuran los datos fijos del proyecto y se carga el contrato principal, pliegos y especificaciones base. Esta información se bloquea (*Baseline Lock*) y se vectoriza de forma permanente en la base de datos del Workspace.
+2.  **Gestión de Casos Independientes:** El equipo abre Casos específicos bajo demanda (ej. "Revisión de Oferta del Subcontratista A", "Ensayo de compactación de zapatas"). Cada Caso se analiza y puede dejarse pendiente, retomarse o cerrarse de forma del proyecto. El motor de SURE contrasta los documentos del Caso contra el Baseline inmutable.
+3.  **Cierre del Caso y Reporte Residente:** Al verificar la conformidad de las alertas, el usuario finaliza el caso. El sistema genera el *Informe de Riesgo Transaccional Definitivo del Caso* firmado con la huella digital SHA-256, guardándose en la base de datos del Workspace de forma permanente (residente) sin costo transaccional.
+4.  **Generación de Reporte Analítico Mensual:** Al no operar 100% en línea de forma intrusiva, la plataforma permite al supervisor generar reportes consolidados en cualquier momento (ej. mensualmente), mostrando las estadísticas de Casos resueltos, Casos pendientes, alertas activas e históricos del proyecto.
 
 ---
 
@@ -137,9 +136,16 @@ SURE RMA segmenta las alertas detectadas de forma estructurada según la severid
 
 En proyectos medianos y grandes donde colaboran contratistas, ingenieros de control, asesores legales y financieros, SURE RMA garantiza la gobernanza mediante:
 
-*   **Buscador Global de Reportes:** Permite acceder inmediatamente a la carpeta del caso usando el código del hito o reporte borrador para aportar evidencias correctivas.
-*   **Audit Trail Transparente:** Registro inmutable de cada acción realizada (ej. *"Carlos Salazar cargó el archivo de pruebas de compactación de la zapata 4 y resolvió la alerta amarilla #12"*).
-*   **Dashboard de Índices de Control:** Actualización automática y visual en tiempo real de los seis índices de control tras cada carga incremental:
+*   **Panel de Casos del Workspace:** Un tablero central que lista de forma clara y organizada cada uno de los casos procesados o en curso en el proyecto. La tabla de control incluye:
+    *   `Número de Referencia` del Caso (ej. `SURE-CASE-2026-104`).
+    *   `Descripción / Asunto` (ej. *"Revisión de planos de cimentación - Adenda 2"*).
+    *   `Usuario` que inició o actualizó el caso.
+    *   `Estatus` del Caso (Pendiente / Finalizado).
+    *   `Fecha de Creación / Actualización`.
+    *   `Logs de Auditoría y Detalles` (Enlace al historial de archivos y alertas).
+*   **Buscador Global de Reportes:** Permite acceder inmediatamente a la carpeta de cualquier Caso usando su código de referencia para revisar el borrador o ingresar información.
+*   **Audit Trail Transparente:** Registro inmutable de cada acción realizada en la plataforma (ej. *"Carlos Salazar finalizó el Caso SURE-CASE-2026-104 y emitió el reporte definitivo"*).
+*   **Dashboard de Índices de Control:** Actualización automática y visual de los seis índices de control consolidados del proyecto en función de los casos finalizados:
     *   **IDR:** Índice de Desviación de Requisitos.
     *   **ITCS:** Índice de Trazabilidad y Cumplimiento de Suministros.
     *   **ICCR:** Índice de Cumplimiento Contractual y Regulatorio.
