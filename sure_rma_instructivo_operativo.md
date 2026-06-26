@@ -30,7 +30,7 @@ graph TD
     A["SURE RMA"] --> B["Caso Tipo 1: Auditoría Transaccional (Due Diligence)"]
     A --> C["Caso Tipo 2: Workspace de Proyecto (Gestión Continua)"]
     B --> B1["Memoria Efímera - Eliminación instantánea"]
-    B --> B2["Ventana de 7 días / 1 Carga Delta"]
+    B --> B2["Ejecución Única (One-Shot) / Resiliencia a Fallas"]
     C --> C1["Memoria Permanente - Vector DB dedicada"]
     C --> C2["Ventana Activa del Proyecto / Sin límite de Cargas"]
 ```
@@ -56,11 +56,11 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 | Característica / Parámetro | Caso Tipo 1: Auditoría Transaccional | Caso Tipo 2: Workspace de Proyecto |
 | :--- | :--- | :--- |
 | **Enfoque de Negocio** | Due Diligence / Compra Única | Gestión de Proyectos / Conciliación Continua |
-| **Esquema de Memoria** | Efímera (Eliminada tras cierre) | Permanente (Vector Database Privada dedicada) |
+| **Esquema de Memoria** | Efímera (Eliminada tras entrega del informe) | Permanente (Vector Database Privada dedicada) |
 | **Tarifa Base** | Pago por Uso (Pay-as-you-go) | Suscripción Mensual Fija (Planes Tier 3 a Tier 6) |
 | **Costo por Caso / Hito** | **USD 50.00** por Caso único (baja a USD 47.50 por volumen) | **Sin costo por uso** (Incluido en la tarifa mensual del Workspace) |
-| **Ventana de Conciliación** | **7 días naturales** (Vigencia fija) | **Duración del Proyecto** (Mientras la suscripción esté activa) |
-| **Cargas de Subsanación** | **1 Carga Inicial + 1 Carga Delta** de corrección | **1 Carga Inicial + Cargas Delta ilimitadas** diarias |
+| **Ventana de Conciliación** | **Sin ventana interactiva** (Ejecución única / One-Shot) | **Duración del Proyecto** (Mientras la suscripción esté activa) |
+| **Cargas de Subsanación** | **Sin Cargas Delta** (Permite reanudación por falla técnica antes de emitir el reporte) | **1 Carga Inicial + Cargas Delta ilimitadas** diarias |
 | **Usuarios Autorizados** | 1 a 5 usuarios (según plan básico) | **Ilimitados** (Acceso compartido al Workspace del proyecto) |
 | **Google Search Grounding** | Estándar (Verificación de entidades/sanciones) | Deep Grounding (Verificación exhaustiva en tiempo real) |
 
@@ -71,13 +71,22 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 > [!IMPORTANT]
 > **Racional de Plazos:** Los límites de tiempo y carga están diseñados para proteger el modelo de negocio transaccional de SURE. Sin un límite en el Caso Tipo 1, un cliente podría usar una sola transacción de USD 50 para auditar secuencialmente a múltiples proveedores distintos a lo largo de un mes.
 
-### 4.1 Ventana de 7 Días para Caso Tipo 1 (Due Diligence)
-*   **¿Por qué aplica?** Una Due Diligence transaccional requiere inmediatez. Una ventana de **7 días naturales** es más que suficiente para que el comitente cargue los documentos iniciales, reciba las alertas, le solicite al proveedor la subsanación (p. ej., una firma faltante o un anexo omitido) y ejecute la **única Carga Delta permitida** para cerrar el Reporte Definitivo. 
-*   Al término de los 7 días (o tras la Carga Delta de cierre), el caso se bloquea automáticamente y la memoria del servidor se purga por completo.
+### 4.1 Ejecución Única y Resiliencia ante Fallas Técnicas (Caso Tipo 1)
+*   **Modelo de Ejecución Única (One-Shot):** El Caso Tipo 1 es transaccional y directo. No dispone de una ventana de conciliación interactiva ni admite la carga de documentos de subsanación (Cargas Delta). El crédito de transacción (token) se consume de manera definitiva e irreversible al momento de procesarse el caso y emitirse el *Informe de Riesgo Transaccional*.
+*   **Protocolo de Recuperación por Interrupción Técnica:** Para proteger al usuario de imprevistos que puedan interrumpir el flujo (caída de conexión a internet, falla de energía eléctrica, etc.), se establece la siguiente regla de negocio:
+    1.  **Condición de Reanudación:** Mientras el *Informe de Riesgo Transaccional* **no haya sido generado**, la operación se considera "en curso" y el token permanece activo (disponible).
+    2.  **Ruta de Acceso:** El cliente puede regresar al área de pago de la plataforma y seleccionar la opción **"Terminar operación pendiente"**.
+    3.  **Identificación y Validación:** Al ingresar su correo electrónico, el sistema verificará el estado del pago y mostrará la información de **"Token disponible"**.
+    4.  **Procesamiento:** El usuario podrá volver a cargar los documentos y procesar el caso para obtener el reporte final, consumiendo e inactivando el token en ese instante.
 
 ### 4.2 Ventana de Proyecto Activo para Caso Tipo 2 (Proyectos)
 *   **¿Por qué aplica?** El desarrollo de un proyecto de infraestructura es continuo y toma meses o años. Los hitos (como las valuaciones de obra mensuales) se suceden de forma progresiva. 
 *   La Ventana de Conciliación permanece **abierta e interactiva de forma permanente** mientras la suscripción al Workspace de Proyecto esté activa. No se imponen límites de días ni de cantidad de Cargas Delta rápidas para comparar borradores en el día a día. El proceso de **Cerrar y Emitir un Informe de Riesgo Transaccional Definitivo** (p. ej. al finalizar la conciliación mensual de un hito) es un evento puramente operativo de bloqueo y archivo documental que no genera ningún cargo adicional ni consumo de créditos, estando totalmente cubierto por la tarifa plana de la suscripción.
+
+### 4.3 Control de Correspondencia y Protección de Evasión en Proyectos (Caso Tipo 2)
+Dado que el Workspace de Proyecto (Caso Tipo 2) opera bajo una tarifa plana mensual con Cargas Delta ilimitadas, la plataforma aplica validaciones automáticas de coherencia con el Baseline para evitar abusos:
+*   **Consistencia del Baseline:** Toda Carga Delta incremental debe referirse estrictamente al mismo alcance físico, contraparte, número de contrato o hito declarado en la Carga Inicial (Baseline).
+*   **Bloqueo por Cambio de Alcance:** Si el motor de IA de SURE detecta que el lote documental corresponde a un proyecto u obra ajena a la configurada en el Workspace, la carga se bloqueará automáticamente. Esto evita la evasión de la suscripción de múltiples proyectos bajo una misma cuenta de Workspace.
 
 ---
 
@@ -86,15 +95,15 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 ### 5.1 Workflow del Caso Tipo 1: Auditoría Transaccional (Due Diligence)
 
 ```
-[Apertura de Caso (USD 50)] ➔ [Carga Inicial (Documentos Base)] ➔ [Análisis de Agentes (7 min)]
-        ➔ [Bandeja de Alertas Abierta] ➔ [1 Carga Delta de Subsanación (Max. 7 días)]
-        ➔ [Emisión de Informe Definitivo Inmutable & Purga de Memoria]
+[Pago de Caso (USD 50) / Token] ➔ [Acceso con Correo] ➔ [Carga de Documentos] ➔ [Análisis de Agentes (7 min)]
+        ➔ [Emisión de Informe Definitivo Inmutable] ➔ [Consumo de Token & Purga de Memoria]
 ```
 
-1.  **Carga Inicial (Carga 1):** El usuario carga el expediente de la oferta o la contraparte. El sistema genera el ID de Caso y el primer Reporte Borrador.
-2.  **Alertas y Q&A:** Los agentes procesan los metadatos y redactan la bandeja de alertas (Rojo, Amarillo, Azul). El usuario puede interrogar al asistente sobre el origen de las alertas en el chat interactivo.
-3.  **Carga Delta (Carga 2):** El usuario carga los documentos de subsanación entregados por el proveedor.
-4.  **Cierre y Purga:** El sistema actualiza el estado de las alertas a "Resueltas", emite el *Informe de Riesgo Transaccional Definitivo* con firma SHA-256, y **purga permanentemente** el historial de archivos cargados.
+1.  **Pago y Obtención de Token:** El cliente realiza el pago de la transacción única (USD 50.00) y el sistema le asigna un token de auditoría asociado a su correo electrónico.
+2.  **Carga de Documentos:** El usuario accede con su correo, visualiza su "Token disponible", y procede a cargar el lote de documentos base (contratos, fichas técnicas o cartas de crédito). 
+    *   *Nota de Resiliencia:* Si ocurre una desconexión o fallo eléctrico antes del siguiente paso, el usuario regresa desde el área de pago ingresando su correo para continuar con el mismo token disponible.
+3.  **Análisis y Procesamiento:** Al hacer clic en procesar, los agentes autónomos de SURE RMA realizan el cruce de información en un lapso estimado de 7 minutos.
+4.  **Entrega y Purga:** La plataforma genera y muestra el *Informe de Riesgo Transaccional Definitivo* con firma digital SHA-256. En ese instante, el token de transacción se consume e inactiva de manera irreversible, y se **purgan permanentemente** todos los documentos y registros cargados de la memoria del servidor (Memoria Efímera).
 
 ### 5.2 Workflow del Caso Tipo 2: Workspace de Proyecto (Gestión Continua)
 
