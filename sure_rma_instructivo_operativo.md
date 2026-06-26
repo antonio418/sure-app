@@ -84,10 +84,10 @@ Para asegurar un modelo justo y evitar el uso inadecuado de créditos únicos en
 *   **Operación Flexible de Casos:** La Ventana de Conciliación permanece abierta de manera indefinida mientras la suscripción esté activa. El usuario puede abrir múltiples Casos en paralelo, dejar un Caso inconcluso (marcado como "Pendiente") para iniciar otro prioritario, y reanudarlo posteriormente cuando cuente con la información requerida.
 *   **Reporte Residente:** Al terminar la conciliación de un Caso, el usuario procesa su cierre. Esto genera un *Informe de Riesgo Transaccional Definitivo del Caso* que se archiva y queda residente de manera permanente en la base de datos del proyecto para fines de auditoría, sin costo adicional ni consumo de créditos.
 
-### 4.3 Protección de Suscripción mediante Bloqueo de Identidad del Proyecto (Baseline Lock)
-Para evitar que un cliente evada la suscripción individual por proyecto y utilice un solo Workspace para múltiples obras diferentes (ej. desactivando o inhabilitando documentos del Proyecto 1 para procesar el Proyecto 2):
+### 4.3 Garantía de Coherencia del Proyecto mediante Bloqueo de Identidad (Baseline Lock)
+Para asegurar que los análisis del Workspace se mantengan estrictamente vinculados a la obra o contrato objeto del servicio:
 *   **Baseline Lock (Bloqueo de Metadatos):** Durante la inicialización del Workspace, el cliente debe definir los metadatos de identidad del proyecto (Nombre oficial de la obra, Número de Contrato Principal, Nombre del Comitente y Ubicación). Estos datos son **inmutables** y de solo lectura.
-*   **Filtro Algorítmico de Consistencia:** Toda Carga Inicial o Delta en cualquier Caso procesado dentro de ese Workspace se valida algorítmicamente contra este Baseline Lock. Si el motor de IA de SURE detecta que los documentos subidos pertenecen a un contrato, obra o comitente diferente, la carga se bloquea automáticamente y el sistema exige la apertura de un nuevo Workspace con su respectiva suscripción.
+*   **Filtro Algorítmico de Consistencia:** Toda Carga Inicial o Delta en cualquier Caso procesado dentro de ese Workspace se valida algorítmicamente contra este Baseline Lock. Si el motor de IA de SURE detecta que los documentos subidos corresponden a una obra o contrato diferente a los configurados originalmente en el Workspace, el procesamiento se detendrá para preservar la consistencia de los datos del proyecto, requiriendo un Workspace separado.
 
 ---
 
