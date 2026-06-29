@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/campaigns/dispatch-drip",
-      "schedule": "0 10 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

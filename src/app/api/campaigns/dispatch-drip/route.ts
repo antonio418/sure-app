@@ -23,12 +23,24 @@ async function handleDispatch(req: NextRequest) {
     const resend = new Resend(resendKey);
 
     // =========================================================================
-    // WEEKEND KILLSWITCH
+    // WEEKEND & FRIDAY NIGHT KILLSWITCH (Lithuania Timezone: Europe/Vilnius)
     // =========================================================================
-    const currentDay = new Date().getDay();
-    if (currentDay === 0 || currentDay === 6) { // 0 is Sunday, 6 is Saturday
-      console.log("[Drip Engine] Fin de semana detectado. Abortando envío.");
-      return NextResponse.json({ success: true, message: 'Es fin de semana. No se envían correos.', dispatched: 0 });
+    const ltDateStr = new Date().toLocaleString('en-US', { timeZone: 'Europe/Vilnius' });
+    const ltDate = new Date(ltDateStr);
+    const ltDay = ltDate.getDay(); // 0 = Sunday, 1 = Monday, 5 = Friday, 6 = Saturday
+    const ltHour = ltDate.getHours();
+
+    const isWeekend = ltDay === 0 || ltDay === 6;
+    const isFridayNight = ltDay === 5 && ltHour >= 20; // Friday after 8 PM
+    const isMondayEarly = ltDay === 1 && ltHour < 6;   // Monday before 6 AM
+
+    if (isWeekend || isFridayNight || isMondayEarly) {
+      console.log(`[Drip Engine] Horario no permitido (Lituania: ${ltDateStr}). Abortando envío.`);
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Fuera de horario permitido (Viernes 8 PM - Lunes 6 AM). No se envían correos.', 
+        dispatched: 0 
+      });
     }
 
     // =========================================================================
