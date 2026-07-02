@@ -9,7 +9,8 @@ import remarkGfm from 'remark-gfm';
 import { 
   ShieldCheck, ArrowLeft, Printer, FileText, Download, 
   ChevronRight, Calendar, AlertTriangle, CheckSquare,
-  Lock, CreditCard, Upload, RefreshCw, Eye, CheckCircle2, Info, Globe, Check
+  Lock, CreditCard, Upload, RefreshCw, Eye, CheckCircle2, Info, Globe, Check,
+  FileSpreadsheet, Presentation
 } from 'lucide-react';
 
 interface ContingencyPlan {
@@ -136,6 +137,9 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
       }
 
       setPlan(data);
+      if (typeof window !== 'undefined' && data) {
+        document.title = `SURE RMA - Plan de Contingencia - ${data.client_name}`;
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'No se pudo cargar el plan de contingencia.');
@@ -287,6 +291,242 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
     window.print();
   };
 
+  // Helper to download Word files (.doc format which is fully editable in MS Word)
+  const downloadWordTemplate = (title: string, headers: string[], rows: string[][]) => {
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1 { color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; }
+          h2 { color: #475569; text-align: center; font-size: 12px; margin-bottom: 20px; font-weight: normal; }
+          p { font-size: 11px; margin: 3px 0; color: #334155; }
+          table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+          th, td { border: 1px solid #cbd5e1; padding: 6px 10px; font-size: 11px; text-align: left; }
+          th { background-color: #f1f5f9; font-weight: bold; color: #0f172a; }
+        </style>
+      </head>
+      <body>
+        <h1>SURE RMA - PLAN DE CONTINGENCIA</h1>
+        <h2>${title.toUpperCase()}</h2>
+        <p><strong>Comunidad/Entidad:</strong> ${plan?.client_name}</p>
+        <p><strong>Tipo de Entidad:</strong> ${plan?.client_type}</p>
+        <p><strong>Fecha de Emisión:</strong> ${new Date(plan?.created_at || '').toLocaleDateString()}</p>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;" />
+        <table>
+          <thead>
+            <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+        <br />
+        <p style="font-size: 9px; color: #94a3b8; text-align: center; margin-top: 40px;">Documento oficial generado por SURE RMA AI. Todos los derechos reservados.</p>
+      </body>
+      </html>
+    `;
+    const blob = new Blob([html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/\s+/g, '_')}_${plan?.client_name.replace(/\s+/g, '_')}.doc`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Helper to download Excel files (.xls format which is fully editable in MS Excel)
+  const downloadExcelTemplate = (title: string, headers: string[], rows: string[][]) => {
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <style>
+          table { border-collapse: collapse; }
+          th, td { border: 1px solid #94a3b8; padding: 6px; font-size: 10pt; font-family: Arial; }
+          th { background-color: #cbd5e1; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><th colspan="${headers.length}" style="font-size: 14pt; background-color: #1e293b; color: white;">SURE RMA - ${title.toUpperCase()}</th></tr>
+          <tr><td colspan="${headers.length}" style="font-weight: bold;">Cliente: ${plan?.client_name}</td></tr>
+          <tr><td colspan="${headers.length}">Fecha: ${new Date(plan?.created_at || '').toLocaleDateString()}</td></tr>
+          <tr></tr>
+          <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+          ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+        </table>
+      </body>
+      </html>
+    `;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/\s+/g, '_')}_${plan?.client_name.replace(/\s+/g, '_')}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Helper to download PowerPoint vector graphic converted to a native PPTX file
+  const downloadPPTXTemplate = () => {
+    const svgEl = document.querySelector('.mermaid-chart svg');
+    if (!svgEl) {
+      alert("No se encontró el organigrama renderizado en la página para exportar.");
+      return;
+    }
+
+    // Get SVG dimensions
+    const width = svgEl.clientWidth || svgEl.getBoundingClientRect().width || 800;
+    const height = svgEl.clientHeight || svgEl.getBoundingClientRect().height || 600;
+
+    const svgString = new XMLSerializer().serializeToString(svgEl);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const DOMURL = window.URL || window.webkitURL || window;
+    const url = DOMURL.createObjectURL(svgBlob);
+
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width * 2; // Increase scale for higher resolution
+      canvas.height = height * 2;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#0a1128'; // Match dark background color
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const pngUrl = canvas.toDataURL('image/png');
+        
+        // Load pptxgenjs dynamically
+        import('pptxgenjs').then(({ default: pptxgen }) => {
+          const pres = new pptxgen();
+          pres.layout = 'LAYOUT_16x9';
+          
+          const slide = pres.addSlide();
+          
+          // Add Title
+          slide.addText("ORGANIGRAMA DE RESPUESTA ANTE EMERGENCIAS", {
+            x: 0.5,
+            y: 0.4,
+            w: 12.3,
+            h: 0.5,
+            fontSize: 18,
+            bold: true,
+            color: '00E5FF',
+            fontFace: 'Arial'
+          });
+          
+          // Add Subtitle
+          slide.addText(`Cliente: ${plan?.client_name} | Documento oficial SURE RMA`, {
+            x: 0.5,
+            y: 0.9,
+            w: 12.3,
+            h: 0.3,
+            fontSize: 10,
+            color: '94A3B8',
+            fontFace: 'Arial'
+          });
+          
+          // Add the converted PNG diagram centered
+          slide.addImage({
+            data: pngUrl,
+            x: 0.5,
+            y: 1.4,
+            w: 12.3,
+            h: 5.5,
+            sizing: { type: 'contain', w: 12.3, h: 5.5 }
+          });
+          
+          // Save the PPTX presentation
+          pres.writeFile({ fileName: `Organigrama_Contingencia_${plan?.client_name.replace(/\s+/g, '_')}.pptx` });
+        });
+      }
+      DOMURL.revokeObjectURL(url);
+    };
+    img.src = url;
+  };
+
+  // Formats Templates Data
+  const handleDownloadFormat3_1 = () => {
+    downloadWordTemplate("Formato 3.1 - Directorio de Coordinadores y Suplentes", 
+      ["Rol de Emergencia", "Nombre del Titular", "Suplente Oficial 1", "Suplente Oficial 2", "Teléfono de Contacto", "Canal de Radio / Frecuencia"],
+      [
+        ["Coordinador General (Comando)", "[Escribir Nombre del Titular]", "[Escribir Suplente 1]", "[Escribir Suplente 2]", "[Escribir Teléfono]", "Canal 1 (Seguridad)"],
+        ["Coordinador de Seguridad", "[Escribir Nombre del Titular]", "[Escribir Suplente 1]", "[Escribir Suplente 2]", "[Escribir Teléfono]", "Canal 2 (Operaciones)"],
+        ["Coordinador Médico / Salud", "[Escribir Nombre del Titular]", "[Escribir Suplente 1]", "[Escribir Suplente 2]", "[Escribir Teléfono]", "Canal 3 (Salud)"],
+        ["Coordinador de Logística y Suministros", "[Escribir Nombre del Titular]", "[Escribir Suplente 1]", "[Escribir Suplente 2]", "[Escribir Teléfono]", "Canal 4 (Soporte)"],
+        ["Coordinador de Defensa Civil / Rescate", "[Escribir Nombre del Titular]", "[Escribir Suplente 1]", "[Escribir Suplente 2]", "[Escribir Teléfono]", "Canal 5 (Rescate)"]
+      ]
+    );
+  };
+
+  const handleDownloadFormat3_2 = () => {
+    downloadExcelTemplate("Formato 3.2 - Matriz de Responsabilidades",
+      ["Actividad / Tarea Crítica", "Coordinador General", "Coordinador Seguridad", "Coordinador Médico", "Coordinador Logística", "Coordinador Defensa Civil"],
+      [
+        ["Activar Alerta Amarilla/Naranja/Roja", "Aprobación Final", "Apoyo / Ejecución", "Informado", "Consultado", "Apoyo"],
+        ["Establecer Puesto de Mando Unificado", "Dirección General", "Apoyo Logístico", "Apoyo", "Ejecución Física", "Apoyo"],
+        ["Coordinar evacuación o resguardo vertical", "Supervisión", "Apoyo Perimetral", "Evaluación Médica", "Apoyo", "Ejecución de Ruta"],
+        ["Atención a lesionados y primeros auxilios", "Informado", "Resguardo de Área", "Ejecución Directa", "Suministro Médico", "Apoyo / Traslado"],
+        ["Desconexión de servicios (Gas, Electricidad)", "Autorización", "Apoyo", "Apoyo", "Ejecución Técnica", "Apoyo"],
+        ["Llamado a cuerpos de socorro externos", "Aprobación", "Ejecución de Enlace", "Apoyo", "Apoyo", "Apoyo"]
+      ]
+    );
+  };
+
+  const handleDownloadFormat3_3 = () => {
+    downloadWordTemplate("Formato 3.3 - Mensajes Pre-redactados para Emergencias",
+      ["Nivel de Alerta", "Canal de Difusión", "Plantilla de Mensaje Oficial Editable"],
+      [
+        ["Alerta Amarilla (Fase Preventiva)", "WhatsApp / SMS / Canales Internos", `"[SURE] AVISO PREVENTIVO: Se ha activado el Nivel de Alerta Amarilla para las instalaciones de ${plan?.client_name} debido a [Indicar Amenaza, ej. lluvias fuertes]. Manténgase informado mediante canales oficiales."`],
+        ["Alerta Naranja (Fase de Preparación)", "WhatsApp / Megáfonos / Sirenas", `"[SURE] INSTRUCCIÓN DE PREPARACIÓN: Alerta Naranja activada por [Indicar Amenaza]. Verifique sus suministros de emergencia, suspenda labores no esenciales y prepare su evacuación."`],
+        ["Alerta Roja (Fase de Evacuación)", "Todos los Canales Coexistentes", `"[SURE] EVACUACIÓN INMEDIATA: Alerta Roja activada por [Indicar Amenaza]. Proceda de inmediato a evacuar las áreas siguiendo las rutas hacia el Punto de Encuentro Oficial [Ubicación]."`]
+      ]
+    );
+  };
+
+  const handleDownloadFormat3_4 = () => {
+    downloadExcelTemplate("Formato 3.4 - Hoja de Inventario de Bienes y Recursos Críticos",
+      ["Recurso / Bien Crítico", "Ubicación Física", "Cantidad", "Estado de Operatividad", "Fecha Última Inspección", "Responsable de Mantenimiento"],
+      [
+        ["Extintores PQS/CO2 (Multiuso)", "[Escribir Ubicación, ej. Pasillo Central]", "[Cantidad]", "[Operativo / Requiere Recarga]", "[Fecha]", "[Nombre del Responsable]"],
+        ["Generador de Respaldo / Planta Eléctrica", "[Escribir Ubicación, ej. Patio de Servicio]", "[Cantidad]", "[Operativo / Requiere Combustible]", "[Fecha]", "[Nombre del Responsable]"],
+        ["Radios de Frecuencia VHF / UHF", "[Escribir Ubicación, ej. Garita Principal]", "[Cantidad]", "[Operativo / Cargado]", "[Fecha]", "[Nombre del Responsable]"],
+        ["Megáfonos, Sirenas y Silbatos", "[Escribir Ubicación, ej. Oficina de Logística]", "[Cantidad]", "[Operativo / Con Baterías]", "[Fecha]", "[Nombre del Responsable]"],
+        ["Botiquines de Emergencia y Trauma", "[Escribir Ubicación, ej. Enfermería/Recepción]", "[Cantidad]", "[Completo / Productos Vigentes]", "[Fecha]", "[Nombre del Responsable]"],
+        ["Tanques de Reserva de Agua Potable", "[Escribir Ubicación, ej. Azotea / Subterráneo]", "[Capacidad en Litros]", "[Lleno / Inspeccionado]", "[Fecha]", "[Nombre del Responsable]"]
+      ]
+    );
+  };
+
+  const handleDownloadFormat3_5 = () => {
+    downloadWordTemplate("Formato 3.5 - Formato de Informe de Evento Post-Incidente",
+      ["Campo del Reporte de Emergencia", "Detalle / Información Registrada"],
+      [
+        ["Fecha y Hora Exacta del Evento", "[Escribir Fecha y Hora de inicio del Incidente]"],
+        ["Tipo de Amenaza / Evento Ocurrido", "[Escribir Tipo de Incidente, ej. Fuego, Sismo, Inundación]"],
+        ["Descripción Cronológica de los Hechos", "[Describir línea de tiempo desde la alerta hasta el control del evento]"],
+        ["Afectaciones / Daños Materiales Identificados", "[Detallar daños en infraestructura y maquinaria]"],
+        ["Lesionados, Afectados o Evacuados", "[Indicar cantidad de personas heridas, trasladadas o afectadas]"],
+        ["Acciones Inmediatas de Respuesta Tomadas", "[Describir labores realizadas por las brigadas internas]"],
+        ["Firmas de Conformidad y Cierre", "Coordinador de Emergencias: ____________________   Representante Legal: ____________________"]
+      ]
+    );
+  };
+
+  const handleDownloadFormat3_6 = () => {
+    downloadWordTemplate("Formato 3.6 - Formato de Minuta de Reunión (MoM)",
+      ["Punto de Agenda / Discusión", "Acuerdos Alcanzados y Acciones", "Responsable Asignado", "Fecha Límite Compromiso"],
+      [
+        ["Revisión de Simulacro y Tiempos de Respuesta", "[Escribir observaciones y puntos de mejora del simulacro]", "[Nombre del Responsable]", "[Fecha Límite]"],
+        ["Actualización de Directorio de Coordinadores", "[Asignación de suplentes oficiales y teléfonos]", "[Nombre del Responsable]", "[Fecha Límite]"],
+        ["Inspección de Válvulas de Corte Rápido (Gas/Agua)", "[Verificación física de llaves y tableros principales]", "[Nombre del Responsable]", "[Fecha Límite]"],
+        ["Mantenimiento de Planta Eléctrica y Radios", "[Fecha programada para cambio de aceite y baterías]", "[Nombre del Responsable]", "[Fecha Límite]"]
+      ]
+    );
+  };
+
   // Helper to split markdown sections for the tab switcher
   const getPlanSections = () => {
     if (!plan?.generated_plan_md) return [];
@@ -330,6 +570,27 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
   return (
     <main className="min-h-screen bg-[#050a15] text-[#cbd5e1] font-open-sans flex flex-col selection:bg-[#00e5ff]/30">
       
+      {/* Estilos para impresión nativa de alta calidad (Corrige el texto oscuro sobre fondo blanco y tablas) */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body, main, article, p, span, h1, h2, h3, h4, h5, h6, li, td, th, div, blockquote, table, tr {
+            background: white !important;
+            color: #000000 !important;
+          }
+          header, aside, button, .print\\:hidden {
+            display: none !important;
+          }
+          .mermaid-chart svg {
+            filter: invert(1) !important;
+          }
+          /* Asegurar que las tablas tengan bordes legibles en papel */
+          table, th, td {
+            border: 1px solid #ddd !important;
+            border-collapse: collapse !important;
+          }
+        }
+      ` }} />
+
       {/* Header - Se oculta al imprimir */}
       <header className="w-full px-6 py-5 bg-[#0a1128]/80 backdrop-blur-md border-b border-white/5 fixed top-0 z-50 flex justify-between items-center print:hidden">
         <div className="flex items-center gap-3">
@@ -419,6 +680,117 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
                   <span>5.- Plan Kaizen y Mejora Continua</span>
                 </li>
               </ul>
+            </div>
+
+            {/* Descargar Formatos Editables */}
+            <div className="border-t border-white/5 pt-4">
+              <h4 className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <Download className="w-4 h-4 text-[#00e5ff]" /> Descargar Editables
+              </h4>
+              {currentStatus === 'paid' ? (
+                <div className="space-y-1.5">
+                  <button 
+                    onClick={handleDownloadFormat3_1}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-[#00e5ff]/10 text-slate-300 hover:text-[#00e5ff] rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-[#00e5ff]/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.1 (Word)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={handleDownloadFormat3_2}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-emerald-500/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.2 (Excel)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={handleDownloadFormat3_3}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-[#00e5ff]/10 text-slate-300 hover:text-[#00e5ff] rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-[#00e5ff]/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.3 (Word)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={handleDownloadFormat3_4}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-emerald-500/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.4 (Excel)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={handleDownloadFormat3_5}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-[#00e5ff]/10 text-slate-300 hover:text-[#00e5ff] rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-[#00e5ff]/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.5 (Word)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={handleDownloadFormat3_6}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-[#00e5ff]/10 text-slate-300 hover:text-[#00e5ff] rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-[#00e5ff]/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <span className="truncate">Formato 3.6 (Word)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <button 
+                    onClick={downloadPPTXTemplate}
+                    className="w-full text-left px-3 py-2 bg-white/5 hover:bg-amber-500/10 text-slate-300 hover:text-amber-400 rounded-lg text-[11px] transition-all flex items-center justify-between cursor-pointer border border-white/5 hover:border-amber-500/20"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Presentation className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                      <span className="truncate">Organigrama (PPTX)</span>
+                    </span>
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  <p className="text-[10px] text-amber-400/90 mt-2 bg-amber-500/5 border border-amber-500/10 p-2 rounded-lg leading-relaxed">
+                    💡 <strong>Tip para Organigrama:</strong> Inserta el archivo descargado en PowerPoint y haz clic derecho {"→"} <em>"Convertir a Forma"</em> para editar los cuadros y líneas directamente en tu diapositiva.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1.5 opacity-50">
+                  <div className="w-full px-3 py-2 bg-white/5 text-slate-400 rounded-lg text-[11px] flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileText className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate">Formatos de Relleno (Word)</span>
+                    </span>
+                    <Lock className="w-3 h-3 text-amber-400/70" />
+                  </div>
+                  <div className="w-full px-3 py-2 bg-white/5 text-slate-400 rounded-lg text-[11px] flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate">Matrices Operativas (Excel)</span>
+                    </span>
+                    <Lock className="w-3 h-3 text-amber-400/70" />
+                  </div>
+                  <div className="w-full px-3 py-2 bg-white/5 text-slate-400 rounded-lg text-[11px] flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Presentation className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate">Organigrama (PPTX)</span>
+                    </span>
+                    <Lock className="w-3 h-3 text-amber-400/70" />
+                  </div>
+                  <p className="text-[9px] text-amber-400/80 mt-2 text-center">
+                    🔒 Aprueba el plan y paga el saldo para descargar.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Secciones del Documento */}

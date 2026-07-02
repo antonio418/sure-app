@@ -120,6 +120,8 @@ Debes hacer referencia directa a este plano en las secciones de zonificación y 
 
 CRITICAL DIRECTIVE: You MUST write the entire contingency plan, all section headers, tables, notes, blockquotes, and all fillable templates (Formularios 3.1 - 3.6) strictly in the following language: ${targetLang}. Do not mix languages or default to English or Spanish unless explicitly asked.
 
+CRITICAL CONSTRAINTS: Be concise, direct, and avoid unnecessary filler in the early sections (sections 1-7) to guarantee that all 9 sections, including all fillable templates (Formatos 3.1 - 3.6) and Section 9 (Plan Kaizen), are generated in full. Do not omit or truncate any section under any circumstances. You must output the entire plan.
+
 Escribe con un tono formal, técnico, preventivo y corporativo. Comienza directamente con el título del plan en Markdown.`;
 
     const userPrompt = `Respuestas del cliente para generar el plan:
