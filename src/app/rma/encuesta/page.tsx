@@ -61,7 +61,9 @@ const BASE_UI_TEXTS = {
 
   step4HelpTitle: "Sobre Comunicación y Detalles",
   step4HelpBody: "La comunicación es la columna vertebral de cualquier contingencia. Priorizar los canales adecuados garantiza que las alertas tempranas lleguen a todos. Cualquier detalle especial (como una quebrada propensa a inundarse o ancianos de alta vulnerabilidad) permite a la IA inyectar una sección de atención prioritaria y personalizada para tu caso.",
-  step4HelpExample: "Ejemplo: En comunidades grandes, un grupo de WhatsApp actúa como canal principal, pero se debe contar con un canal acústico alternativo (como megáfonos o silbatos) y visitas presenciales de respaldo."
+  step4HelpExample: "Ejemplo: En comunidades grandes, un grupo de WhatsApp actúa como canal principal, pero se debe contar con un canal acústico alternativo (como megáfonos o silbatos) y visitas presenciales de respaldo.",
+  preRecordedLanguagesLabel: "¿En qué idiomas desea los mensajes pregrabados a ser usados en caso de emergencia?",
+  preRecordedLanguagesPlaceholder: "Ej. Español, Inglés y Lituano..."
 };
 
 // Lista de idiomas comunes del mundo
@@ -86,7 +88,61 @@ const WORLD_LANGUAGES = [
   { code: "tr", name: "Türkçe (Turco)" },
   { code: "vi", name: "Tiếng Việt (Vietnamita)" },
   { code: "th", name: "ไทย (Tailandés)" },
-  { code: "ko", name: "한국어 (Coreano)" }
+  { code: "ko", name: "한국어 (Coreano)" },
+  { code: "nl", name: "Nederlands (Neerlandés)" },
+  { code: "fi", name: "Suomi (Finlandés)" },
+  { code: "sv", name: "Svenska (Sueco)" },
+  { code: "no", name: "Norsk (Noruego)" },
+  { code: "da", name: "Dansk (Danés)" },
+  { code: "cs", name: "Čeština (Checo)" },
+  { code: "hu", name: "Magyar (Húngaro)" },
+  { code: "ro", name: "Română (Rumano)" },
+  { code: "bg", name: "Български (Búlgaro)" },
+  { code: "el", name: "Ελληνικά (Griego)" },
+  { code: "he", name: "עברית (Hebreo)" },
+  { code: "id", name: "Bahasa Indonesia (Indonesio)" },
+  { code: "ms", name: "Bahasa Melayu (Malayo)" },
+  { code: "tl", name: "Tagalog (Filipino)" },
+  { code: "ga", name: "Gaeilge (Irlandés)" },
+  { code: "cy", name: "Cymraeg (Galés)" },
+  { code: "hr", name: "Hrvatski (Croata)" },
+  { code: "sr", name: "Српски (Serbio)" },
+  { code: "sl", name: "Slovenščina (Esloveno)" },
+  { code: "sk", name: "Slovenčina (Eslovaco)" },
+  { code: "sq", name: "Shqip (Albanés)" },
+  { code: "mk", name: "Македонски (Macedonio)" },
+  { code: "ka", name: "ქართული (Georgiano)" },
+  { code: "hy", name: "Հայերեն (Armenio)" },
+  { code: "az", name: "Azərbaycan (Azerí)" },
+  { code: "kk", name: "Қазақ (Kazajo)" },
+  { code: "uz", name: "Oʻzbek (Uzbeko)" },
+  { code: "fa", name: "فارسی (Persa)" },
+  { code: "ur", name: "اردو (Urdu)" },
+  { code: "bn", name: "বাংলা (Bengalí)" },
+  { code: "pa", name: "ਪੰਜਾਬੀ (Punjabi)" },
+  { code: "gu", name: "ગુજરાતી (Gujarati)" },
+  { code: "mr", name: "मराठी (Marathi)" },
+  { code: "te", name: "తెలుగు (Telugu)" },
+  { code: "ta", name: "தமிழ் (Tamil)" },
+  { code: "kn", name: "ಕನ್ನಡ (Kannada)" },
+  { code: "ml", name: "മലയാളം (Malayalam)" },
+  { code: "si", name: "සිංහල (Cingalés)" },
+  { code: "my", name: "မြန်မာ (Birmano)" },
+  { code: "km", name: "ខ្មែរ (Jemer)" },
+  { code: "lo", name: "ລາວ (Lao)" },
+  { code: "mn", name: "Монгол (Mongol)" },
+  { code: "ne", name: "नेपाली (Nepalí)" },
+  { code: "am", name: "አማርኛ (Amhárico)" },
+  { code: "so", name: "Soomaali (Somalí)" },
+  { code: "yo", name: "Yorùbá (Yoruba)" },
+  { code: "ig", name: "Asụsụ Igbo (Igbo)" },
+  { code: "zu", name: "isiZulu (Zulu)" },
+  { code: "af", name: "Afrikaans" },
+  { code: "eu", name: "Euskara (Vasco)" },
+  { code: "ca", name: "Català (Catalán)" },
+  { code: "gl", name: "Galego (Gallego)" },
+  { code: "eo", name: "Esperanto" },
+  { code: "la", name: "Latina (Latín)" }
 ];
 
 export default function SurveyPage() {
@@ -106,6 +162,7 @@ export default function SurveyPage() {
   // Form State
   const [clientName, setClientName] = useState("");
   const [clientType, setClientType] = useState("Urbanización Residencial (Condominio / Edificios)");
+  const [clientTypeCustom, setClientTypeCustom] = useState(""); // Tipo de entidad personalizado
   const [location, setLocation] = useState("");
   const [limits, setLimits] = useState("");
   const [population, setPopulation] = useState("");
@@ -116,6 +173,59 @@ export default function SurveyPage() {
   const [securityPrivate, setSecurityPrivate] = useState(false);
   const [medicalResidents, setMedicalResidents] = useState(false);
   const [specialDetails, setSpecialDetails] = useState("");
+  const [preRecordedCommsLanguages, setPreRecordedCommsLanguages] = useState("");
+
+  // Opciones editables por el cliente
+  const [servicesList, setServicesList] = useState([
+    "Electricidad / Tableros", 
+    "Gas (Doméstico/Centralizado)", 
+    "Agua Potable / Bombeo", 
+    "Telecomunicaciones / Internet", 
+    "Sistemas Contra Incendios", 
+    "Generadores de Respaldo"
+  ]);
+  const [customService, setCustomService] = useState("");
+  const handleAddService = () => {
+    if (customService.trim() && !servicesList.includes(customService.trim())) {
+      setServicesList(prev => [...prev, customService.trim()]);
+      setCriticalServices(prev => [...prev, customService.trim()]);
+      setCustomService("");
+    }
+  };
+
+  const [threatsList, setThreatsList] = useState([
+    "Sismos / Terremotos", 
+    "Inundaciones / Desbordes", 
+    "Incendios Forestales / Estructurales", 
+    "Disturbios / Intrusión", 
+    "Cortes de Servicios", 
+    "Robos y Secuestros"
+  ]);
+  const [customThreat, setCustomThreat] = useState("");
+  const handleAddThreat = () => {
+    if (customThreat.trim() && !threatsList.includes(customThreat.trim())) {
+      setThreatsList(prev => [...prev, customThreat.trim()]);
+      setThreats(prev => [...prev, customThreat.trim()]);
+      setCustomThreat("");
+    }
+  };
+
+  const [resourcesList, setResourcesList] = useState([
+    "Extintores", 
+    "Generador / Planta Eléctrica", 
+    "Sistemas de Radio VHF / UHF", 
+    "Megáfonos / Sirenas / Silbatos", 
+    "Botiquín Médico Central", 
+    "Tanques de Reserva de Agua"
+  ]);
+  const [customResource, setCustomResource] = useState("");
+  const handleAddResource = () => {
+    if (customResource.trim() && !resourcesList.includes(customResource.trim())) {
+      setResourcesList(prev => [...prev, customResource.trim()]);
+      setResources(prev => [...prev, customResource.trim()]);
+      setCustomResource("");
+    }
+  };
 
   const stepsCount = 4;
 
@@ -213,7 +323,7 @@ export default function SurveyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_name: clientName,
-          client_type: clientType,
+          client_type: clientType === "Otro" ? clientTypeCustom : clientType,
           language: selectedLanguage,
           survey_responses: {
             location,
@@ -225,7 +335,8 @@ export default function SurveyPage() {
             critical_services: criticalServices,
             security_private: securityPrivate,
             medical_residents: medicalResidents,
-            special_details: specialDetails
+            special_details: specialDetails,
+            pre_recorded_languages: preRecordedCommsLanguages
           }
         })
       });
@@ -407,7 +518,7 @@ export default function SurveyPage() {
                       <div className="grid gap-1.5">
                         <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{uiTexts.clientTypeLabel}</label>
                         <select 
-                          className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#00e5ff] focus:outline-none transition-colors"
+                          className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#00e5ff] focus:outline-none transition-colors cursor-pointer"
                           value={clientType}
                           onChange={(e) => setClientType(e.target.value)}
                         >
@@ -418,6 +529,20 @@ export default function SurveyPage() {
                           <option value="Centro Comercial o Negocio de Alta Confluencia">Centro Comercial o Negocio de Alta Confluencia</option>
                           <option value="Otro">Otro</option>
                         </select>
+
+                        {clientType === "Otro" && (
+                          <div className="mt-2 grid gap-1.5 animate-fadeIn">
+                            <label className="text-[10px] text-[#00e5ff] font-bold uppercase tracking-wider">Describe el Tipo de Entidad / Uso</label>
+                            <input 
+                              type="text"
+                              className="w-full bg-[#050a15] border border-[#00e5ff]/30 rounded-xl px-4 py-2.5 text-xs text-white focus:border-[#00e5ff] focus:outline-none transition-colors"
+                              placeholder="Ej. Hospital, Club Social, Colegio, Campamento..."
+                              value={clientTypeCustom}
+                              onChange={(e) => setClientTypeCustom(e.target.value)}
+                              required
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid gap-1.5">
@@ -465,7 +590,7 @@ export default function SurveyPage() {
                       <div className="space-y-3">
                         <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{uiTexts.servicesLabel}</label>
                         <div className="grid grid-cols-2 gap-2">
-                          {["Electricidad / Tableros", "Gas (Doméstico/Centralizado)", "Agua Potable / Bombeo", "Telecomunicaciones / Internet", "Sistemas Contra Incendios", "Generadores de Respaldo"].map((service) => (
+                          {servicesList.map((service) => (
                             <button
                               key={service}
                               type="button"
@@ -483,6 +608,24 @@ export default function SurveyPage() {
                             </button>
                           ))}
                         </div>
+
+                        {/* Agregar servicio personalizado */}
+                        <div className="flex gap-2 mt-2">
+                          <input 
+                            type="text"
+                            placeholder="Otro servicio crítico..."
+                            className="flex-grow bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff]"
+                            value={customService}
+                            onChange={(e) => setCustomService(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddService}
+                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                          >
+                            + Añadir
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -497,7 +640,7 @@ export default function SurveyPage() {
                       <div className="space-y-2">
                         <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{uiTexts.threatsLabel}</label>
                         <div className="grid grid-cols-2 gap-2">
-                          {["Sismos / Terremotos", "Inundaciones / Desbordes", "Incendios Forestales / Estructurales", "Disturbios / Intrusión", "Cortes de Servicios", "Robos y Secuestros"].map((threat) => (
+                          {threatsList.map((threat) => (
                             <button
                               key={threat}
                               type="button"
@@ -515,12 +658,30 @@ export default function SurveyPage() {
                             </button>
                           ))}
                         </div>
+
+                        {/* Agregar amenaza personalizada */}
+                        <div className="flex gap-2 mt-2">
+                          <input 
+                            type="text"
+                            placeholder="Otra amenaza..."
+                            className="flex-grow bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff]"
+                            value={customThreat}
+                            onChange={(e) => setCustomThreat(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddThreat}
+                            className="px-4 py-2 bg-[#00e5ff] text-black text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                          >
+                            + Añadir
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-2">
                         <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{uiTexts.resourcesLabel}</label>
                         <div className="grid grid-cols-2 gap-2">
-                          {["Extintores", "Generador / Planta Eléctrica", "Sistemas de Radio VHF / UHF", "Megáfonos / Sirenas / Silbatos", "Botiquín Médico Central", "Tanques de Reserva de Agua"].map((resource) => (
+                          {resourcesList.map((resource) => (
                             <button
                               key={resource}
                               type="button"
@@ -537,6 +698,24 @@ export default function SurveyPage() {
                               <span className="truncate">{resource}</span>
                             </button>
                           ))}
+                        </div>
+
+                        {/* Agregar recurso personalizado */}
+                        <div className="flex gap-2 mt-2">
+                          <input 
+                            type="text"
+                            placeholder="Otro recurso disponible..."
+                            className="flex-grow bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff]"
+                            value={customResource}
+                            onChange={(e) => setCustomResource(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddResource}
+                            className="px-4 py-2 bg-[#00e5ff] text-black text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                          >
+                            + Añadir
+                          </button>
                         </div>
                       </div>
 
@@ -602,6 +781,17 @@ export default function SurveyPage() {
                             </button>
                           ))}
                         </div>
+                      </div>
+
+                      <div className="grid gap-1.5">
+                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{uiTexts.preRecordedLanguagesLabel}</label>
+                        <input 
+                          type="text"
+                          className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#00e5ff] focus:outline-none transition-colors"
+                          placeholder={uiTexts.preRecordedLanguagesPlaceholder}
+                          value={preRecordedCommsLanguages}
+                          onChange={(e) => setPreRecordedCommsLanguages(e.target.value)}
+                        />
                       </div>
 
                       <div className="grid gap-1.5">

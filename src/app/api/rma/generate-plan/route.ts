@@ -45,6 +45,13 @@ export async function POST(req: NextRequest) {
     let systemPrompt = `Actúa como un Consultor Sénior en Gestión de Riesgos, Protección Civil y Continuidad del Negocio. 
 Tu tarea es tomar las respuestas de una encuesta de diagnóstico y generar un Plan de Contingencia (PDC) personalizado, detallado y profesional.
 
+DIRECTRICES CRÍTICAS PARA LA REDACCIÓN:
+1. PROHIBIDO acusar al cliente de carecer de recursos o dar por sentado debilidades. Está prohibido escribir "Ausencia de...", "Falta de..." o "Inexistencia de...".
+2. En su lugar, debes plantearlo como una verificación preventiva utilizando la siguiente redacción exacta (traducida al idioma del documento):
+   "Los siguientes elementos son cruciales para garantizar la seguridad y continuidad de operaciones. Se recomienda verificar la disponibilidad y estado de los siguientes elementos clave:"
+   Luego, enumera los puntos como elementos a verificar (ej. "Verificar si se dispone de personal médico...", "Confirmar existencia de plan documentado...", "Verificar protocolos HAZMAT...", etc.).
+3. Si el usuario solicita mensajes pregrabados de emergencia, debes generar las plantillas de mensajes (alerta Amarilla, Naranja y Roja) redactadas por completo en cada uno de los idiomas solicitados por el usuario.
+
 El formato del plan debe seguir rigurosamente las siguientes secciones en Markdown, utilizando tablas extensas, diagramas Mermaid para los organigramas y notas estilo GitHub (> [!NOTE], > [!IMPORTANT], > [!WARNING]) para destacar puntos críticos:
 
 # Plan de Contingencia Personalizado para: [Nombre del Cliente]
@@ -57,7 +64,7 @@ El formato del plan debe seguir rigurosamente las siguientes secciones en Markdo
 *   **Población / Densidad**: [Detalles demográficos o cantidad de personal]
 
 ## 2. Identificación de Focos de Riesgo y Vulnerabilidades
-*Clasifica en una tabla los riesgos específicos (naturales, antrópicos, tecnológicos o de servicios) basándote en las respuestas del cliente.*
+*Clasifica en una tabla los riesgos específicos (naturales, antrópicos, tecnológicos o de servicios) basándote en las respuestas del cliente. Sigue estrictamente la directriz de redactar todo como recomendaciones de verificación sin asumir carencias.*
 
 ## 3. Metodología de Zonificación y Escalabilidad
 *Explica cómo se dividirá el territorio/área (zonas, sectores, bloques, departamentos) para descentralizar la respuesta y comunicación.*
@@ -126,6 +133,7 @@ Escribe con un tono formal, técnico, preventivo y corporativo. Comienza directa
 - **Seguridad privada**: ${updatedResponses.security_private ? 'Sí' : 'No'}
 - **Médicos/Sicólogos**: ${updatedResponses.medical_residents ? 'Sí' : 'No'}
 - **Detalles especiales**: ${updatedResponses.special_details || 'Ninguno'}
+- **Idiomas para mensajes pregrabados de emergencia**: ${updatedResponses.pre_recorded_languages || 'No especificados'}
 ${updatedResponses.layout_url ? `- **Plano de las instalaciones**: Cargado correctamente en ${updatedResponses.layout_url}` : ''}
 
 Por favor genera el plan completo e incorpóralo en el idioma ${targetLang}.`;

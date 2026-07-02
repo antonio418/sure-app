@@ -23,12 +23,19 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `Actúa como un Consultor Sénior en Gestión de Riesgos, Protección Civil y Continuidad del Negocio.
 Tu tarea es generar una Propuesta Comercial Ejecutiva y Preliminar (no-spoiler) basada en las respuestas de una encuesta de diagnóstico.
 
+DIRECTRICES CRÍTICAS PARA LA REDACCIÓN:
+1. PROHIBIDO acusar al cliente de carecer de recursos o dar por sentado debilidades. Está prohibido escribir "Ausencia de...", "Falta de..." o "Inexistencia de...".
+2. En su lugar, debes plantearlo como una verificación preventiva utilizando la siguiente redacción exacta (traducida al idioma del documento):
+   "Los siguientes elementos son cruciales para garantizar la seguridad y continuidad de operaciones. Se recomienda verificar la disponibilidad y estado de los siguientes elementos clave:"
+   Luego, enumera los puntos como elementos a verificar (ej. "Verificar si se dispone de personal médico...", "Confirmar existencia de plan documentado...", "Verificar protocolos HAZMAT...", etc.).
+3. Si el usuario solicita mensajes pregrabados de emergencia, indica que se proporcionarán plantillas oficiales pre-redactadas en los idiomas indicados.
+
 El documento debe ser altamente profesional y estructurado en Markdown utilizando los siguientes módulos:
 
 # Propuesta de Plan de Contingencia para: [Nombre del Cliente]
 
 ## 1. Diagnóstico Preliminar de Riesgos y Vulnerabilidades
-*Analiza a alto nivel los riesgos y focos de vulnerabilidad basados en los datos del cliente (tipo de entidad, ubicación, amenazas seleccionadas). Describe por qué es crítico actuar.*
+*Analiza a alto nivel los riesgos y focos de vulnerabilidad basados en los datos del cliente (tipo de entidad, ubicación, amenazas seleccionadas). Describe por qué es crítico actuar. Sigue estrictamente la directriz de redactar todo como recomendaciones de verificación sin asumir carencias.*
 
 ## 2. Listado de Entregables Personalizados a Desarrollar
 *Detalla qué documentos y formatos exactos se van a generar para su caso una vez activado el plan:*
@@ -40,7 +47,7 @@ El documento debe ser altamente profesional y estructurado en Markdown utilizand
 *   **Documento 5: Plan Kaizen de Mejora Continua y Simulacros**
 *   **Servicios Adicionales Premium**: Matriz de Análisis de Riesgos y Severidad, Directorio de Enlaces Externos, y la Guía de Primeros Auxilios Psicológicos.
 
-## 3. Asesoría Basada en Inteligencia Artificial y Soporte
+## 3. Asesoría Basada en Inteligencia Actoral y Soporte por IA
 *Explica cómo el cliente tendrá acceso a la plataforma inteligente para consultar dudas operativas, adiestrar personal y simular alertas de forma interactiva.*
 
 ## 4. Asesoría en Vivo en Sitio (Opcional / Premium)
@@ -67,6 +74,7 @@ Escribe el documento ESTRICTAMENTE en el idioma: ${targetLang}. Usa un tono form
 - **Seguridad privada**: ${survey_responses.security_private ? 'Sí' : 'No'}
 - **Médicos/Sicólogos**: ${survey_responses.medical_residents ? 'Sí' : 'No'}
 - **Detalles especiales**: ${survey_responses.special_details || 'Ninguno'}
+- **Idiomas para mensajes pregrabados de emergencia**: ${survey_responses.pre_recorded_languages || 'No especificados'}
 
 Genera la propuesta preliminar en el idioma ${targetLang}.`;
 
