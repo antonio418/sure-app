@@ -338,36 +338,38 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
     URL.revokeObjectURL(url);
   };
 
-  // Helper to download Excel files (.xls format which is fully editable in MS Excel)
+  // Helper to download Excel templates as clean CSV files (to avoid Excel format/extension warning alerts)
   const downloadExcelTemplate = (title: string, headers: string[], rows: string[][]) => {
-    const html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta charset="utf-8" />
-        <style>
-          table { border-collapse: collapse; }
-          th, td { border: 1px solid #94a3b8; padding: 6px; font-size: 10pt; font-family: Arial; }
-          th { background-color: #cbd5e1; font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <table>
-          <tr><th colspan="${headers.length}" style="font-size: 14pt; background-color: #1e293b; color: white;">SURE RMA - ${title.toUpperCase()}</th></tr>
-          <tr><td colspan="${headers.length}" style="font-weight: bold;">Cliente: ${plan?.client_name}</td></tr>
-          <tr><td colspan="${headers.length}">Fecha: ${new Date(plan?.created_at || '').toLocaleDateString()}</td></tr>
-          <tr></tr>
-          <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-          ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
-        </table>
-      </body>
-      </html>
-    `;
-    // Prepend UTF-8 BOM to guarantee proper character rendering in Microsoft Excel
-    const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const csvRows = [];
+    
+    // Add title header
+    csvRows.push([`SURE RMA - ${title.toUpperCase()}`]);
+    csvRows.push([`Cliente: ${plan?.client_name}`]);
+    csvRows.push([`Fecha: ${new Date(plan?.created_at || '').toLocaleDateString()}`]);
+    csvRows.push([]); // Spacing
+    
+    // Add headers
+    csvRows.push(headers);
+    
+    // Add rows
+    rows.forEach(row => {
+      csvRows.push(row);
+    });
+    
+    // Convert to CSV string, escaping quotes and wrapping values in quotes
+    const csvString = 'sep=,\n' + csvRows.map(row => 
+      row.map(cell => {
+        const escaped = String(cell).replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(',')
+    ).join('\n');
+    
+    // Prepend UTF-8 BOM so Excel decodes accents correctly (e.g. é, ó)
+    const blob = new Blob(['\ufeff' + csvString], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${title.replace(/\s+/g, '_')}_${plan?.client_name.replace(/\s+/g, '_')}.xls`;
+    a.download = `${title.replace(/\s+/g, '_')}_${plan?.client_name.replace(/\s+/g, '_')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -378,20 +380,23 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
     import('pptxgenjs').then(({ default: pptxgen }) => {
       try {
         const pres = new pptxgen();
-        pres.layout = 'LAYOUT_16x9';
+        
+        // Define standard widescreen size explicitly to guarantee 13.33 x 7.5 inches layout
+        pres.defineLayout({ name: 'STANDARD_16_9', width: 13.33, height: 7.5 });
+        pres.layout = 'STANDARD_16_9';
         
         const slide = pres.addSlide();
         
-        // Dark background matching the dashboard
-        slide.background = { color: '0a1128' };
+        // Correct background property for full-slide background fill
+        slide.background = { fill: '0a1128' };
         
         // Add Title
         slide.addText("ORGANIGRAMA DE RESPUESTA ANTE EMERGENCIAS", {
-          x: 0.5,
+          x: 1.0,
           y: 0.4,
-          w: 12.3,
-          h: 0.5,
-          fontSize: 20,
+          w: 11.33,
+          h: 0.4,
+          fontSize: 18,
           bold: true,
           color: '00E5FF',
           fontFace: 'Arial'
@@ -399,11 +404,11 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
         
         // Add Subtitle
         slide.addText(`Cliente: ${plan?.client_name} | Documento oficial SURE RMA`, {
-          x: 0.5,
-          y: 0.9,
-          w: 12.3,
-          h: 0.3,
-          fontSize: 10,
+          x: 1.0,
+          y: 0.8,
+          w: 11.33,
+          h: 0.2,
+          fontSize: 9,
           color: '94A3B8',
           fontFace: 'Arial'
         });
@@ -411,16 +416,16 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
         // ----------------- TIER 1: DIRECCIÓN GENERAL -----------------
         slide.addText(`DIRECCIÓN GENERAL\n${plan?.client_name || 'Kauno Elektronika'}\nAutoridad Máxima del PDC`, {
           shape: 'rect',
-          x: 5.16,
-          y: 1.2,
-          w: 3.0,
-          h: 0.8,
+          x: 5.06,
+          y: 1.1,
+          w: 3.2,
+          h: 0.6,
           fill: { color: '1a1a2e' },
           line: { color: 'e94560', width: 2 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 9,
+          fontSize: 8,
           bold: true,
           fontFace: 'Arial'
         });
@@ -428,160 +433,160 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
         // ----------------- TIER 2: COORDINADOR GENERAL -----------------
         slide.addText("⭐ COORDINADOR GENERAL\nComando de Emergencias\n(+ 2 Suplentes)", {
           shape: 'rect',
-          x: 5.16,
-          y: 2.4,
-          w: 3.0,
-          h: 0.8,
+          x: 5.06,
+          y: 1.9,
+          w: 3.2,
+          h: 0.6,
           fill: { color: '16213e' },
           line: { color: '0f3460', width: 2 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 9,
+          fontSize: 8,
           bold: true,
           fontFace: 'Arial'
         });
 
         // ----------------- TIER 3: COORDINADORES DE ÁREA -----------------
-        // C - Seguridad
+        // C - Seguridad (Center X = 2.2)
         slide.addText("🔒 COORD. DE SEGURIDAD\nControl Perimetral e Intrusión\n(+ 2 Suplentes)", {
           shape: 'rect',
-          x: 0.8,
-          y: 3.6,
+          x: 1.0,
+          y: 2.9,
           w: 2.4,
-          h: 0.8,
+          h: 0.6,
           fill: { color: '0f3460' },
           line: { color: 'e94560', width: 1.5 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 8,
+          fontSize: 7.5,
           bold: true,
           fontFace: 'Arial'
         });
 
-        // D - Médico
+        // D - Médico (Center X = 5.17)
         slide.addText("🏥 COORD. MÉDICO\nPrimeros Auxilios Fís. y Psic.\n(+ 2 Suplentes)", {
           shape: 'rect',
-          x: 3.8,
-          y: 3.6,
+          x: 3.97,
+          y: 2.9,
           w: 2.4,
-          h: 0.8,
+          h: 0.6,
           fill: { color: '0f3460' },
           line: { color: 'e94560', width: 1.5 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 8,
+          fontSize: 7.5,
           bold: true,
           fontFace: 'Arial'
         });
 
-        // E - Logística
+        // E - Logística (Center X = 8.14)
         slide.addText("📦 COORD. DE LOGÍSTICA\nServicios Críticos y Suministros\n(+ 2 Suplentes)", {
           shape: 'rect',
-          x: 6.8,
-          y: 3.6,
+          x: 6.94,
+          y: 2.9,
           w: 2.4,
-          h: 0.8,
+          h: 0.6,
           fill: { color: '0f3460' },
           line: { color: 'e94560', width: 1.5 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 8,
+          fontSize: 7.5,
           bold: true,
           fontFace: 'Arial'
         });
 
-        // F - Defensa Civil
+        // F - Defensa Civil (Center X = 11.11)
         slide.addText("🚨 COORD. DEFENSA CIVIL\nRescate y Evacuación\n(+ 2 Suplentes)", {
           shape: 'rect',
-          x: 9.8,
-          y: 3.6,
+          x: 9.91,
+          y: 2.9,
           w: 2.4,
-          h: 0.8,
+          h: 0.6,
           fill: { color: '0f3460' },
           line: { color: 'e94560', width: 1.5 },
           color: 'FFFFFF',
           align: 'center',
           valign: 'middle',
-          fontSize: 8,
+          fontSize: 7.5,
           bold: true,
           fontFace: 'Arial'
         });
 
         // ----------------- TIER 4: BRIGADAS Y ENLACES -----------------
         const tier4 = [
-          { text: "👮 Brigada de Seguridad\nPrivada y Accesos", x: 0.5, w: 1.4 },
-          { text: "📞 Enlace con Policía\nCoordinación Externa", x: 2.1, w: 1.4 },
-          { text: "🩺 Brigada de Primeros\nAuxilios Físicos", x: 3.5, w: 1.4 },
-          { text: "🧠 Apoyo Psicológico\nPost-Evento", x: 5.1, w: 1.4 },
-          { text: "⚡ Brigada de Servicios\nGas, Electricidad y Agua", x: 6.5, w: 1.4 },
-          { text: "🔧 Brigada Mantenimiento\nGenerador y Criticos", x: 8.1, w: 1.4 },
-          { text: "🚨 Guías de Evacuación\nZonas A, B, C y D", x: 9.5, w: 1.1 },
-          { text: "🔥 Brigada Contra\nIncendios (Extintores)", x: 10.7, w: 1.1 },
-          { text: "🚒 Enlace con Bomberos\nCoordinación Externa", x: 11.9, w: 1.1 }
+          { text: "👮 Brigada de Seguridad\nPrivada y Accesos", x: 1.0, w: 1.1 },
+          { text: "📞 Enlace con Policía\nCoordinación Externa", x: 2.27, w: 1.1 },
+          { text: "🩺 Brigada de Primeros\nAuxilios Físicos", x: 3.54, w: 1.1 },
+          { text: "🧠 Apoyo Psicológico\nPost-Evento", x: 4.81, w: 1.1 },
+          { text: "⚡ Brigada de Servicios\nGas, Electricidad y Agua", x: 6.08, w: 1.1 },
+          { text: "🔧 Brigada Mantenimiento\nGenerador y Críticos", x: 7.35, w: 1.1 },
+          { text: "🚨 Guías de Evacuación\nZonas A, B, C y D", x: 8.62, w: 1.1 },
+          { text: "🔥 Brigada Contra\nIncendios (Extintores)", x: 9.89, w: 1.1 },
+          { text: "🚒 Enlace con Bomberos\nCoordinación Externa", x: 11.16, w: 1.1 }
         ];
 
         tier4.forEach(item => {
           slide.addText(item.text, {
             shape: 'rect',
             x: item.x,
-            y: 4.8,
+            y: 3.9,
             w: item.w,
-            h: 0.8,
+            h: 0.6,
             fill: { color: '1a1a2e' },
             line: { color: '555555', width: 1 },
             color: 'CCCCCC',
             align: 'center',
             valign: 'middle',
-            fontSize: 7.5,
+            fontSize: 6.5,
             fontFace: 'Arial'
           });
         });
 
         // ----------------- CONNECTOR LINES -----------------
         // Line from Tier 1 to Tier 2
-        slide.addShape('line', { x: 6.66, y: 2.0, w: 0, h: 0.4, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 6.66, y: 1.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
         
         // Line from Tier 2 down
-        slide.addShape('line', { x: 6.66, y: 3.2, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 6.66, y: 2.5, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
         
         // Tier 3 Horizontal line
-        slide.addShape('line', { x: 2.0, y: 3.4, w: 9.0, h: 0, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 2.2, y: 2.7, w: 8.91, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
         
         // Tier 3 Vertical drop lines
-        slide.addShape('line', { x: 2.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
-        slide.addShape('line', { x: 5.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
-        slide.addShape('line', { x: 8.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
-        slide.addShape('line', { x: 11.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 2.2, y: 2.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 5.17, y: 2.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 8.14, y: 2.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 11.11, y: 2.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
 
         // Tier 3 to Tier 4 drop lines
         // Column C
-        slide.addShape('line', { x: 2.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 1.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 1.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 2.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 2.2, y: 3.5, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 1.55, y: 3.7, w: 1.27, h: 0, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 1.55, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 2.82, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
 
         // Column D
-        slide.addShape('line', { x: 5.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 4.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 4.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 5.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 5.17, y: 3.5, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 4.09, y: 3.7, w: 1.27, h: 0, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 4.09, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 5.36, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
 
         // Column E
-        slide.addShape('line', { x: 8.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 7.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 7.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 8.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 8.14, y: 3.5, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 6.63, y: 3.7, w: 1.27, h: 0, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 6.63, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 7.9, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
 
         // Column F
-        slide.addShape('line', { x: 11.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 10.05, y: 4.6, w: 2.4, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 10.05, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 11.25, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
-        slide.addShape('line', { x: 12.45, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 11.11, y: 3.5, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 9.17, y: 3.7, w: 2.54, h: 0, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 9.17, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 10.44, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
+        slide.addShape('line', { x: 11.71, y: 3.7, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.2 } });
 
         // Save the PPTX presentation
         pres.writeFile({ fileName: `Organigrama_Contingencia_${plan?.client_name.replace(/\s+/g, '_')}.pptx` });
