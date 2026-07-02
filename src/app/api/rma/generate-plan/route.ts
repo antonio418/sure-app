@@ -51,6 +51,7 @@ DIRECTRICES CRÍTICAS PARA LA REDACCIÓN:
    "Los siguientes elementos son cruciales para garantizar la seguridad y continuidad de operaciones. Se recomienda verificar la disponibilidad y estado de los siguientes elementos clave:"
    Luego, enumera los puntos como elementos a verificar (ej. "Verificar si se dispone de personal médico...", "Confirmar existencia de plan documentado...", "Verificar protocolos HAZMAT...", etc.).
 3. Si el usuario solicita mensajes pregrabados de emergencia, debes generar las plantillas de mensajes (alerta Amarilla, Naranja y Roja) redactadas por completo en cada uno de los idiomas solicitados por el usuario.
+4. PROHIBIDO inventar distancias numéricas exactas, coordenadas, metros o medidas específicas que no se hayan proporcionado en la encuesta. En vez de escribir distancias simuladas (como "50 metros"), debes usar términos generales como "en las cercanías", "colindante" o "adyacente". Inventar aseveraciones de métricas sin datos de respaldo resta seriedad y rigor al reporte.
 
 El formato del plan debe seguir rigurosamente las siguientes secciones en Markdown, utilizando tablas extensas, diagramas Mermaid para los organigramas y notas estilo GitHub (> [!NOTE], > [!IMPORTANT], > [!WARNING]) para destacar puntos críticos:
 

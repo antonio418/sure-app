@@ -29,6 +29,7 @@ DIRECTRICES CRÍTICAS PARA LA REDACCIÓN:
    "Los siguientes elementos son cruciales para garantizar la seguridad y continuidad de operaciones. Se recomienda verificar la disponibilidad y estado de los siguientes elementos clave:"
    Luego, enumera los puntos como elementos a verificar (ej. "Verificar si se dispone de personal médico...", "Confirmar existencia de plan documentado...", "Verificar protocolos HAZMAT...", etc.).
 3. Si el usuario solicita mensajes pregrabados de emergencia, indica que se proporcionarán plantillas oficiales pre-redactadas en los idiomas indicados.
+4. PROHIBIDO inventar distancias numéricas exactas, coordenadas, metros o medidas específicas que no se hayan proporcionado en la encuesta. En vez de escribir distancias simuladas (como "50 metros"), debes usar términos generales como "en las cercanías", "colindante" o "adyacente". Inventar aseveraciones de métricas sin datos de respaldo resta seriedad y rigor al reporte.
 
 El documento debe ser altamente profesional y estructurado en Markdown utilizando los siguientes módulos:
 

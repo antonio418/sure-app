@@ -453,7 +453,8 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
               </div>
 
               {/* Renders Propuesta No-Spoiler */}
-              <article className="bg-[#0a1128]/30 border border-white/5 p-8 md:p-12 rounded-3xl shadow-xl glass">
+              <article className="bg-[#0a1128]/30 border border-white/5 p-8 md:p-12 rounded-3xl shadow-xl relative glass select-none">
+                <div className="absolute inset-0 bg-[#050a15]/5 pointer-events-none z-10" />
                 <div className="prose prose-invert max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {plan.generated_plan_md}
@@ -525,7 +526,7 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
 
               {/* Visor de Plan Completo (Bloqueado) */}
               <article className="bg-[#0a1128]/30 border border-white/5 p-8 md:p-12 rounded-3xl shadow-xl relative glass select-none">
-                <div className="absolute inset-0 bg-[#050a15]/10 backdrop-blur-[1px] pointer-events-none z-10" />
+                <div className="absolute inset-0 bg-[#050a15]/5 pointer-events-none z-10" />
                 <div className="prose prose-invert max-w-none">
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
