@@ -127,9 +127,20 @@ export default function RMAPage() {
             </span>
           </h1>
           
-          <p className="text-lg md:text-xl text-slate-400 max-w-3xl font-light leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-400 max-w-3xl font-light leading-relaxed mb-10">
             {t('ui.hero_rma_desc')}
           </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link 
+              href="/rma/encuesta" 
+              className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#00e5ff] to-cyan-500 text-black font-black uppercase tracking-widest text-sm rounded-2xl transition-all hover:scale-105 shadow-[0_0_25px_rgba(0,229,255,0.25)]"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              <span>Crear Plan de Contingencia (PDC)</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -341,175 +352,111 @@ export default function RMAPage() {
         </div>
       </section>
 
-      {/* Precios Institucionales */}
+      {/* Precios RMA Plan de Contingencia */}
       <section className="py-24 px-6 bg-black/40">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">{t('ui.pricing_title')}</h2>
-            <p className="text-xl text-slate-400">
-              {t('ui.pricing_sub')}
+            <div className="text-emerald-500 font-bold uppercase tracking-widest text-xs mb-3">Modelos de Inversión</div>
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">Estructura Comercial y Tarifas</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto font-light">
+              Ofrecemos un modelo transparente y por fases diseñado para proteger tu inversión y garantizar la más alta calidad en tu plan de contingencia perimetral.
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto bg-[#1e293b]/50 backdrop-blur-xl rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-black/40 border-b border-white/10">
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_plan')}</th>
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_ops')}</th>
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_fee')}</th>
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_unit')}</th>
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_add')}</th>
-                    <th className="p-6 font-black text-white uppercase tracking-widest text-sm">{t('ui.th_action')}</th>
-                  </tr>
-                </thead>
-                <tbody className="text-slate-300">
-                  {/* Grupo 1: SURE Transactional */}
-                  <tr className="bg-blue-500/10 border-b border-blue-500/20">
-                    <td colSpan={6} className="p-4 font-black text-blue-400 uppercase tracking-widest text-xs">
-                      {t('ui.pricing_group_transactional')}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_basic')}</td>
-                    <td className="p-6">{t('ui.plan_payg')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$0</td>
-                    <td className="p-6 font-mono">$50.00</td>
-                    <td className="p-6 font-mono">$50.00</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy(null)} 
-                        disabled={loadingPrice === 'payg'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'payg' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">Tier 1x5</td>
-                    <td className="p-6">Up to 5</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$245.00</td>
-                    <td className="p-6 font-mono">$49.00</td>
-                    <td className="p-6 font-mono">$49.00</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8z28oubYEwHxx4DnD8gdk')} 
-                        disabled={loadingPrice === 'price_1TZ8z28oubYEwHxx4DnD8gdk'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8z28oubYEwHxx4DnD8gdk' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_tier1')}</td>
-                    <td className="p-6">{t('ui.plan_up25')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$1,210.00</td>
-                    <td className="p-6 font-mono">$48.40</td>
-                    <td className="p-6 font-mono">$48.40</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8Ms8oubYEwHxxrCK6grr2')} 
-                        disabled={loadingPrice === 'price_1TZ8Ms8oubYEwHxxrCK6grr2'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8Ms8oubYEwHxxrCK6grr2' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_tier2')}</td>
-                    <td className="p-6">{t('ui.plan_up50')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$2,375.00</td>
-                    <td className="p-6 font-mono">$47.50</td>
-                    <td className="p-6 font-mono">$47.50</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8ZO8oubYEwHxxo6I8cAc6')} 
-                        disabled={loadingPrice === 'price_1TZ8ZO8oubYEwHxxo6I8cAc6'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8ZO8oubYEwHxxo6I8cAc6' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  
-                  {/* Grupo 2: SURE Project Workspace */}
-                  <tr className="bg-emerald-500/10 border-b border-emerald-500/20">
-                    <td colSpan={6} className="p-4 font-black text-emerald-400 uppercase tracking-widest text-xs">
-                      {t('ui.pricing_group_workspace')}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-emerald-500/30 hover:bg-emerald-500/5 transition-colors bg-emerald-500/10">
-                    <td className="p-6 font-bold text-white">
-                      {t('ui.plan_tier3')}
-                    </td>
-                    <td className="p-6 text-white font-medium">{t('ui.plan_up75')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold text-lg">$3,375.00</td>
-                    <td className="p-6 font-mono text-white font-bold">$45.00</td>
-                    <td className="p-6 font-mono text-white font-bold">$45.00</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8nD8oubYEwHxxGnaEY9Di')} 
-                        disabled={loadingPrice === 'price_1TZ8nD8oubYEwHxxGnaEY9Di'}
-                        className="inline-block bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8nD8oubYEwHxxGnaEY9Di' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_tier4')}</td>
-                    <td className="p-6">{t('ui.plan_up100')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$4,250.00</td>
-                    <td className="p-6 font-mono">$42.50</td>
-                    <td className="p-6 font-mono">$42.50</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8qO8oubYEwHxxuOcRIKNG')} 
-                        disabled={loadingPrice === 'price_1TZ8qO8oubYEwHxxuOcRIKNG'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8qO8oubYEwHxxuOcRIKNG' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_tier5')}</td>
-                    <td className="p-6">{t('ui.plan_up150')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$6,000.00</td>
-                    <td className="p-6 font-mono">$40.00</td>
-                    <td className="p-6 font-mono">$40.00</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8tM8oubYEwHxxQf5uCyk2')} 
-                        disabled={loadingPrice === 'price_1TZ8tM8oubYEwHxxQf5uCyk2'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8tM8oubYEwHxxQf5uCyk2' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-6 font-bold text-white">{t('ui.plan_tier6')}</td>
-                    <td className="p-6">{t('ui.plan_up200')}</td>
-                    <td className="p-6 font-mono text-emerald-400 font-bold">$7,500.00</td>
-                    <td className="p-6 font-mono">$37.50</td>
-                    <td className="p-6 font-mono">$37.50</td>
-                    <td className="p-6">
-                      <button 
-                        onClick={() => handleBuy('price_1TZ8w98oubYEwHxxW9PxHhXW')} 
-                        disabled={loadingPrice === 'price_1TZ8w98oubYEwHxxW9PxHhXW'}
-                        className="inline-block bg-slate-800 hover:bg-emerald-500 text-white hover:text-black border border-slate-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {loadingPrice === 'price_1TZ8w98oubYEwHxxW9PxHhXW' ? '...' : t('ui.btn_buy')}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            
+            {/* Tarjeta 1: Diagnóstico Gratuito */}
+            <div className="bg-[#1e293b]/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-between hover:border-[#00e5ff]/30 transition-all group">
+              <div>
+                <span className="text-[10px] bg-[#00e5ff]/10 text-[#00e5ff] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Fase Inicial</span>
+                <h3 className="text-xl font-black text-white mt-4">Diagnóstico Gratuito</h3>
+                <div className="text-3xl font-black text-white my-4">$0 <span className="text-xs text-slate-500 font-light">USD</span></div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-6 font-light">
+                  Rellena la encuesta inicial y recibe al instante un reporte preliminar con los focos de riesgo detectados y el listado de entregables específicos para tu caso.
+                </p>
+                <ul className="text-xs text-slate-300 space-y-2 mb-8">
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Encuesta interactiva</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Reporte no-spoiler</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Listado de entregables</li>
+                </ul>
+              </div>
+              <Link 
+                href="/rma/encuesta" 
+                className="w-full text-center py-3 bg-slate-800 hover:bg-[#00e5ff] text-white hover:text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all"
+              >
+                Iniciar Diagnóstico
+              </Link>
+            </div>
+
+            {/* Tarjeta 2: Puesta en Marcha */}
+            <div className="bg-[#1e293b]/60 border border-emerald-500/30 rounded-3xl p-6 flex flex-col justify-between hover:border-emerald-400/50 transition-all group relative shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full">Recomendado</div>
+              <div>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Fase Redacción</span>
+                <h3 className="text-xl font-black text-white mt-4">Puesta en Marcha</h3>
+                <div className="text-3xl font-black text-white my-4">$2,000 <span className="text-xs text-slate-500 font-light">USD</span></div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-6 font-light">
+                  Redacción completa de los documentos maestros, incrustación de planos perimetrales y formatos rellenables (3.1 a 3.6). Se abona en dos hitos.
+                </p>
+                <ul className="text-xs text-slate-300 space-y-2 mb-8">
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> $500 de anticipo a la firma</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Carga de planos habilitada</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> $1,500 al aprobar visor</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 2 meses de soporte gratis</li>
+                </ul>
+              </div>
+              <Link 
+                href="/rma/encuesta" 
+                className="w-full text-center py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+              >
+                Contratar Plan
+              </Link>
+            </div>
+
+            {/* Tarjeta 3: Mantenimiento Anual */}
+            <div className="bg-[#1e293b]/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-between hover:border-purple-500/30 transition-all group">
+              <div>
+                <span className="text-[10px] bg-purple-500/10 text-purple-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Acceso Continuo</span>
+                <h3 className="text-xl font-black text-white mt-4">Mantenimiento Anual</h3>
+                <div className="text-3xl font-black text-white my-4">$200 <span className="text-xs text-slate-500 font-light">USD/mes</span></div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-6 font-light">
+                  Contrato anual que otorga acceso permanente a la plataforma inteligente para realizar adiciones, cambios de coordinadores y registro de simulacros de incidentes.
+                </p>
+                <ul className="text-xs text-slate-300 space-y-2 mb-8">
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Cambios y adiciones ilimitadas</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Actualización de coordinadores</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Soporte Kaizen continuado</li>
+                </ul>
+              </div>
+              <Link 
+                href="/rma/encuesta" 
+                className="w-full text-center py-3 bg-slate-800 hover:bg-purple-500 text-white hover:text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all"
+              >
+                Suscribirse
+              </Link>
+            </div>
+
+            {/* Tarjeta 4: Asesoría Presencial */}
+            <div className="bg-[#1e293b]/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-between hover:border-amber-500/30 transition-all group">
+              <div>
+                <span className="text-[10px] bg-amber-500/10 text-amber-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Servicio Premium</span>
+                <h3 className="text-xl font-black text-white mt-4">Asesoría en Sitio</h3>
+                <div className="text-2xl font-black text-white my-4">Cotización <span className="text-xs text-slate-500 font-light">personalizada</span></div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-6 font-light">
+                  Coordinación presencial de expertos en tus instalaciones para realizar auditorías físicas del terreno, adiestramiento de brigadas de zona y supervisión de simulacros.
+                </p>
+                <ul className="text-xs text-slate-300 space-y-2 mb-8">
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Auditorías físicas in-situ</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Dirección de simulacros reales</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Aceptación previa de condiciones</li>
+                </ul>
+              </div>
+              <Link 
+                href="/rma/encuesta" 
+                className="w-full text-center py-3 bg-slate-800 hover:bg-amber-500 text-white hover:text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all"
+              >
+                Contactar Consultor
+              </Link>
             </div>
           </div>
 
