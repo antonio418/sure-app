@@ -21,6 +21,87 @@ interface ContingencyPlan {
   created_at: string;
 }
 
+interface MermaidProps {
+  chart: string;
+}
+
+const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
+  const [svg, setSvg] = useState<string>('');
+  const [error, setError] = useState<boolean>(false);
+  const elementId = React.useId().replace(/:/g, '');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let isMounted = true;
+    
+    const renderChart = async () => {
+      try {
+        const mermaid = (await import('mermaid')).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          securityLevel: 'loose',
+          themeVariables: {
+            background: '#0a1128',
+            primaryColor: '#00e5ff',
+            secondaryColor: '#10b981',
+            lineColor: '#cbd5e1',
+          }
+        });
+        
+        const cleanChart = chart
+          .trim()
+          .replace(/\\n/g, '\n')
+          .replace(/\\"/g, '"');
+          
+        const { svg: renderedSvg } = await mermaid.render(
+          `mermaid-${elementId}`,
+          cleanChart
+        );
+        
+        if (isMounted) {
+          setSvg(renderedSvg);
+          setError(false);
+        }
+      } catch (err) {
+        console.error("Mermaid parsing error:", err);
+        if (isMounted) {
+          setError(true);
+        }
+      }
+    };
+
+    renderChart();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [chart, elementId]);
+
+  if (error) {
+    return (
+      <pre className="text-xs text-red-400 bg-red-950/20 p-4 rounded-xl border border-red-500/20 overflow-x-auto font-mono max-w-full">
+        {chart}
+      </pre>
+    );
+  }
+
+  if (!svg) {
+    return (
+      <div className="flex items-center justify-center p-8 bg-slate-900/50 rounded-xl animate-pulse my-4">
+        <div className="text-xs text-slate-400">Renderizando organigrama...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="mermaid-chart overflow-x-auto flex justify-center py-4 bg-[#0a1128]/50 p-6 rounded-2xl border border-white/5 my-6 max-w-full print:bg-white print:border-none"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+};
+
 export default function PlanPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
   const planId = resolvedParams.id;
@@ -542,9 +623,9 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
                         if (className.includes('language-mermaid')) {
                           const code = (props.children as any)?.props?.children || '';
                           return (
-                            <div className="bg-[#050a15] p-6 rounded-xl border border-white/5 my-6">
+                            <div className="my-6">
                               <span className="text-[10px] uppercase font-bold tracking-widest text-[#00e5ff] block mb-2">Diagrama de Organización</span>
-                              <pre className="text-xs text-[#cbd5e1] font-mono leading-relaxed">{code}</pre>
+                              <Mermaid chart={code} />
                             </div>
                           );
                         }
@@ -608,9 +689,9 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
                         if (className.includes('language-mermaid')) {
                           const code = (props.children as any)?.props?.children || '';
                           return (
-                            <div className="bg-[#050a15] p-6 rounded-xl border border-white/5 my-6 overflow-x-auto print:bg-black/5 print:border-black/20">
+                            <div className="my-6 overflow-x-auto">
                               <span className="text-[10px] uppercase font-bold tracking-widest text-[#00e5ff] block mb-3 print:text-black">Diagrama de Organización</span>
-                              <pre className="text-xs text-[#cbd5e1] font-mono leading-relaxed print:text-black">{code}</pre>
+                              <Mermaid chart={code} />
                             </div>
                           );
                         }
