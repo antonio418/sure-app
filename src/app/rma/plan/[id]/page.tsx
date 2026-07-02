@@ -296,6 +296,7 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
     const html = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
       <head>
+        <meta charset="utf-8" />
         <title>${title}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
@@ -327,7 +328,8 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
       </body>
       </html>
     `;
-    const blob = new Blob([html], { type: 'application/msword' });
+    // Prepend UTF-8 BOM to guarantee proper character rendering in Microsoft Word
+    const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -341,6 +343,7 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
     const html = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
       <head>
+        <meta charset="utf-8" />
         <style>
           table { border-collapse: collapse; }
           th, td { border: 1px solid #94a3b8; padding: 6px; font-size: 10pt; font-family: Arial; }
@@ -359,7 +362,8 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
       </body>
       </html>
     `;
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    // Prepend UTF-8 BOM to guarantee proper character rendering in Microsoft Excel
+    const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -370,81 +374,222 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
 
   // Helper to download PowerPoint vector graphic converted to a native PPTX file
   const downloadPPTXTemplate = () => {
-    const svgEl = document.querySelector('.mermaid-chart svg');
-    if (!svgEl) {
-      alert("No se encontró el organigrama renderizado en la página para exportar.");
-      return;
-    }
-
-    // Get SVG dimensions
-    const width = svgEl.clientWidth || svgEl.getBoundingClientRect().width || 800;
-    const height = svgEl.clientHeight || svgEl.getBoundingClientRect().height || 600;
-
-    const svgString = new XMLSerializer().serializeToString(svgEl);
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const DOMURL = window.URL || window.webkitURL || window;
-    const url = DOMURL.createObjectURL(svgBlob);
-
-    const img = new window.Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = width * 2; // Increase scale for higher resolution
-      canvas.height = height * 2;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = '#0a1128'; // Match dark background color
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // Load pptxgenjs dynamically
+    import('pptxgenjs').then(({ default: pptxgen }) => {
+      try {
+        const pres = new pptxgen();
+        pres.layout = 'LAYOUT_16x9';
         
-        const pngUrl = canvas.toDataURL('image/png');
+        const slide = pres.addSlide();
         
-        // Load pptxgenjs dynamically
-        import('pptxgenjs').then(({ default: pptxgen }) => {
-          const pres = new pptxgen();
-          pres.layout = 'LAYOUT_16x9';
-          
-          const slide = pres.addSlide();
-          
-          // Add Title
-          slide.addText("ORGANIGRAMA DE RESPUESTA ANTE EMERGENCIAS", {
-            x: 0.5,
-            y: 0.4,
-            w: 12.3,
-            h: 0.5,
-            fontSize: 18,
-            bold: true,
-            color: '00E5FF',
-            fontFace: 'Arial'
-          });
-          
-          // Add Subtitle
-          slide.addText(`Cliente: ${plan?.client_name} | Documento oficial SURE RMA`, {
-            x: 0.5,
-            y: 0.9,
-            w: 12.3,
-            h: 0.3,
-            fontSize: 10,
-            color: '94A3B8',
-            fontFace: 'Arial'
-          });
-          
-          // Add the converted PNG diagram centered
-          slide.addImage({
-            data: pngUrl,
-            x: 0.5,
-            y: 1.4,
-            w: 12.3,
-            h: 5.5,
-            sizing: { type: 'contain', w: 12.3, h: 5.5 }
-          });
-          
-          // Save the PPTX presentation
-          pres.writeFile({ fileName: `Organigrama_Contingencia_${plan?.client_name.replace(/\s+/g, '_')}.pptx` });
+        // Dark background matching the dashboard
+        slide.background = { color: '0a1128' };
+        
+        // Add Title
+        slide.addText("ORGANIGRAMA DE RESPUESTA ANTE EMERGENCIAS", {
+          x: 0.5,
+          y: 0.4,
+          w: 12.3,
+          h: 0.5,
+          fontSize: 20,
+          bold: true,
+          color: '00E5FF',
+          fontFace: 'Arial'
         });
+        
+        // Add Subtitle
+        slide.addText(`Cliente: ${plan?.client_name} | Documento oficial SURE RMA`, {
+          x: 0.5,
+          y: 0.9,
+          w: 12.3,
+          h: 0.3,
+          fontSize: 10,
+          color: '94A3B8',
+          fontFace: 'Arial'
+        });
+
+        // ----------------- TIER 1: DIRECCIÓN GENERAL -----------------
+        slide.addText(`DIRECCIÓN GENERAL\n${plan?.client_name || 'Kauno Elektronika'}\nAutoridad Máxima del PDC`, {
+          shape: 'rect',
+          x: 5.16,
+          y: 1.2,
+          w: 3.0,
+          h: 0.8,
+          fill: { color: '1a1a2e' },
+          line: { color: 'e94560', width: 2 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 9,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // ----------------- TIER 2: COORDINADOR GENERAL -----------------
+        slide.addText("⭐ COORDINADOR GENERAL\nComando de Emergencias\n(+ 2 Suplentes)", {
+          shape: 'rect',
+          x: 5.16,
+          y: 2.4,
+          w: 3.0,
+          h: 0.8,
+          fill: { color: '16213e' },
+          line: { color: '0f3460', width: 2 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 9,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // ----------------- TIER 3: COORDINADORES DE ÁREA -----------------
+        // C - Seguridad
+        slide.addText("🔒 COORD. DE SEGURIDAD\nControl Perimetral e Intrusión\n(+ 2 Suplentes)", {
+          shape: 'rect',
+          x: 0.8,
+          y: 3.6,
+          w: 2.4,
+          h: 0.8,
+          fill: { color: '0f3460' },
+          line: { color: 'e94560', width: 1.5 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 8,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // D - Médico
+        slide.addText("🏥 COORD. MÉDICO\nPrimeros Auxilios Fís. y Psic.\n(+ 2 Suplentes)", {
+          shape: 'rect',
+          x: 3.8,
+          y: 3.6,
+          w: 2.4,
+          h: 0.8,
+          fill: { color: '0f3460' },
+          line: { color: 'e94560', width: 1.5 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 8,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // E - Logística
+        slide.addText("📦 COORD. DE LOGÍSTICA\nServicios Críticos y Suministros\n(+ 2 Suplentes)", {
+          shape: 'rect',
+          x: 6.8,
+          y: 3.6,
+          w: 2.4,
+          h: 0.8,
+          fill: { color: '0f3460' },
+          line: { color: 'e94560', width: 1.5 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 8,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // F - Defensa Civil
+        slide.addText("🚨 COORD. DEFENSA CIVIL\nRescate y Evacuación\n(+ 2 Suplentes)", {
+          shape: 'rect',
+          x: 9.8,
+          y: 3.6,
+          w: 2.4,
+          h: 0.8,
+          fill: { color: '0f3460' },
+          line: { color: 'e94560', width: 1.5 },
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle',
+          fontSize: 8,
+          bold: true,
+          fontFace: 'Arial'
+        });
+
+        // ----------------- TIER 4: BRIGADAS Y ENLACES -----------------
+        const tier4 = [
+          { text: "👮 Brigada de Seguridad\nPrivada y Accesos", x: 0.5, w: 1.4 },
+          { text: "📞 Enlace con Policía\nCoordinación Externa", x: 2.1, w: 1.4 },
+          { text: "🩺 Brigada de Primeros\nAuxilios Físicos", x: 3.5, w: 1.4 },
+          { text: "🧠 Apoyo Psicológico\nPost-Evento", x: 5.1, w: 1.4 },
+          { text: "⚡ Brigada de Servicios\nGas, Electricidad y Agua", x: 6.5, w: 1.4 },
+          { text: "🔧 Brigada Mantenimiento\nGenerador y Criticos", x: 8.1, w: 1.4 },
+          { text: "🚨 Guías de Evacuación\nZonas A, B, C y D", x: 9.5, w: 1.1 },
+          { text: "🔥 Brigada Contra\nIncendios (Extintores)", x: 10.7, w: 1.1 },
+          { text: "🚒 Enlace con Bomberos\nCoordinación Externa", x: 11.9, w: 1.1 }
+        ];
+
+        tier4.forEach(item => {
+          slide.addText(item.text, {
+            shape: 'rect',
+            x: item.x,
+            y: 4.8,
+            w: item.w,
+            h: 0.8,
+            fill: { color: '1a1a2e' },
+            line: { color: '555555', width: 1 },
+            color: 'CCCCCC',
+            align: 'center',
+            valign: 'middle',
+            fontSize: 7.5,
+            fontFace: 'Arial'
+          });
+        });
+
+        // ----------------- CONNECTOR LINES -----------------
+        // Line from Tier 1 to Tier 2
+        slide.addShape('line', { x: 6.66, y: 2.0, w: 0, h: 0.4, line: { color: 'cbd5e1', width: 2 } });
+        
+        // Line from Tier 2 down
+        slide.addShape('line', { x: 6.66, y: 3.2, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        
+        // Tier 3 Horizontal line
+        slide.addShape('line', { x: 2.0, y: 3.4, w: 9.0, h: 0, line: { color: 'cbd5e1', width: 2 } });
+        
+        // Tier 3 Vertical drop lines
+        slide.addShape('line', { x: 2.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 5.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 8.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+        slide.addShape('line', { x: 11.0, y: 3.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 2 } });
+
+        // Tier 3 to Tier 4 drop lines
+        // Column C
+        slide.addShape('line', { x: 2.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 1.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 1.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 2.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+
+        // Column D
+        slide.addShape('line', { x: 5.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 4.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 4.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 5.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+
+        // Column E
+        slide.addShape('line', { x: 8.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 7.2, y: 4.6, w: 1.6, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 7.2, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 8.8, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+
+        // Column F
+        slide.addShape('line', { x: 11.0, y: 4.4, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 10.05, y: 4.6, w: 2.4, h: 0, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 10.05, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 11.25, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+        slide.addShape('line', { x: 12.45, y: 4.6, w: 0, h: 0.2, line: { color: 'cbd5e1', width: 1.5 } });
+
+        // Save the PPTX presentation
+        pres.writeFile({ fileName: `Organigrama_Contingencia_${plan?.client_name.replace(/\s+/g, '_')}.pptx` });
+      } catch (err) {
+        console.error("PPTX generation failed:", err);
+        alert("Ocurrió un error al generar la presentación. Intenta de nuevo.");
       }
-      DOMURL.revokeObjectURL(url);
-    };
-    img.src = url;
+    });
   };
 
   // Formats Templates Data
