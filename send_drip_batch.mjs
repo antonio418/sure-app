@@ -26,7 +26,7 @@ const resend = new Resend(resendApiKey);
 // =========================================================================
 // CONFIGURACIÓN DE LA CAMPAÑA DE GOTEO (DRIP / LEAK)
 // =========================================================================
-const BATCH_LIMIT = 15;            // Límite de correos a enviar hoy
+const BATCH_LIMIT = 19;            // Límite de correos a enviar hoy
 const DELAY_MINUTES = 4.5;         // Minutos de espera entre correos (4 minutos y 30 segundos)
 // =========================================================================
 
