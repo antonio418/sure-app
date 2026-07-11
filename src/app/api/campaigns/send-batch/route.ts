@@ -43,12 +43,14 @@ export async function POST(req: NextRequest) {
     let campaignGoal = '';
     let attachmentUrl = '';
     let projectName = '';
+    let projectLanguage = 'en';
     if (project_id) {
         const { data: project } = await supabaseAdmin.from('projects').select('*').eq('id', project_id).single();
         if (project) {
             campaignGoal = project.objective;
             attachmentUrl = project.attachment_url || '';
             projectName = project.name || '';
+            projectLanguage = project.language || 'en';
         }
     }
 
@@ -57,14 +59,69 @@ export async function POST(req: NextRequest) {
 
     // Process in parallel to save time
     await Promise.all(leads.map(async (lead) => {
+      const languageCode = projectLanguage;
+      
+      const languageMap: Record<string, { name: string; subject: string; body: string }> = {
+        es: {
+          name: 'ESPAÑOL',
+          subject: "SURE: Oportunidad Estratégica",
+          body: `Estimado ${lead.nombre_contacto || 'Equipo Directivo'},\n\nNos ponemos en contacto en relación a sus operaciones en el sector de ${lead.sector || 'comercio internacional'}.\n\nAtentamente,\nSURE Ecosystem`
+        },
+        en: {
+          name: 'INGLÉS',
+          subject: "SURE: Strategic Opportunity",
+          body: `Dear ${lead.nombre_contacto || 'Management Team'},\n\nWe are writing to you in relation to your operations in the ${lead.sector || 'international trade'} sector.\n\nBest regards,\nSURE Ecosystem`
+        },
+        fr: {
+          name: 'FRANCÉS',
+          subject: "SURE: Opportunité Stratégique",
+          body: `Cher ${lead.nombre_contacto || 'Équipe de Direction'},\n\nNous vous contactons concernant vos activités dans le secteur de ${lead.sector || 'commerce international'}.\n\nCordialement,\nSURE Ecosystem`
+        },
+        de: {
+          name: 'ALEMÁN',
+          subject: "SURE: Strategische Gelegenheit",
+          body: `Sehr geehrte(r) ${lead.nombre_contacto || 'Geschäftsführung'},\n\nwir kontaktieren Sie bezüglich Ihrer Aktivitäten im Bereich ${lead.sector || 'internationaler Handel'}.\n\nMit freundlichen Grüßen,\nSURE Ecosystem`
+        },
+        pt: {
+          name: 'PORTUGUÉS',
+          subject: "SURE: Oportunidade Estratégica",
+          body: `Prezado ${lead.nombre_contacto || 'Diretoria'},\n\nEntramos em contato em relação às suas operações no setor de ${lead.sector || 'comércio internacional'}.\n\nAtenciosamente,\nSURE Ecosystem`
+        },
+        zh: {
+          name: 'CHINO',
+          subject: "SURE: 战略合作机会",
+          body: `尊敬的 ${lead.nombre_contacto || '管理团队'}：\n\n我们写信给您是关于您在 ${lead.sector || '国际贸易'} 领域的业务运营。\n\n此致，\nSURE Ecosystem`
+        },
+        ru: {
+          name: 'RUSO',
+          subject: "SURE: Стратегическая возможность",
+          body: `Уважаемый ${lead.nombre_contacto || 'Руководитель'},\n\nМы обращаемся к вам по поводу вашей деятельности в секторе ${lead.sector || 'международная торговля'}.\n\nС уважением,\nSURE Ecosystem`
+        },
+        ar: {
+          name: 'ÁRABE',
+          subject: "SURE: فرصة استراتيجية",
+          body: `عزيزي ${lead.nombre_contacto || 'فريق الإدارة'}،\n\nنكتب إليكم بخصوص عملياتكم في قطاع ${lead.sector || 'التجارة الدولية'}.\n\nمع أطيب التحيات,\nSURE Ecosystem`
+        },
+        hi: {
+          name: 'HINDI',
+          subject: "SURE: रणनीतिक अवसर",
+          body: `प्रिय ${lead.nombre_contacto || 'प्रबंधन दल'},\n\nहम ${lead.sector || 'अंतरराष्ट्रीय व्यापार'} क्षेत्र में आपके संचालन के संबंध में आपसे संपर्क कर रहे हैं।\n\nसादर,\nSURE Ecosystem`
+        },
+        lt: {
+          name: 'LITUANO',
+          subject: "SURE: Strateginė galimybė",
+          body: `Gerb. ${lead.nombre_contacto || 'Vadovybe'},\n\nKreipiamės į jus dėl jūsų veiklos ${lead.sector || 'tarptautinės prekybos'} sektoriuje.\n\nPagarbiai,\nSURE Ecosystem`
+        }
+      };
+
+      const langInfo = languageMap[languageCode] || languageMap.en;
+      const languageName = langInfo.name;
+
       const isMetersProject = 
         /medidor|meter|cnel|ecuador|ansi/i.test(projectName || '') ||
         /medidor|meter|cnel|ecuador|ansi/i.test(campaignGoal || '');
-
-      const isSpanish = /español|espanol|spanish/i.test(campaignGoal || '');
-      const isPortuguese = /portugués|portugues|portuguese/i.test(campaignGoal || '');
-      const isLithuanian = /gerb|laba diena|marija ai|odontologijos|klinika|šypsenos/i.test(campaignGoal || '');
       
+      const isLithuanian = languageCode === 'lt';
       const isImportDiligence = !isLithuanian && !isMetersProject && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
       const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
       const isProcdiProject = 
@@ -72,13 +129,11 @@ export async function POST(req: NextRequest) {
         /clinica|clínica|medical|kaun|vilniu|marija|procdi|odontolog|dant|lietuva/i.test(projectName || '') ||
         /clinica|clínica|medical|kaun|vilniu|marija|procdi|odontolog|dant|lietuva|antonio@procdi\.com/i.test(campaignGoal || '');
       
-      const languageCode = isSpanish ? 'es' : (isPortuguese ? 'pt' : (isLithuanian ? 'lt' : 'en'));
-      const languageName = isSpanish ? 'ESPAÑOL' : (isPortuguese ? 'PORTUGUÉS' : (isLithuanian ? 'LITUANO' : 'INGLÉS'));
-
       const cleanEmpresaName = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim().toUpperCase() || 'TEAM';
 
-      let subject = "SURE: Oportunidad Estratégica";
-      let body = `Estimado ${lead.nombre_contacto || 'Equipo Directivo'},\n\nNos ponemos en contacto en relación a sus operaciones en el sector de ${lead.sector}.\n\nAtentamente,\nSURE Ecosystem`;
+      let subject = langInfo.subject;
+      let body = langInfo.body;
+
       let emailContentText = body; 
       let htmlBody: string | undefined = undefined;
 
@@ -276,14 +331,89 @@ Kaunas, Lithuania`;
              parsedEmails = JSON.parse(rawText.trim());
          } catch (e) {
              console.warn("Fallo al parsear JSON, usando respaldo.");
-             parsedEmails = {
-                 email_1_subject: "SURE: Oportunidad Estratégica",
-                 email_1_content: rawText,
-                 email_2_subject: "Re: SURE: Seguimiento",
-                 email_2_content: "¿Pudo revisar mi correo anterior?",
-                 email_3_subject: "Cerrando expediente",
-                 email_3_content: "Asumo que no es el momento. Saludos."
+             const fallbackMap: Record<string, any> = {
+                es: {
+                    email_1_subject: "SURE: Oportunidad Estratégica",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Seguimiento",
+                    email_2_content: "¿Pudo revisar mi correo anterior?",
+                    email_3_subject: "Cerrando expediente",
+                    email_3_content: "Asumo que no es el momento. Saludos."
+                },
+                en: {
+                    email_1_subject: "SURE: Strategic Opportunity",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Follow-up",
+                    email_2_content: "Were you able to review my previous email?",
+                    email_3_subject: "Closing file",
+                    email_3_content: "I assume it is not the right time. Best regards."
+                },
+                fr: {
+                    email_1_subject: "SURE: Opportunité Stratégique",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Suivi",
+                    email_2_content: "Avez-vous pu consulter mon e-mail précédent?",
+                    email_3_subject: "Fermeture du dossier",
+                    email_3_content: "J'en déduis que ce n'est pas le bon moment. Cordialement."
+                },
+                de: {
+                    email_1_subject: "SURE: Strategische Gelegenheit",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Nachfassung",
+                    email_2_content: "Konnten Sie meine vorherige E-Mail lesen?",
+                    email_3_subject: "Schließen der Akte",
+                    email_3_content: "Ich nehme an, es ist nicht der richtige Zeitpunkt. Mit freundlichen Grüßen."
+                },
+                pt: {
+                    email_1_subject: "SURE: Oportunidade Estratégica",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Acompanhamento",
+                    email_2_content: "Você pôde revisar meu e-mail anterior?",
+                    email_3_subject: "Fechando processo",
+                    email_3_content: "Assumo que não seja o momento. Atenciosamente."
+                },
+                zh: {
+                    email_1_subject: "SURE: 战略合作机会",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: 跟进",
+                    email_2_content: "您有时间阅读我之前的邮件吗？",
+                    email_3_subject: "关闭此项目",
+                    email_3_content: "我想目前可能不是合适的时间。祝好。"
+                },
+                ru: {
+                    email_1_subject: "SURE: Стратегическая возможность",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Напоминание",
+                    email_2_content: "Удалось ли вам ознакомиться с моим предыдущим письмом?",
+                    email_3_subject: "Закрытие дела",
+                    email_3_content: "Полагаю, сейчас неподходящее время. С уважением."
+                },
+                ar: {
+                    email_1_subject: "SURE: فرصة استراتيجية",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: متابعة",
+                    email_2_content: "هل تمكنت من مراجعة بريدي الإلكتروني السابق؟",
+                    email_3_subject: "إغلاق الملف",
+                    email_3_content: "أفترض أن الوقت ليس مناسباً الآن. مع أطيب التحيات."
+                },
+                hi: {
+                    email_1_subject: "SURE: रणनीतिक अवसर",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: अनुवर्ती",
+                    email_2_content: "क्या आप मेरे पिछले ईमेल की समीक्षा करने में सक्षम थे?",
+                    email_3_subject: "फाइल बंद करना",
+                    email_3_content: "मुझे लगता है कि यह सही समय नहीं है। सादर।"
+                },
+                lt: {
+                    email_1_subject: "SURE: Strateginė galimybė",
+                    email_1_content: rawText,
+                    email_2_subject: "Re: SURE: Tęsinys",
+                    email_2_content: "Ar turėjote galimybę peržiūrėti mano ankstesnį laišką?",
+                    email_3_subject: "Bylos uždarymas",
+                    email_3_content: "Darau prielaidą, kad dabar netinkamas metas. Pagarbiai."
+                }
              };
+             parsedEmails = fallbackMap[languageCode] || fallbackMap.en;
          }
          
          if (isImportDiligence) {

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
-import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive } from 'lucide-react';
+import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive, Send } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -42,7 +42,7 @@ export default function AlfredoAdminPage() {
   const [activeProjectId, setActiveProjectId] = useState<string>('');
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
-  const [newProject, setNewProject] = useState({ name: '', objective: '', originator: '', attachment_url: '' });
+  const [newProject, setNewProject] = useState({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' });
   const [creatingProject, setCreatingProject] = useState(false);
 
   // Leads State
@@ -50,6 +50,7 @@ export default function AlfredoAdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [dispatching, setDispatching] = useState(false);
   const [stats, setStats] = useState({ total: 0, new: 0, sent: 0, converted: 0, cold: 0 });
   const [activeDraft, setActiveDraft] = useState<any>(null);
   const [approving, setApproving] = useState(false);
@@ -132,7 +133,8 @@ export default function AlfredoAdminPage() {
     const payload: any = {
       name: newProject.name,
       objective: newProject.objective,
-      originator: newProject.originator
+      originator: newProject.originator,
+      language: newProject.language || 'en'
     };
 
     if (newProject.attachment_url.trim() !== '') {
@@ -152,7 +154,7 @@ export default function AlfredoAdminPage() {
       }
       setShowNewProjectModal(false);
       setEditingProjectId(null);
-      setNewProject({ name: '', objective: '', originator: '', attachment_url: '' });
+      setNewProject({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' });
     } catch (error: any) {
       alert("Error creando proyecto: " + error.message);
     } finally {
@@ -228,6 +230,34 @@ export default function AlfredoAdminPage() {
       alert(`Error ejecutando la campaña: ${error.message}`);
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleDispatchDrip = async () => {
+    if (!confirm("¿Deseas despachar un lote de correos aprobados ahora mismo?")) return;
+    setDispatching(true);
+    try {
+      const res = await fetch('/api/campaigns/dispatch-drip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ limit: 15 })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error despachando correos");
+      
+      if (data.dispatched > 0) {
+        alert(`Despacho completado con éxito. Se enviaron ${data.dispatched} correo(s).`);
+      } else {
+        alert(`No hay correos pendientes o listos para enviar en este momento: ${data.message || ''}`);
+      }
+      
+      if (activeProjectId) {
+        fetchLeads(activeProjectId);
+      }
+    } catch (error: any) {
+      alert(`Error en el despacho: ${error.message}`);
+    } finally {
+      setDispatching(false);
     }
   };
 
@@ -505,7 +535,7 @@ export default function AlfredoAdminPage() {
               <button 
                 onClick={() => {
                   setEditingProjectId(null);
-                  setNewProject({ name: '', objective: '', originator: '', attachment_url: '' });
+                  setNewProject({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' });
                   setShowNewProjectModal(true);
                 }}
                 className="bg-[var(--color-sure-accent)]/10 text-[var(--color-sure-accent)] hover:bg-[var(--color-sure-accent)] hover:text-black border border-[var(--color-sure-accent)]/50 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors ml-auto"
@@ -519,7 +549,8 @@ export default function AlfredoAdminPage() {
                       name: activeProject.name || '',
                       objective: activeProject.objective || '',
                       originator: activeProject.originator || '',
-                      attachment_url: activeProject.attachment_url || ''
+                      attachment_url: activeProject.attachment_url || '',
+                      language: activeProject.language || 'en'
                     });
                     setEditingProjectId(activeProject.id);
                     setShowNewProjectModal(true);
@@ -593,6 +624,14 @@ export default function AlfredoAdminPage() {
              <button onClick={triggerCampaign} disabled={sending || !activeProjectId} className="bg-[var(--color-sure-accent)] text-black hover:bg-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
                 Generar Correos (Draft)
+             </button>
+             <button 
+                onClick={handleDispatchDrip} 
+                disabled={dispatching || !activeProjectId} 
+                className="bg-blue-600 text-white hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.2)]"
+             >
+                {dispatching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                ⚡ Despachar Cola
              </button>
           </div>
         </div>
@@ -889,9 +928,28 @@ export default function AlfredoAdminPage() {
                     <input type="text" value={newProject.attachment_url} onChange={e => setNewProject({...newProject, attachment_url: e.target.value})} placeholder="Ej: https://drive.google.com/tu-loi.pdf" className="w-full bg-black/50 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" />
                     <p className="text-[10px] text-slate-500 mt-1">Pega el link de Google Drive o OneDrive. La IA lo insertará en el correo. Seguro contra Spam.</p>
                  </div>
+                 <div>
+                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Idioma de la Campaña</label>
+                    <select 
+                      value={newProject.language || 'en'} 
+                      onChange={e => setNewProject({...newProject, language: e.target.value})} 
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)] font-bold"
+                    >
+                       <option value="en">🇬🇧 Inglés (Default)</option>
+                       <option value="es">🇪🇸 Español</option>
+                       <option value="fr">🇫🇷 Francés</option>
+                       <option value="de">🇩🇪 Alemán</option>
+                       <option value="pt">🇧🇷 Portugués</option>
+                       <option value="zh">🇨🇳 Chino</option>
+                       <option value="ru">🇷🇺 Ruso</option>
+                       <option value="ar">🇸🇦 Árabe</option>
+                       <option value="hi">🇮🇳 Hindi</option>
+                       <option value="lt">🇱🇹 Lituano</option>
+                    </select>
+                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-6">
-                 <button onClick={() => { setShowNewProjectModal(false); setEditingProjectId(null); setNewProject({ name: '', objective: '', originator: '', attachment_url: '' }); }} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">Cancelar</button>
+                 <button onClick={() => { setShowNewProjectModal(false); setEditingProjectId(null); setNewProject({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' }); }} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">Cancelar</button>
                  <button onClick={handleCreateProject} disabled={creatingProject} className="bg-[var(--color-sure-accent)] text-black font-bold px-6 py-2 rounded-lg hover:bg-white transition-colors disabled:opacity-50">
                     {creatingProject ? 'Guardando...' : 'Guardar Proyecto'}
                  </button>
