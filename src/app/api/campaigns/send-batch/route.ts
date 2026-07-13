@@ -3,12 +3,16 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { GoogleGenAI } from '@google/genai';
 import { Resend } from 'resend';
 import { generateImportDiligenceHtml } from '@/lib/templates/import_diligence_campaign';
+import { requireUser } from '@/lib/authGuard';
 
 // Configure this to true if deploying to Vercel and you want this to run longer
-export const maxDuration = 60; 
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const { project_id, selectedLeads } = await req.json().catch(() => ({ project_id: '', selectedLeads: [] }));
     
     const apiKey = process.env.GEMINI_API_KEY;

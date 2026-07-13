@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { requireUser } from '@/lib/authGuard';
 
 export async function POST(req: NextRequest) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const { lead_id, subject, content } = await req.json();
     if (!lead_id) throw new Error("Falta lead_id");
 

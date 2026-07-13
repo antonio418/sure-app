@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { authedFetch } from '@/lib/apiClient';
 import { useRouter } from 'next/navigation';
 import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive, Send } from 'lucide-react';
 import Link from 'next/link';
@@ -171,7 +172,7 @@ export default function AlfredoAdminPage() {
          payload.content = activeDraft.email_1_content;
       }
       
-      const res = await fetch('/api/campaigns/approve-single', {
+      const res = await authedFetch('/api/campaigns/approve-single', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -196,7 +197,7 @@ export default function AlfredoAdminPage() {
     const text = await file.text();
     
     try {
-      const res = await fetch('/api/campaigns/upload', {
+      const res = await authedFetch('/api/campaigns/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ csvData: text, project_id: activeProjectId })
@@ -217,7 +218,7 @@ export default function AlfredoAdminPage() {
     if (!confirm("¿Generar y enviar borradores para los leads nuevos de ESTE proyecto?")) return;
     setSending(true);
     try {
-      const res = await fetch('/api/campaigns/send-batch', { 
+      const res = await authedFetch('/api/campaigns/send-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ project_id: activeProjectId })
@@ -237,9 +238,13 @@ export default function AlfredoAdminPage() {
     if (!confirm("¿Deseas despachar un lote de correos aprobados ahora mismo?")) return;
     setDispatching(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch('/api/campaigns/dispatch-drip', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
+        },
         body: JSON.stringify({ limit: 15 })
       });
       const data = await res.json();
@@ -266,7 +271,7 @@ export default function AlfredoAdminPage() {
     if (!confirm(`¿Estás seguro de eliminar ${selectedLeads.length} lead(s) seleccionado(s)?`)) return;
     setDeleting(true);
     try {
-      const res = await fetch('/api/campaigns/delete', {
+      const res = await authedFetch('/api/campaigns/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedLeads })
@@ -292,7 +297,7 @@ export default function AlfredoAdminPage() {
     
     setApprovingBatch(true);
     try {
-      const res = await fetch('/api/campaigns/approve-batch', {
+      const res = await authedFetch('/api/campaigns/approve-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lead_ids: draftsToApprove })
@@ -313,7 +318,7 @@ export default function AlfredoAdminPage() {
     
     setUpdatingStatus(true);
     try {
-      const res = await fetch('/api/campaigns/update-status-batch', {
+      const res = await authedFetch('/api/campaigns/update-status-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lead_ids: selectedLeads, status: newStatus })
@@ -340,7 +345,7 @@ export default function AlfredoAdminPage() {
 
       for (let i = 1; i <= iterationsNeeded; i++) {
         setCurrentIteration(i);
-        const res = await fetch('/api/alfredo', {
+        const res = await authedFetch('/api/alfredo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

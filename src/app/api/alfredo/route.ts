@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { ALFREDO_PROMPT } from '@/lib/agents/alfredo';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { requireUser } from '@/lib/authGuard';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,9 @@ export const fetchCache = 'force-no-store';
 
 export async function POST(req: NextRequest) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Falta la API Key de Google Gemini.' }, { status: 500 });

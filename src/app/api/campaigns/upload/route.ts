@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { requireUser } from '@/lib/authGuard';
 
 export async function POST(req: NextRequest) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const reqJson = await req.json();
     const csvData = reqJson.csvData;
     

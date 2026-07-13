@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { Resend } from 'resend';
+import { requireCronOrUser } from '@/lib/authGuard';
 
-export const maxDuration = 60; 
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
   return handleDispatch(req);
@@ -14,6 +15,10 @@ export async function POST(req: NextRequest) {
 
 async function handleDispatch(req: NextRequest) {
   try {
+    // Seguridad: solo el cron de Vercel (CRON_SECRET) o un usuario con sesión pueden disparar envíos.
+    const authError = await requireCronOrUser(req);
+    if (authError) return authError;
+
     const resendKey = process.env.RESEND_API_KEY;
 
     if (!resendKey) {
@@ -296,20 +301,23 @@ async function handleDispatch(req: NextRequest) {
           emailBody = lead.email_3_content;
         }
 
-        // Correos por defecto para SURE Forensics
-        let fromEmail = 'Alfredo - SURE Forensics <alfredo@sure-forensic.com>';
-        let bccEmail = 'alfredo@sure-forensic.com';
+        // Correos por defecto para Antonio Baronas - MB PROCDI
+        let fromEmail = 'Antonio Baronas - MB PROCDI <antonio@procdi.com>';
+        let bccEmail = 'antonio@procdi.com';
         let projectLanguage = 'en';
 
         if (lead.project_id) {
-           const { data: project } = await supabaseAdmin.from('projects').select('name, objective, language').eq('id', lead.project_id).single();
+           const { data: project } = await supabaseAdmin.from('projects').select('name, objective, language, originator').eq('id', lead.project_id).single();
            if (project) {
               projectLanguage = project.language || 'en';
               const nameLower = (project.name || '').toLowerCase();
               const objectiveLower = (project.objective || '').toLowerCase();
               const emailBodyLower = (emailBody || '').toLowerCase();
+              const originatorLower = (project.originator || '').toLowerCase();
               
               const isProcdiProject = 
+                  originatorLower.includes('antonio') ||
+                  originatorLower.includes('procdi') ||
                   nameLower.includes('clinica') || 
                   nameLower.includes('clínica') ||
                   nameLower.includes('medical') || 
@@ -320,6 +328,11 @@ async function handleDispatch(req: NextRequest) {
                   nameLower.includes('odontolog') ||
                   nameLower.includes('dant') ||
                   nameLower.includes('lietuva') ||
+                  nameLower.includes('medidor') ||
+                  nameLower.includes('meter') ||
+                  nameLower.includes('ansi') ||
+                  nameLower.includes('cnel') ||
+                  nameLower.includes('germanio') ||
                   objectiveLower.includes('procdi') ||
                   objectiveLower.includes('antonio@procdi.com') ||
                   objectiveLower.includes('marija') ||
