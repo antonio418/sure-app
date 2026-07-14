@@ -272,8 +272,8 @@ export default function DocumentProcessorPage() {
     setIsProcessing(true);
     try {
       // Store pending state in sessionStorage before OTP send for robust fallback redirection
-      sessionStorage.setItem('pending_price_id', selectedPrice || 'payg');
-      sessionStorage.setItem('pending_option', 'single');
+      localStorage.setItem('pending_price_id', selectedPrice || 'payg');
+      localStorage.setItem('pending_option', 'single');
 
       // Check if user is already logged in with this email to prevent redundant OTP rate limits
       const { data: { session } } = await supabase.auth.getSession();
@@ -378,12 +378,12 @@ export default function DocumentProcessorPage() {
         }
 
         // Check sessionStorage first (robust fallback for existing users)
-        const pendingPrice = sessionStorage.getItem('pending_price_id');
-        const pendingOption = sessionStorage.getItem('pending_option');
+        const pendingPrice = localStorage.getItem('pending_price_id');
+        const pendingOption = localStorage.getItem('pending_option');
         
         if (pendingPrice && pendingOption === 'single') {
-          sessionStorage.removeItem('pending_price_id');
-          sessionStorage.removeItem('pending_option');
+          localStorage.removeItem('pending_price_id');
+          localStorage.removeItem('pending_option');
           setWorkflowStep('uploader');
           handleBuy(pendingPrice === 'payg' ? null : pendingPrice);
           return;
@@ -421,7 +421,7 @@ export default function DocumentProcessorPage() {
                 
                 // Only redirect back to choice if they are currently inside the uploader view
                 // (prevents kicking them back to pricing selection during the registration/payment flow)
-                const pendingPrice = sessionStorage.getItem('pending_price_id');
+                const pendingPrice = localStorage.getItem('pending_price_id');
                 setWorkflowStep(prev => {
                   if (prev === 'uploader' && !pendingPrice) {
                     return 'choice';
@@ -1291,8 +1291,8 @@ DETALLES ADICIONALES: ${instructions || ''}
                   setIsProcessing(true);
                   try {
                     // Store pending state in sessionStorage
-                    sessionStorage.setItem('pending_price_id', selectedPrice || 'payg');
-                    sessionStorage.setItem('pending_option', 'single');
+                    localStorage.setItem('pending_price_id', selectedPrice || 'payg');
+                    localStorage.setItem('pending_option', 'single');
 
                     const res = await fetch('/api/auth/generate-testing-link', {
                       method: 'POST',

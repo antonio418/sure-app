@@ -1224,9 +1224,9 @@ export default function SurveyPage() {
                         setLoading(true);
                         try {
                           // Store pending state in sessionStorage
-                          sessionStorage.setItem('pending_price_id', priceId || 'payg');
-                          sessionStorage.setItem('pending_option', 'project');
-                          sessionStorage.setItem('pending_plan_id', pendingPlanId);
+                          localStorage.setItem('pending_price_id', priceId || 'payg');
+                          localStorage.setItem('pending_option', 'project');
+                          localStorage.setItem('pending_plan_id', pendingPlanId);
 
                           const res = await fetch('/api/auth/generate-testing-link', {
                             method: 'POST',

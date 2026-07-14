@@ -8,9 +8,9 @@ export default function SessionRedirector() {
     const checkRedirect = async (session: any) => {
       if (session?.user) {
         // Check sessionStorage first (robust fallback for existing users)
-        const pendingPrice = sessionStorage.getItem('pending_price_id');
-        const pendingOption = sessionStorage.getItem('pending_option');
-        const pendingPlanId = sessionStorage.getItem('pending_plan_id');
+        const pendingPrice = localStorage.getItem('pending_price_id');
+        const pendingOption = localStorage.getItem('pending_option');
+        const pendingPlanId = localStorage.getItem('pending_plan_id');
 
         if (pendingPrice) {
           if (pendingOption === 'single') {
@@ -19,6 +19,11 @@ export default function SessionRedirector() {
             }
             return;
           } else if (pendingOption === 'project' && pendingPlanId) {
+            // Clear keys for project redirect since destination page (/rma/plan/[id]) does not consume them
+            localStorage.removeItem('pending_price_id');
+            localStorage.removeItem('pending_option');
+            localStorage.removeItem('pending_plan_id');
+            
             if (window.location.pathname !== `/rma/plan/${pendingPlanId}`) {
               window.location.href = `/rma/plan/${pendingPlanId}`;
             }
@@ -29,6 +34,11 @@ export default function SessionRedirector() {
         // Fallback to metadata
         const meta = session.user.user_metadata;
         if (meta?.pending_price_id) {
+          // Clear metadata first to avoid loop
+          supabase.auth.updateUser({
+            data: { pending_price_id: null, pending_option: null, pending_plan_id: null }
+          });
+
           if (meta.pending_option === 'single') {
             if (window.location.pathname !== '/auditoria-rma') {
               window.location.href = '/auditoria-rma';
