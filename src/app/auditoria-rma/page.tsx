@@ -768,16 +768,95 @@ export default function DocumentProcessorPage() {
     setTimeout(() => setCopiedFileId(null), 2000);
   };
 
-  // Start the final audit process (simulation)
-  const runFullAudit = () => {
+  const [finalReport, setFinalReport] = useState<any>(null);
+
+  // Start the final audit process (real API call)
+  const runFullAudit = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      // Compile documents markdown
+      let compiledMarkdown = '';
+      if (selectedMode === 'single') {
+        compiledMarkdown = filesSingle
+          .map((f, i) => `--- DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+      } else {
+        const refDocs = filesRef
+          .map((f, i) => `--- REFERENCE DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+        const evalDocs = filesEval
+          .map((f, i) => `--- EVALUATION DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+        compiledMarkdown = `[REFERENCE BASELINE DOCUMENTS]\n${refDocs}\n\n[EVALUATION PROPOSALS / SCHEMES TO COMPARE]\n${evalDocs}`;
+      }
+
+      const userContextStr = `
+PROYECTO: ${projectNumber || 'No especificado'}
+CLIENTE/COMPRADOR: ${client || 'No especificado'}
+PARTICIPANTE/EMISOR: ${participant || 'No especificado'}
+MONTO: ${amount || 'No especificado'} ${currency || 'USD'}
+ETAPA: ${activeStage || 'No especificada'}
+DETALLES ADICIONALES: ${instructions || ''}
+`;
+
+      const formData = new FormData();
+      formData.append('agent', 'consolidator');
+      formData.append('targetLanguage', language === 'es' ? 'es' : 'en');
+      formData.append('previousReports', compiledMarkdown);
+      formData.append('userContext', userContextStr);
+      formData.append('analysisMode', selectedMode);
+      if (email) formData.append('email', email);
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze documents');
+      }
+
+      if (data.report) {
+        const jsonMatch = data.report.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          parsed.dateGenerated = new Date().toLocaleDateString();
+          setFinalReport(parsed);
+          setProcessingSuccess(true);
+          
+          // Deduct credits from user locally
+          setCredits(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+          
+          // Deduct credits in database
+          if (email) {
+            await fetch('/api/credits', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            }).catch(e => console.error("Credit deduction sync error:", e));
+          }
+        } else {
+          throw new Error("Could not parse JSON report structure from AI output.");
+        }
+      } else {
+        throw new Error("No report returned by AI service.");
+      }
+    } catch (error: any) {
+      console.error("AI Analysis Failure:", error);
+      alert(language === 'es' 
+        ? "Fallo en el Análisis: " + error.message 
+        : "Analysis Failure: " + error.message
+      );
+    } finally {
       setIsProcessing(false);
-      setProcessingSuccess(true);
-    }, 3000);
+    }
   };
 
   const getFinalReportData = () => {
+    if (finalReport) {
+      return finalReport;
+    }
     const hasBatialFile = 
       filesSingle.some(f => f.name.toLowerCase().includes('batial')) ||
       filesRef.some(f => f.name.toLowerCase().includes('batial')) ||
