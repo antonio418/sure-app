@@ -1204,14 +1204,6 @@ export default function DocumentProcessorPage() {
               </div>
 
               <button
-                type="submit"
-                disabled={isProcessing}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer mt-4"
-              >
-                {isProcessing ? 'Enviando...' : 'Confirmar Email y Proceder al Pago'}
-              </button>
-
-              <button
                 type="button"
                 onClick={async () => {
                   setIsProcessing(true);
@@ -1258,9 +1250,17 @@ export default function DocumentProcessorPage() {
                   }
                 }}
                 disabled={isProcessing}
-                className="w-full mt-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-amber-500/20 shadow-md"
+                className="w-full mb-3 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 border border-amber-400/30"
               >
                 ⚙️ [Pruebas] Iniciar Sesión Directo e ir a Stripe (Bypass Email)
+              </button>
+
+              <button
+                type="submit"
+                disabled={isProcessing}
+                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer"
+              >
+                {isProcessing ? 'Enviando...' : 'Confirmar Email y Proceder al Pago'}
               </button>
             </form>
           </div>
