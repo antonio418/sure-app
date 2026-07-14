@@ -1179,15 +1179,46 @@ export default function DocumentProcessorPage() {
               </button>
 
               <button
-                  type="button"
-                  onClick={() => {
-                    sessionStorage.setItem('rma_payment_success', 'true');
-                    setWorkflowStep('uploader');
-                  }}
-                  className="w-full mt-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-[#00e5ff] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-[#00e5ff]/20 shadow-md"
-                >
-                  ⚙️ [Provisional] Obviar Pago y Entrar al Cargador (Bypass Stripe)
-                </button>
+                type="button"
+                onClick={async () => {
+                  setIsProcessing(true);
+                  try {
+                    // Store pending state in sessionStorage
+                    sessionStorage.setItem('pending_price_id', selectedPrice || 'payg');
+                    sessionStorage.setItem('pending_option', 'single');
+
+                    const res = await fetch('/api/auth/generate-testing-link', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: clientEmail.trim(),
+                        companyName,
+                        taxId,
+                        clientFullName,
+                        clientIdNum,
+                        clientPhone,
+                        selectedPrice: selectedPrice || 'payg',
+                        pendingOption: 'single'
+                      })
+                    });
+                    const data = await res.json();
+                    if (data.link) {
+                      window.location.href = data.link;
+                      return;
+                    } else {
+                      throw new Error(data.error || 'Failed to generate testing link');
+                    }
+                  } catch (linkErr: any) {
+                    alert("Error al generar enlace de pruebas: " + linkErr.message);
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+                disabled={isProcessing}
+                className="w-full mt-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-amber-500/20 shadow-md"
+              >
+                ⚙️ [Pruebas] Iniciar Sesión Directo e ir a Stripe (Bypass Email)
+              </button>
             </form>
           </div>
         )}

@@ -1199,12 +1199,46 @@ export default function SurveyPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        router.push(`/rma/plan/${pendingPlanId}?priceId=${priceId || 'payg'}`);
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          // Store pending state in sessionStorage
+                          sessionStorage.setItem('pending_price_id', priceId || 'payg');
+                          sessionStorage.setItem('pending_option', 'project');
+                          sessionStorage.setItem('pending_plan_id', pendingPlanId);
+
+                          const res = await fetch('/api/auth/generate-testing-link', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              email: clientEmail.trim(),
+                              companyName,
+                              taxId,
+                              clientFullName,
+                              clientIdNum,
+                              clientPhone,
+                              selectedPrice: priceId || 'payg',
+                              pendingOption: 'project',
+                              pendingPlanId
+                            })
+                          });
+                          const data = await res.json();
+                          if (data.link) {
+                            window.location.href = data.link;
+                            return;
+                          } else {
+                            throw new Error(data.error || 'Failed to generate testing link');
+                          }
+                        } catch (linkErr: any) {
+                          alert("Error al generar enlace de pruebas: " + linkErr.message);
+                        } finally {
+                          setLoading(false);
+                        }
                       }}
-                      className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-[#00e5ff] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-[#00e5ff]/20 shadow-sm"
+                      disabled={loading}
+                      className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-amber-500/20 shadow-sm"
                     >
-                      ⚙️ [Provisional] Ir a Pasarela Stripe Directo
+                      ⚙️ [Pruebas] Iniciar Sesión Directo e ir a Stripe (Bypass Email)
                     </button>
                   </div>
               </form>
