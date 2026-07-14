@@ -162,6 +162,8 @@ const localTranslations: Record<string, Record<string, string>> = {
     cardProjectTitle: '2. Project Assessment Tool',
     cardProjectDesc: 'Continuous workspace for risk management and contingency plans in major infrastructure, commodities, and massive bidding projects.',
     btnBackWizard: 'Back',
+    btnPayAndStartSingle: 'Pay $50 to Start Audit',
+    btnPayAndStartComparative: 'Buy Plan to Start Comparison',
     plansSingleTitle: 'Select Your Single Case Plan',
     basicSub: 'Pay per use',
     basicF1: '$50.00 per operation',
@@ -1962,14 +1964,11 @@ export default function DocumentProcessorPage() {
               : filesRef.some(f => f.status === 'uploading' || f.status === 'parsing') || 
                 filesEval.some(f => f.status === 'uploading' || f.status === 'parsing');
                 
-            const hasCredits = (credits ?? 0) > 0;
-            const buttonAction = !hasCredits ? () => handleBuy(selectedPrice || null) : runFullAudit;
-
             return (
               <button
-                onClick={buttonAction}
+                onClick={runFullAudit}
                 disabled={isProcessing || isAnyFileParsing}
-                className="px-10 py-5 rounded-xl font-black text-lg md:text-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none animate-pulse-subtle"
+                className="px-10 py-5 rounded-xl font-black text-lg md:text-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none"
               >
                 {isProcessing ? (
                   <>
@@ -1980,11 +1979,6 @@ export default function DocumentProcessorPage() {
                   <>
                     <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
                     <span>Convirtiendo a Markdown...</span>
-                  </>
-                ) : !hasCredits ? (
-                  <>
-                    <span>{selectedMode === 'single' ? lt.btnPayAndStartSingle : lt.btnPayAndStartComparative}</span>
-                    <CreditCard className="w-5 h-5" />
                   </>
                 ) : (
                   <>
@@ -2006,11 +2000,25 @@ export default function DocumentProcessorPage() {
             <p className="text-sm text-slate-400 mb-6">{lt.processingMessage}</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mt-4">
-              <RMAPdfGenerator 
-                finalReport={getFinalReportData()}
-                buttonColor="bg-emerald-500 hover:bg-emerald-400 font-extrabold w-full"
-                language={language}
-              />
+              {(credits ?? 0) > 0 || localStorage.getItem('rma_payment_success') === 'true' ? (
+                <RMAPdfGenerator 
+                  finalReport={getFinalReportData()}
+                  buttonColor="bg-emerald-500 hover:bg-emerald-400 font-extrabold w-full"
+                  language={language}
+                />
+              ) : (
+                <button
+                  onClick={() => handleBuy(selectedPrice || null)}
+                  className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>
+                    {selectedPrice && selectedPrice !== 'payg'
+                      ? (language === 'es' ? 'Comprar Plan para Descargar PDF' : 'Buy Plan to Download PDF')
+                      : (language === 'es' ? 'Pagar $50 para Descargar PDF' : 'Pay $50 to Download PDF')}
+                  </span>
+                </button>
+              )}
               <button 
                 onClick={async () => {
                   try {
