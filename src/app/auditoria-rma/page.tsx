@@ -297,23 +297,34 @@ export default function DocumentProcessorPage() {
       if (err.message?.toLowerCase().includes('rate limit')) {
         const proceed = window.confirm(
           "Límite de correos de Supabase excedido para este período.\n\n" +
-          "¿Deseas simular la confirmación de correo e ingresar directamente al cargador para continuar tus pruebas?"
+          "¿Deseas generar tu enlace de inicio de sesión de pruebas para confirmar tu cuenta y continuar directamente al pago de Stripe?"
         );
         if (proceed) {
-          localStorage.setItem('rma_payment_success', 'true');
           try {
-            await supabase.auth.updateUser({
-              data: { pending_price_id: null, pending_option: null }
+            const res = await fetch('/api/auth/generate-testing-link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: clientEmail.trim(),
+                companyName,
+                taxId,
+                clientFullName,
+                clientIdNum,
+                clientPhone,
+                selectedPrice: selectedPrice || 'payg',
+                pendingOption: 'single'
+              })
             });
-          } catch (e) {}
-          const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
-          if (isProjectPrice) {
-            setSelectedMode('comparative');
-          } else {
-            setSelectedMode('single');
+            const data = await res.json();
+            if (data.link) {
+              window.location.href = data.link;
+              return;
+            } else {
+              throw new Error(data.error || 'Failed to generate testing link');
+            }
+          } catch (linkErr: any) {
+            alert("Error al generar enlace de pruebas: " + linkErr.message);
           }
-          setWorkflowStep('uploader');
-          return;
         }
       }
       alert(`Error al enviar el enlace mágico: ${err.message}`);

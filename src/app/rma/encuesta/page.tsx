@@ -267,11 +267,35 @@ export default function SurveyPage() {
       if (err.message?.toLowerCase().includes('rate limit')) {
         const proceed = window.confirm(
           "Límite de correos de Supabase excedido para este período.\n\n" +
-          "¿Deseas simular la confirmación e ir directamente al Plan de Contingencia para continuar tus pruebas?"
+          "¿Deseas generar tu enlace de inicio de sesión de pruebas para confirmar tu cuenta y continuar directamente al pago de Stripe?"
         );
         if (proceed) {
-          router.push(`/rma/plan/${pendingPlanId}?success=true`);
-          return;
+          try {
+            const res = await fetch('/api/auth/generate-testing-link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: clientEmail.trim(),
+                companyName,
+                taxId,
+                clientFullName,
+                clientIdNum,
+                clientPhone,
+                selectedPrice: priceId || 'payg',
+                pendingOption: 'project',
+                pendingPlanId
+              })
+            });
+            const data = await res.json();
+            if (data.link) {
+              window.location.href = data.link;
+              return;
+            } else {
+              throw new Error(data.error || 'Failed to generate testing link');
+            }
+          } catch (linkErr: any) {
+            alert("Error al generar enlace de pruebas: " + linkErr.message);
+          }
         }
       }
       alert(`Error al enviar el enlace mágico: ${err.message}`);
