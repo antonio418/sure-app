@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import { 
   ShieldCheck, ArrowLeft, Upload, FileText, CheckCircle2, 
   AlertTriangle, Trash2, ArrowRight, Loader2, HelpCircle,
-  Eye, Copy, Check, X, Cpu
+  Eye, Copy, Check, X, Cpu, CreditCard
 } from 'lucide-react';
 
 // Local translations mapping for self-contained language adaptability
@@ -1962,11 +1962,14 @@ export default function DocumentProcessorPage() {
               : filesRef.some(f => f.status === 'uploading' || f.status === 'parsing') || 
                 filesEval.some(f => f.status === 'uploading' || f.status === 'parsing');
                 
+            const hasCredits = (credits ?? 0) > 0;
+            const buttonAction = !hasCredits ? () => handleBuy(selectedPrice || null) : runFullAudit;
+
             return (
               <button
-                onClick={runFullAudit}
+                onClick={buttonAction}
                 disabled={isProcessing || isAnyFileParsing}
-                className="px-10 py-5 rounded-xl font-black text-lg md:text-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none"
+                className="px-10 py-5 rounded-xl font-black text-lg md:text-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none animate-pulse-subtle"
               >
                 {isProcessing ? (
                   <>
@@ -1977,6 +1980,11 @@ export default function DocumentProcessorPage() {
                   <>
                     <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
                     <span>Convirtiendo a Markdown...</span>
+                  </>
+                ) : !hasCredits ? (
+                  <>
+                    <span>{selectedMode === 'single' ? lt.btnPayAndStartSingle : lt.btnPayAndStartComparative}</span>
+                    <CreditCard className="w-5 h-5" />
                   </>
                 ) : (
                   <>
