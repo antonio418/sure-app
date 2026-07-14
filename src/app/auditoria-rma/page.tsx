@@ -322,6 +322,14 @@ export default function DocumentProcessorPage() {
       localStorage.removeItem('rma_payment_success'); // Clean up legacy localstorage bypass key
       const params = new URLSearchParams(window.location.search);
       const successParam = params.get('success');
+      const cancelParam = params.get('cancel');
+
+      if (successParam === 'true' || cancelParam === 'true') {
+        localStorage.removeItem('pending_price_id');
+        localStorage.removeItem('pending_option');
+        localStorage.removeItem('pending_plan_id');
+      }
+
       if (successParam === 'true') {
         sessionStorage.setItem('rma_payment_success', 'true');
         setWorkflowStep('uploader');
