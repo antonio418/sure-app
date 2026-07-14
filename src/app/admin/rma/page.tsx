@@ -104,9 +104,18 @@ export default function RMAPage() {
 
   const uploadFiles = async () => {
     addLog(t('uploading'));
+    const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_SIZE = 25 * 1024 * 1024; // 25 MB
     const uploadedPaths = [];
     for (const file of files) {
-      const filePath = `${Date.now()}_${file.name}`;
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        throw new Error(`Tipo de archivo no permitido (${file.name}). Solo PDF o imágenes.`);
+      }
+      if (file.size > MAX_SIZE) {
+        throw new Error(`El archivo ${file.name} supera el límite de 25 MB.`);
+      }
+      const ext = file.name.split('.').pop() || 'bin';
+      const filePath = `${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('temp_dossiers').upload(filePath, file);
       if (error) {
          addLog(t('upload_error', { file: file.name, msg: error.message }));

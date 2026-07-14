@@ -19,13 +19,44 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
+// Límite de intentos best-effort (en memoria, por instancia).
+// Para un límite robusto en producción conviene un store externo (Redis/Upstash).
+const registerAttempts = new Map<string, { count: number; ts: number }>();
+const RL_WINDOW_MS = 10 * 60 * 1000; // 10 minutos
+const RL_MAX = 5;                     // máximo 5 registros por IP en la ventana
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const rec = registerAttempts.get(ip);
+  if (!rec || now - rec.ts > RL_WINDOW_MS) {
+    registerAttempts.set(ip, { count: 1, ts: now });
+    return false;
+  }
+  rec.count++;
+  return rec.count > RL_MAX;
+}
+
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ error: 'Demasiados intentos de registro. Inténtalo de nuevo en unos minutos.' }, { status: 429 });
+    }
+
     const body = await req.json();
     const { email, password, entityType, fullName, companyName, taxId, pvm, country } = body;
 
     if (!email || !password || !entityType) {
       return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 });
+    }
+
+    // Validación básica de formato de correo y contraseña
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'El correo no tiene un formato válido.' }, { status: 400 });
+    }
+    if (typeof password !== 'string' || password.length < 8) {
+      return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, { status: 400 });
     }
 
     // 1. Crear usuario en Supabase Auth

@@ -3,6 +3,7 @@ import { Montserrat, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import AIWidget from "@/components/ui/AIWidget";
+import SessionRedirector from "@/components/ui/SessionRedirector";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -37,6 +38,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
+          <SessionRedirector />
           {children}
           <AIWidget />
         </LanguageProvider>

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Falta la API Key de Anthropic (Claude) en el servidor.' }, { status: 500 });
     }
 
-    const { planId, language, layout_url } = await req.json();
+    const { planId, language, layout_url, special_details } = await req.json();
 
     if (!planId) {
       return NextResponse.json({ error: 'Falta el parámetro requerido: planId.' }, { status: 400 });
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     const updatedResponses = {
       ...survey_responses,
       layout_url: layout_url || survey_responses.layout_url || null,
+      special_details: special_details || survey_responses.special_details || null,
       status: 'review' // Cambiar estado a "review" (Borrador de Revisión)
     };
 

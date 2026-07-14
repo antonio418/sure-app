@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -11,6 +13,61 @@ import {
 } from 'lucide-react';
 
 // Estructura de textos base de la interfaz (en Español)
+const BASE_UI_TEXTS_EN = {
+  title: "Contingency Planner",
+  step: "Step",
+  of: "of",
+  back: "Back",
+  next: "Next",
+  submit: "Generate Free Proposal",
+  loadingTitle: "Drafting Executive Proposal...",
+  helpHeader: "Context Window and Help",
+  helpIntro: "This panel helps you complete each section with practical tips and real examples.",
+  
+  step1Title: "1. General Community / Entity Data",
+  clientNameLabel: "Community, Entity or Client Name",
+  clientNamePlaceholder: "e.g. Avila Terraces, Metalworks Center, Medical Center",
+  clientTypeLabel: "Entity Type",
+  locationLabel: "Location and Environment",
+  locationPlaceholder: "e.g. Sucre Municipality, Caracas, bordered by highway",
+  limitsLabel: "Physical Boundaries and Borders",
+  limitsPlaceholder: "North: X Street, South: Y River, West: Z Avenue",
+  
+  step1HelpTitle: "About General Data",
+  step1HelpBody: "Accurately establishing the name and type of entity helps the AI select the correct regulatory framework and protocols (for example, the protocols for an industrial factory with multiple buildings are very different from those of a residential condominium). Defining the location and boundaries allows the identification of environmental threats (such as forests, highways, or rivers).",
+  step1HelpExample: "Example: For a residential neighborhood: 'North: El Avila National Park (forest fire risk), South: Highway distributor (risk of protests and road closures)'.",
+
+  step2Title: "2. Population and Critical Services",
+  populationLabel: "Estimated Population (Families, Employees or Residents)",
+  populationPlaceholder: "e.g. 125 buildings (4052 apartments) / 12,000 people",
+  servicesLabel: "Critical Services to Protect (Select all that apply)",
+  
+  step2HelpTitle: "About Population and Services",
+  step2HelpBody: "Knowing population density helps us scale the required health resources, stretchers, and logistics. Identifying critical services to protect allows the AI to design protocols for the rapid shutdown of gas, electricity, or water in the event of earthquakes or fires, mitigating secondary explosion risks.",
+  step2HelpExample: "Example: In a residential building, 'Drinking Water / Pumping System' and 'Centralized Domestic Gas' are the most vulnerable services during seismic activity.",
+
+  step3Title: "3. Threats and Resources",
+  threatsLabel: "Main Threats of Concern",
+  resourcesLabel: "Available Material Resources",
+  securityLabel: "Private Security / Watchmen?",
+  medicalLabel: "Resident Doctors / Psychologists / Nurses?",
+  
+  step3HelpTitle: "About Threats and Resources",
+  step3HelpBody: "Each threat requires a different evacuation response. For example, during floods, evacuation is vertical (upper floors), while during earthquakes it is to open areas. Knowing what resources you have (radios, generators, extinguishers) and the presence of medical or security personnel allows assigning specific roles in the organization chart without incurring extra costs.",
+  step3HelpExample: "Example: If you have 'VHF Radio Systems', the communication plan will prioritize these autonomous channels if cell phone service collapses.",
+
+  step4Title: "4. Communication and Special Details",
+  commsLabel: "Priority communication channels for alerts",
+  detailsLabel: "Special Requirements or Details (Optional)",
+  detailsPlaceholder: "e.g. 'We have a nearby river on the southern boundary that tends to overflow if it rains for more than 5 hours straight', or 'We want special emphasis on seismic evacuation for people using walkers'.",
+  
+  step4HelpTitle: "About Communication and Details",
+  step4HelpBody: "Communication is the backbone of any contingency plan. Prioritizing the right channels ensures that early warnings reach everyone. Any special detail (such as a creek prone to flooding or highly vulnerable elderly residents) allows the AI to inject a section of prioritized and customized attention for your case.",
+  step4HelpExample: "Example: In large communities, a WhatsApp group acts as the primary channel, but a backup acoustic channel (such as megaphones or whistles) and door-to-door visits must be planned.",
+  preRecordedLanguagesLabel: "In what languages do you want the pre-recorded emergency broadcast messages?",
+  preRecordedLanguagesPlaceholder: "e.g. English, Spanish and Lithuanian..."
+};
+
 const BASE_UI_TEXTS = {
   title: "Planificador de Contingencia",
   step: "Paso",
@@ -147,7 +204,71 @@ const WORLD_LANGUAGES = [
 
 export default function SurveyPage() {
   const router = useRouter();
+  const { language } = useLanguage();
   const [step, setStep] = useState(1);
+
+  // Client confirmation states (Otp / Magic Link)
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [taxId, setTaxId] = useState('');
+  const [clientFullName, setClientFullName] = useState('');
+  const [clientIdNum, setClientIdNum] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
+  const [clientEmailConfirm, setClientEmailConfirm] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [pendingPlanId, setPendingPlanId] = useState('');
+  const [priceId, setPriceId] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setPriceId(params.get('priceId') || '');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (language === 'en') {
+      setSelectedLanguage("English (Inglés)");
+      setUiTexts(BASE_UI_TEXTS_EN);
+    } else {
+      setSelectedLanguage("Español");
+      setUiTexts(BASE_UI_TEXTS);
+    }
+  }, [language]);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (clientEmail.toLowerCase().trim() !== clientEmailConfirm.toLowerCase().trim()) {
+      alert("Los correos electrónicos no coinciden.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: clientEmail.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/rma/plan/${pendingPlanId}`,
+          data: {
+            company_name: companyName,
+            tax_id: taxId,
+            full_name: clientFullName,
+            client_id: clientIdNum,
+            phone: clientPhone,
+            pending_price_id: priceId || 'payg',
+            pending_option: 'project',
+            pending_plan_id: pendingPlanId
+          }
+        }
+      });
+      if (otpErr) throw otpErr;
+      setOtpSent(true);
+    } catch (err: any) {
+      alert(`Error al enviar el enlace mágico: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Procesando datos diagnósticos...");
   const [error, setError] = useState<string | null>(null);
@@ -347,7 +468,14 @@ export default function SurveyPage() {
         throw new Error(data.error || 'Ocurrió un error al generar la propuesta.');
       }
 
-      router.push(`/rma/plan/${data.planId}`);
+      // Check if session exists
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push(`/rma/plan/${data.planId}?priceId=${priceId}`);
+      } else {
+        setPendingPlanId(data.planId);
+        setShowConfirmModal(true);
+      }
 
     } catch (err: any) {
       console.error(err);
@@ -901,6 +1029,155 @@ export default function SurveyPage() {
 
         </div>
       </section>
+
+      {/* Modal de confirmación de email y datos del cliente (Magic Link) */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#0a1128]/95 border border-white/15 p-8 rounded-3xl max-w-lg w-full relative shadow-2xl overflow-y-auto max-h-[90vh]">
+            <button 
+              onClick={() => {
+                setShowConfirmModal(false);
+                setLoading(false);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {otpSent ? (
+              <div className="text-center py-6 space-y-4">
+                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl">✓</div>
+                <h3 className="text-xl font-black text-white">¡Enlace de Confirmación Enviado!</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Hemos enviado un enlace de inicio de sesión a <strong>{clientEmail}</strong>. 
+                  Por favor, abre el correo y haz clic en el enlace para confirmar tu cuenta y continuar directamente al pago de tu suscripción en Stripe.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-black text-white">Información del Cliente y Facturación</h3>
+                  <p className="text-xs text-slate-400 mt-1">Completa tus datos para confirmar tu cuenta y proceder al pago de tu plan.</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre de la Empresa (Opcional)</label>
+                    <input 
+                      type="text" 
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Ej. Mi Compañía S.A."
+                      className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nº de Registro Fiscal (Opcional)</label>
+                    <input 
+                      type="text" 
+                      value={taxId}
+                      onChange={(e) => setTaxId(e.target.value)}
+                      placeholder="Ej. RUC / NIF / Tax ID"
+                      className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre y Apellido *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={clientFullName}
+                        onChange={(e) => setClientFullName(e.target.value)}
+                        placeholder="Ej. Juan Pérez"
+                        className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nº de Identidad *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={clientIdNum}
+                        onChange={(e) => setClientIdNum(e.target.value)}
+                        placeholder="Ej. DNI / Cédula"
+                        className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Número de Teléfono *</label>
+                    <input 
+                      type="tel" 
+                      required
+                      value={clientPhone}
+                      onChange={(e) => setClientPhone(e.target.value)}
+                      placeholder="Ej. +370 600 00000"
+                      className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico *</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={clientEmail}
+                      onChange={(e) => setClientEmail(e.target.value)}
+                      placeholder="correo@empresa.com"
+                      className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Confirmar Correo Electrónico *</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={clientEmailConfirm}
+                      onChange={(e) => setClientEmailConfirm(e.target.value)}
+                      placeholder="Repetir correo electrónico"
+                      className="w-full bg-[#050a15] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00e5ff] focus:ring-1 focus:ring-[#00e5ff]"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-gradient-to-r from-[#00e5ff] to-cyan-500 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer mt-4"
+                >
+                  {loading ? 'Confirmando...' : 'Confirmar Email y Proceder al Pago'}
+                </button>
+
+                <div className="flex flex-col gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(`/rma/plan/${pendingPlanId}?success=true`);
+                      }}
+                      className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-[#00e5ff] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-[#00e5ff]/20 shadow-sm"
+                    >
+                      ⚙️ [Provisional] Obviar Pago e Ir al Plan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(`/rma/plan/${pendingPlanId}?priceId=${priceId || 'payg'}`);
+                      }}
+                      className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-[#00e5ff] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-[#00e5ff]/20 shadow-sm"
+                    >
+                      ⚙️ [Provisional] Ir a Pasarela Stripe Directo
+                    </button>
+                  </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="w-full py-8 text-center text-xs text-slate-500 border-t border-white/5 bg-[#0a1128]/40">

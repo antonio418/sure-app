@@ -81,7 +81,7 @@ const HYBRID_PRICING_MAP: Record<string, { flat: string; overage: string }> = {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { priceId, successUrl, cancelUrl } = body;
+    const { priceId, successUrl, cancelUrl, customerEmail } = body;
 
     const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'https://sureforensic.com';
     const defaultSuccessUrl = `${origin}/intake`;
@@ -93,6 +93,10 @@ export async function POST(req: Request) {
       cancel_url: cancelUrl || defaultCancelUrl,
       allow_promotion_codes: true,
     };
+
+    if (customerEmail) {
+      sessionConfig.customer_email = customerEmail;
+    }
 
     if (priceId) {
       sessionConfig.mode = 'subscription';
@@ -142,8 +146,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ];
-      sessionConfig.success_url = `${origin}/admin?success=true&full_pipeline=true&session_id={CHECKOUT_SESSION_ID}`;
-      sessionConfig.cancel_url = `${origin}/admin?canceled=true`;
+      sessionConfig.success_url = successUrl || `${origin}/admin?success=true&full_pipeline=true&session_id={CHECKOUT_SESSION_ID}`;
+      sessionConfig.cancel_url = cancelUrl || `${origin}/admin?canceled=true`;
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);

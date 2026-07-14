@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { authedFetch } from '@/lib/apiClient';
 import { ShieldCheck, Plus, Trash2, Key, Calendar, Mail, Loader2, Target } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -56,7 +57,7 @@ export default function VIPHubPage() {
     const token = `${safeName}_VIP_${randomSuffix}`;
 
     try {
-      const res = await fetch('/api/vip-tokens', {
+      const res = await authedFetch('/api/vip-tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, company_name: newCompanyName })
@@ -77,7 +78,7 @@ export default function VIPHubPage() {
   const deleteToken = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este cupón?")) return;
     try {
-      await fetch('/api/vip-tokens', {
+      await authedFetch('/api/vip-tokens', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })

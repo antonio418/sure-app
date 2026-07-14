@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireUser } from '@/lib/authGuard';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +9,9 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const { token, company_name } = await req.json();
     if (!token || !company_name) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
@@ -25,6 +29,9 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const authError = await requireUser(req);
+    if (authError) return authError;
+
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 

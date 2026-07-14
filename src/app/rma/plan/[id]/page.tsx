@@ -118,6 +118,7 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
 
   // Carga de archivo
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [specialDetails, setSpecialDetails] = useState('');
 
   useEffect(() => {
     fetchPlan();
@@ -126,15 +127,16 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
   async function fetchPlan() {
     try {
       setLoading(true);
-      const { data, error: dbError } = await supabase
-        .from('contingency_plans')
-        .select('*')
-        .eq('id', planId)
-        .single();
-
-      if (dbError) {
-        throw dbError;
+      const res = await fetch('/api/rma/get-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId })
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || 'No se pudo cargar el plan.');
       }
+      const data = result.plan;
 
       setPlan(data);
       if (typeof window !== 'undefined' && data) {
@@ -197,6 +199,18 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
 
     try {
       setUploadingFile(true);
+
+      // Validación: el plano debe ser una imagen y no superar 15 MB
+      const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!ALLOWED_IMAGE_TYPES.includes(selectedFile.type)) {
+        setUploadingFile(false);
+        throw new Error('El plano debe ser una imagen (JPG, PNG, WEBP o GIF).');
+      }
+      if (selectedFile.size > 15 * 1024 * 1024) {
+        setUploadingFile(false);
+        throw new Error('El plano supera el límite de 15 MB.');
+      }
+
       setGeneratingFullPlan(true);
       setGeneratingMessage("Subiendo plano a Supabase Storage...");
 
@@ -232,7 +246,8 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
         body: JSON.stringify({
           planId,
           language: plan?.survey_responses?.language || 'Español',
-          layout_url: publicUrl
+          layout_url: publicUrl,
+          special_details: specialDetails
         })
       });
 
@@ -264,7 +279,8 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId,
-          language: plan?.survey_responses?.language || 'Español'
+          language: plan?.survey_responses?.language || 'Español',
+          special_details: specialDetails
         })
       });
 
@@ -1081,6 +1097,20 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
                 <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                   ¡Anticipo de $500 recibido! Para generar tu Plan de Contingencia completo con rutas de evacuación específicas, sube un plano técnico de distribución de áreas (fábrica, edificios, etc.).
                 </p>
+
+                {/* Ventana de contexto para detalles del plan */}
+                <div className="mb-5 w-full text-left">
+                  <label className="block text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider">
+                    Detalles e instrucciones de contexto (Opcional):
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={specialDetails}
+                    onChange={(e) => setSpecialDetails(e.target.value)}
+                    placeholder="Describe detalles específicos de tus instalaciones, número de empleados, tipo de maquinaria o cualquier instrucción particular que deba contemplar el plan..."
+                    className="w-full bg-[#050a15] border border-white/10 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white focus:outline-none transition-colors"
+                  />
+                </div>
 
                 <form onSubmit={handleFileUploadAndGenerate} className="flex flex-col sm:flex-row gap-4 items-center">
                   <input 
