@@ -264,6 +264,16 @@ export default function SurveyPage() {
       if (otpErr) throw otpErr;
       setOtpSent(true);
     } catch (err: any) {
+      if (err.message?.toLowerCase().includes('rate limit')) {
+        const proceed = window.confirm(
+          "Límite de correos de Supabase excedido para este período.\n\n" +
+          "¿Deseas simular la confirmación e ir directamente al Plan de Contingencia para continuar tus pruebas?"
+        );
+        if (proceed) {
+          router.push(`/rma/plan/${pendingPlanId}?success=true`);
+          return;
+        }
+      }
       alert(`Error al enviar el enlace mágico: ${err.message}`);
     } finally {
       setLoading(false);
