@@ -271,6 +271,10 @@ export default function DocumentProcessorPage() {
     }
     setIsProcessing(true);
     try {
+      // Store pending state in sessionStorage before OTP send for robust fallback redirection
+      sessionStorage.setItem('pending_price_id', selectedPrice || 'payg');
+      sessionStorage.setItem('pending_option', 'single');
+
       // Check if user is already logged in with this email to prevent redundant OTP rate limits
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email?.toLowerCase().trim() === clientEmail.toLowerCase().trim()) {
@@ -357,6 +361,18 @@ export default function DocumentProcessorPage() {
       
       if (session?.user) {
         setEmail(session.user.email || null);
+
+        // Check sessionStorage first (robust fallback for existing users)
+        const pendingPrice = sessionStorage.getItem('pending_price_id');
+        const pendingOption = sessionStorage.getItem('pending_option');
+        
+        if (pendingPrice && pendingOption === 'single') {
+          sessionStorage.removeItem('pending_price_id');
+          sessionStorage.removeItem('pending_option');
+          setWorkflowStep('uploader');
+          handleBuy(pendingPrice === 'payg' ? null : pendingPrice);
+          return;
+        }
         
         const meta = session.user.user_metadata;
         if (meta?.pending_price_id && meta?.pending_option === 'single') {
