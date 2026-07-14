@@ -369,6 +369,20 @@ export default function DocumentProcessorPage() {
       if (session?.user) {
         setEmail(session.user.email || null);
 
+        // Pre-populate input states with user metadata (so client doesn't have to fill them again)
+        const meta = session.user.user_metadata;
+        if (meta) {
+          if (meta.company_name) setCompanyName(meta.company_name);
+          if (meta.tax_id) setTaxId(meta.tax_id);
+          if (meta.full_name) setClientFullName(meta.full_name);
+          if (meta.client_id) setClientIdNum(meta.client_id);
+          if (meta.phone) setClientPhone(meta.phone);
+          if (session.user.email) {
+            setClientEmail(session.user.email);
+            setClientEmailConfirm(session.user.email);
+          }
+        }
+
         // Check sessionStorage first (robust fallback for existing users)
         const pendingPrice = sessionStorage.getItem('pending_price_id');
         const pendingOption = sessionStorage.getItem('pending_option');
@@ -381,7 +395,6 @@ export default function DocumentProcessorPage() {
           return;
         }
         
-        const meta = session.user.user_metadata;
         if (meta?.pending_price_id && meta?.pending_option === 'single') {
           // Clear metadata first to avoid loop
           await supabase.auth.updateUser({
