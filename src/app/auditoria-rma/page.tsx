@@ -300,39 +300,15 @@ export default function DocumentProcessorPage() {
       if (otpErr) throw otpErr;
       setWorkflowStep('check-email');
     } catch (err: any) {
-      // Automatic silent fallback to direct login if OTP sending fails (bypasses rate limit alerts entirely)
-      console.warn("OTP send failed, performing silent direct login fallback:", err.message);
-      try {
-        const res = await fetch('/api/auth/generate-testing-link', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: clientEmail.trim(),
-            companyName,
-            taxId,
-            clientFullName,
-            clientIdNum,
-            clientPhone,
-            selectedPrice: selectedPrice || 'payg',
-            pendingOption: 'single'
-          })
-        });
-        const data = await res.json();
-        if (data.otp) {
-          const { error: verifyErr } = await supabase.auth.verifyOtp({
-            email: clientEmail.trim(),
-            token: data.otp,
-            type: 'magiclink'
-          });
-          if (verifyErr) throw verifyErr;
-          setWorkflowStep('uploader');
-          handleBuy(selectedPrice === 'payg' ? null : selectedPrice);
-          return;
-        } else {
-          throw new Error(data.error || 'Failed to generate fallback OTP');
-        }
-      } catch (fallbackErr: any) {
-        alert(`Error al procesar el registro: ${fallbackErr.message}`);
+      // Show strict email confirmation error and instruct them on the rate limits
+      console.error("OTP send failed:", err.message);
+      if (err.message?.toLowerCase().includes('rate limit')) {
+        alert(
+          "Límite de correos de Supabase excedido para este período.\n\n" +
+          "Para continuar con tus pruebas de desarrollo, utiliza el botón naranja '⚙️ [Pruebas] Iniciar Sesión Directo (Bypass Email)'."
+        );
+      } else {
+        alert("Error al enviar el enlace mágico: " + err.message);
       }
       alert(`Error al enviar el enlace mágico: ${err.message}`);
     } finally {
