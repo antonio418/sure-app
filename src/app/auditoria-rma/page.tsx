@@ -1964,6 +1964,20 @@ export default function DocumentProcessorPage() {
               : filesRef.some(f => f.status === 'uploading' || f.status === 'parsing') || 
                 filesEval.some(f => f.status === 'uploading' || f.status === 'parsing');
                 
+            const hasCredits = (credits ?? 0) > 0 || localStorage.getItem('rma_payment_success') === 'true';
+
+            if (!hasCredits) {
+              return (
+                <button
+                  onClick={() => setWorkflowStep(selectedMode === 'single' ? 'plans-single' : 'plans-project')}
+                  className="px-10 py-5 rounded-xl font-black text-lg md:text-xl bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-500/20 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                >
+                  <span>{language === 'es' ? 'Seleccionar Tarifa / Comprar Créditos' : 'Select Plan / Buy Credits'}</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              );
+            }
+
             return (
               <button
                 onClick={runFullAudit}
@@ -2000,25 +2014,11 @@ export default function DocumentProcessorPage() {
             <p className="text-sm text-slate-400 mb-6">{lt.processingMessage}</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mt-4">
-              {(credits ?? 0) > 0 || localStorage.getItem('rma_payment_success') === 'true' ? (
-                <RMAPdfGenerator 
-                  finalReport={getFinalReportData()}
-                  buttonColor="bg-emerald-500 hover:bg-emerald-400 font-extrabold w-full"
-                  language={language}
-                />
-              ) : (
-                <button
-                  onClick={() => handleBuy(selectedPrice || null)}
-                  className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>
-                    {selectedPrice && selectedPrice !== 'payg'
-                      ? (language === 'es' ? 'Comprar Plan para Descargar PDF' : 'Buy Plan to Download PDF')
-                      : (language === 'es' ? 'Pagar $50 para Descargar PDF' : 'Pay $50 to Download PDF')}
-                  </span>
-                </button>
-              )}
+              <RMAPdfGenerator 
+                finalReport={getFinalReportData()}
+                buttonColor="bg-emerald-500 hover:bg-emerald-400 font-extrabold w-full"
+                language={language}
+              />
               <button 
                 onClick={async () => {
                   try {
