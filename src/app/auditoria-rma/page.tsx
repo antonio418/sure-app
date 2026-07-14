@@ -359,9 +359,13 @@ export default function DocumentProcessorPage() {
                 setSelectedMode('single');
               }
             } else {
-              // Database says 0 credits and no plan: clear local storage bypass flag and force to plans
-              localStorage.removeItem('rma_payment_success');
-              setWorkflowStep('choice');
+              // Database says 0 credits and no plan: clear local storage bypass flag only if not currently active
+              if (localStorage.getItem('rma_payment_success') !== 'true') {
+                localStorage.removeItem('rma_payment_success');
+                setWorkflowStep('choice');
+              } else {
+                setWorkflowStep('uploader');
+              }
             }
           }
         } catch (err) {
