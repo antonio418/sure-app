@@ -415,10 +415,19 @@ export default function DocumentProcessorPage() {
                 setSelectedMode('single');
               }
             } else {
-              // Database says 0 credits and no plan: clear local storage bypass flag only if not currently active
+              // Database says 0 credits and no plan
               if (sessionStorage.getItem('rma_payment_success') !== 'true') {
                 sessionStorage.removeItem('rma_payment_success');
-                setWorkflowStep('choice');
+                
+                // Only redirect back to choice if they are currently inside the uploader view
+                // (prevents kicking them back to pricing selection during the registration/payment flow)
+                const pendingPrice = sessionStorage.getItem('pending_price_id');
+                setWorkflowStep(prev => {
+                  if (prev === 'uploader' && !pendingPrice) {
+                    return 'choice';
+                  }
+                  return prev;
+                });
               } else {
                 setWorkflowStep('uploader');
               }
