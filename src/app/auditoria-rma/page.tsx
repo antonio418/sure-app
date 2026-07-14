@@ -269,6 +269,13 @@ export default function DocumentProcessorPage() {
     }
     setIsProcessing(true);
     try {
+      // Check if user is already logged in with this email to prevent redundant OTP rate limits
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email?.toLowerCase().trim() === clientEmail.toLowerCase().trim()) {
+        handleBuy(selectedPrice);
+        return;
+      }
+
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: clientEmail.trim(),
         options: {
@@ -294,6 +301,11 @@ export default function DocumentProcessorPage() {
         );
         if (proceed) {
           localStorage.setItem('rma_payment_success', 'true');
+          try {
+            await supabase.auth.updateUser({
+              data: { pending_price_id: null, pending_option: null }
+            });
+          } catch (e) {}
           const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
           if (isProjectPrice) {
             setSelectedMode('comparative');
