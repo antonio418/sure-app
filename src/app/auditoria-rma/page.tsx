@@ -322,11 +322,18 @@ export default function DocumentProcessorPage() {
               })
             });
             const data = await res.json();
-            if (data.link) {
-              window.location.href = data.link;
+            if (data.otp) {
+              const { error: verifyErr } = await supabase.auth.verifyOtp({
+                email: clientEmail.trim(),
+                token: data.otp,
+                type: 'magiclink'
+              });
+              if (verifyErr) throw verifyErr;
+              setWorkflowStep('uploader');
+              handleBuy(selectedPrice === 'payg' ? null : selectedPrice);
               return;
             } else {
-              throw new Error(data.error || 'Failed to generate testing link');
+              throw new Error(data.error || 'Failed to generate testing OTP');
             }
           } catch (linkErr: any) {
             alert("Error al generar enlace de pruebas: " + linkErr.message);
@@ -1202,11 +1209,21 @@ export default function DocumentProcessorPage() {
                       })
                     });
                     const data = await res.json();
-                    if (data.link) {
-                      window.location.href = data.link;
+                    if (data.otp) {
+                      // Client-side verification of OTP directly (bypasses redirect/domain limits)
+                      const { error: verifyErr } = await supabase.auth.verifyOtp({
+                        email: clientEmail.trim(),
+                        token: data.otp,
+                        type: 'magiclink'
+                      });
+                      if (verifyErr) throw verifyErr;
+                      
+                      // Trigger manual session check to start Stripe checkout redirect
+                      setWorkflowStep('uploader');
+                      handleBuy(selectedPrice === 'payg' ? null : selectedPrice);
                       return;
                     } else {
-                      throw new Error(data.error || 'Failed to generate testing link');
+                      throw new Error(data.error || 'Failed to generate testing OTP');
                     }
                   } catch (linkErr: any) {
                     alert("Error al generar enlace de pruebas: " + linkErr.message);

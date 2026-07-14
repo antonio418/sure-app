@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       link: data.properties.action_link,
+      otp: data.properties.email_otp,
       user: data.user
     });
   } catch (err: any) {

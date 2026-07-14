@@ -287,11 +287,32 @@ export default function SurveyPage() {
               })
             });
             const data = await res.json();
-            if (data.link) {
-              window.location.href = data.link;
-              return;
+            if (data.otp) {
+              const { error: verifyErr } = await supabase.auth.verifyOtp({
+                email: clientEmail.trim(),
+                token: data.otp,
+                type: 'magiclink'
+              });
+              if (verifyErr) throw verifyErr;
+              
+              setLoading(true);
+                            setLoadingMessage('Redirigiendo a Stripe...');
+              const stripeRes = await fetch('/api/checkout-dns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  priceId,
+                  email: clientEmail.trim(),
+                  planId: pendingPlanId
+                })
+              });
+              const stripeData = await stripeRes.json();
+              if (stripeData.url) {
+                window.location.href = stripeData.url;
+                return;
+              }
             } else {
-              throw new Error(data.error || 'Failed to generate testing link');
+              throw new Error(data.error || 'Failed to generate testing OTP');
             }
           } catch (linkErr: any) {
             alert("Error al generar enlace de pruebas: " + linkErr.message);
@@ -1223,11 +1244,32 @@ export default function SurveyPage() {
                             })
                           });
                           const data = await res.json();
-                          if (data.link) {
-                            window.location.href = data.link;
-                            return;
+                          if (data.otp) {
+                            const { error: verifyErr } = await supabase.auth.verifyOtp({
+                              email: clientEmail.trim(),
+                              token: data.otp,
+                              type: 'magiclink'
+                            });
+                            if (verifyErr) throw verifyErr;
+
+                            setLoading(true);
+                            setLoadingMessage('Redirigiendo a Stripe...');
+                            const stripeRes = await fetch('/api/checkout-dns', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ 
+                                priceId,
+                                email: clientEmail.trim(),
+                                planId: pendingPlanId
+                              })
+                            });
+                            const stripeData = await stripeRes.json();
+                            if (stripeData.url) {
+                              window.location.href = stripeData.url;
+                              return;
+                            }
                           } else {
-                            throw new Error(data.error || 'Failed to generate testing link');
+                            throw new Error(data.error || 'Failed to generate testing OTP');
                           }
                         } catch (linkErr: any) {
                           alert("Error al generar enlace de pruebas: " + linkErr.message);
