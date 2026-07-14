@@ -880,6 +880,19 @@ export default function DocumentProcessorPage() {
         </div>
         <div className="flex items-center gap-6">
           <LanguageSelector />
+          {email && (
+            <button
+              onClick={async () => {
+                sessionStorage.clear();
+                localStorage.clear();
+                await supabase.auth.signOut();
+                window.location.href = '/auditoria-rma';
+              }}
+              className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors bg-amber-500/10 px-4 py-2 rounded-xl border border-amber-500/20 cursor-pointer"
+            >
+              🔄 Empezar de Cero
+            </button>
+          )}
           <Link href="/rma" className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-xl border border-white/5">
             <ArrowLeft className="w-4 h-4" /> {lt.backToHub}
           </Link>
