@@ -338,14 +338,15 @@ export default function DocumentProcessorPage() {
   useEffect(() => {
     // 1. Check success parameter synchronously FIRST to avoid async race conditions, using sessionStorage for persistence
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('rma_payment_success'); // Clean up legacy localstorage bypass key
       const params = new URLSearchParams(window.location.search);
       const successParam = params.get('success');
       if (successParam === 'true') {
-        localStorage.setItem('rma_payment_success', 'true');
+        sessionStorage.setItem('rma_payment_success', 'true');
         setWorkflowStep('uploader');
         alert("¡Compra de créditos realizada con éxito! Tu saldo se actualizará en unos instantes.");
         window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (localStorage.getItem('rma_payment_success') === 'true') {
+      } else if (sessionStorage.getItem('rma_payment_success') === 'true') {
         setWorkflowStep('uploader');
       }
     }
@@ -385,8 +386,8 @@ export default function DocumentProcessorPage() {
               }
             } else {
               // Database says 0 credits and no plan: clear local storage bypass flag only if not currently active
-              if (localStorage.getItem('rma_payment_success') !== 'true') {
-                localStorage.removeItem('rma_payment_success');
+              if (sessionStorage.getItem('rma_payment_success') !== 'true') {
+                sessionStorage.removeItem('rma_payment_success');
                 setWorkflowStep('choice');
               } else {
                 setWorkflowStep('uploader');
@@ -1164,7 +1165,7 @@ export default function DocumentProcessorPage() {
               <button
                   type="button"
                   onClick={() => {
-                    localStorage.setItem('rma_payment_success', 'true');
+                    sessionStorage.setItem('rma_payment_success', 'true');
                     setWorkflowStep('uploader');
                   }}
                   className="w-full mt-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-[#00e5ff] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center border border-[#00e5ff]/20 shadow-md"
@@ -1964,7 +1965,7 @@ export default function DocumentProcessorPage() {
               : filesRef.some(f => f.status === 'uploading' || f.status === 'parsing') || 
                 filesEval.some(f => f.status === 'uploading' || f.status === 'parsing');
                 
-            const hasCredits = (credits ?? 0) > 0 || localStorage.getItem('rma_payment_success') === 'true';
+            const hasCredits = (credits ?? 0) > 0 || sessionStorage.getItem('rma_payment_success') === 'true';
 
             if (!hasCredits) {
               return (
@@ -2024,7 +2025,7 @@ export default function DocumentProcessorPage() {
                   try {
                     await supabase.auth.signOut();
                   } catch(e) {}
-                  localStorage.removeItem('rma_payment_success');
+                  sessionStorage.removeItem('rma_payment_success');
                   setProcessingSuccess(false);
                   setWorkflowStep('thank-you');
                   setFilesSingle([]);
