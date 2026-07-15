@@ -128,7 +128,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     comparativeDescription: 'Scenario Comparison: Use this mode to compare and contrast contents against the requirements (documents uploaded on the left side). Upload the information to be verified, such as offers, letters, or other documents. The system will automatically detect logical differences, scope exclusions, and technical deviations.',
     refColTitle: 'Project Baseline Documents',
     refColDesc: 'Upload contracts, tender specifications, or prequalification documents that will serve as the project baseline.',
-    evalColTitle: 'Documents to Compare',
+    evalColTitle: 'Documents to be Compared',
     evalColDesc: 'Upload offers, draft subcontracts, or supplier agreements to compare them against the baseline documents.',
     dropzoneTitle: 'Drag and drop your files here, or click to browse',
     dropzoneDesc: 'Supported formats: PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), RTF, and TXT',
