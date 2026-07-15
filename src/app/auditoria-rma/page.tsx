@@ -272,8 +272,10 @@ export default function DocumentProcessorPage() {
     setIsProcessing(true);
     try {
       // Store pending state in sessionStorage before OTP send for robust fallback redirection
+      const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
+      const pendingOption = isProjectPrice ? 'project' : 'single';
       localStorage.setItem('pending_price_id', selectedPrice || 'payg');
-      localStorage.setItem('pending_option', 'single');
+      localStorage.setItem('pending_option', pendingOption);
 
       // Check if user is already logged in with this email to prevent redundant OTP rate limits
       const { data: { session } } = await supabase.auth.getSession();
@@ -293,7 +295,7 @@ export default function DocumentProcessorPage() {
             client_id: clientIdNum,
             phone: clientPhone,
             pending_price_id: selectedPrice || 'payg',
-            pending_option: 'single'
+            pending_option: pendingOption
           }
         }
       });
@@ -365,21 +367,19 @@ export default function DocumentProcessorPage() {
         const pendingPrice = localStorage.getItem('pending_price_id');
         const pendingOption = localStorage.getItem('pending_option');
         
-        if (pendingPrice && pendingOption === 'single') {
+        if (pendingPrice && (pendingOption === 'single' || pendingOption === 'project')) {
           localStorage.removeItem('pending_price_id');
           localStorage.removeItem('pending_option');
-          setWorkflowStep('uploader');
           handleBuy(pendingPrice === 'payg' ? null : pendingPrice);
           return;
         }
         
-        if (meta?.pending_price_id && meta?.pending_option === 'single') {
+        if (meta?.pending_price_id && (meta?.pending_option === 'single' || meta?.pending_option === 'project')) {
           // Clear metadata first to avoid loop
           await supabase.auth.updateUser({
             data: { pending_price_id: null, pending_option: null }
           });
           
-          setWorkflowStep('uploader');
           handleBuy(meta.pending_price_id === 'payg' ? null : meta.pending_price_id);
           return;
         }
@@ -1056,7 +1056,11 @@ DETALLES ADICIONALES: ${instructions || ''}
                 <button 
                   onClick={() => {
                     setSelectedPrice('payg');
-                    setWorkflowStep('form-single');
+                    if (email) {
+                      handleBuy(null);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-3 bg-white/10 hover:bg-emerald-500 hover:text-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
                 >
@@ -1077,8 +1081,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8Ms8oubYEwHxxrCK6grr2');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8Ms8oubYEwHxxrCK6grr2';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-3 bg-white/10 hover:bg-emerald-500 hover:text-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
                 >
@@ -1100,8 +1109,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8ZO8oubYEwHxxo6I8cAc6');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8ZO8oubYEwHxxo6I8cAc6';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
                 >
@@ -1138,8 +1152,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8nD8oubYEwHxxGnaEY9Di');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8nD8oubYEwHxxGnaEY9Di';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
                 >
@@ -1159,8 +1178,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8qO8oubYEwHxxuOcRIKNG');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8qO8oubYEwHxxuOcRIKNG';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
                 >
@@ -1180,8 +1204,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8tM8oubYEwHxxQf5uCyk2');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8tM8oubYEwHxxQf5uCyk2';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
                 >
@@ -1202,8 +1231,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </div>
                 <button 
                   onClick={() => {
-                    setSelectedPrice('price_1TZ8w98oubYEwHxxW9PxHhXW');
-                    setWorkflowStep('form-single');
+                    const priceId = 'price_1TZ8w98oubYEwHxxW9PxHhXW';
+                    setSelectedPrice(priceId);
+                    if (email) {
+                      handleBuy(priceId);
+                    } else {
+                      setWorkflowStep('form-single');
+                    }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
                 >
@@ -1275,8 +1309,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   setIsProcessing(true);
                   try {
                     // Store pending state in sessionStorage
+                    // Store pending state in sessionStorage
+                    const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
+                    const pendingOption = isProjectPrice ? 'project' : 'single';
+
                     localStorage.setItem('pending_price_id', selectedPrice || 'payg');
-                    localStorage.setItem('pending_option', 'single');
+                    localStorage.setItem('pending_option', pendingOption);
 
                     const res = await fetch('/api/auth/generate-testing-link', {
                       method: 'POST',
@@ -1289,7 +1327,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                         clientIdNum,
                         clientPhone,
                         selectedPrice: selectedPrice || 'payg',
-                        pendingOption: 'single'
+                        pendingOption: pendingOption
                       })
                     });
                     const data = await res.json();
@@ -1303,7 +1341,6 @@ DETALLES ADICIONALES: ${instructions || ''}
                       if (verifyErr) throw verifyErr;
                       
                       // Trigger manual session check to start Stripe checkout redirect
-                      setWorkflowStep('uploader');
                       handleBuy(selectedPrice === 'payg' ? null : selectedPrice);
                       return;
                     } else {
@@ -1406,7 +1443,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                 <p className="text-3xl font-black text-white mt-1">{credits ?? 0}</p>
               </div>
               <button 
-                onClick={() => setWorkflowStep('plans-single')}
+                onClick={() => setWorkflowStep(selectedMode === 'single' ? 'plans-single' : 'plans-project')}
                 className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
               >
                 Comprar Créditos
