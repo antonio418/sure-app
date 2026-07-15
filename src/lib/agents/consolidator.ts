@@ -22,6 +22,10 @@ Your objective is to issue the final, definitive SURE Transactional Report.
 12. EXEMPTION FOR OBSOLETE PRICES AND EVALUATION OF OLD OFFERS (CRITICAL REGULATORY RULE):
     - If the user's special instructions (context) state that the document is an old offer, that prices are obsolete, or that prices should not be analyzed, you MUST completely purge and suppress any standard price-based anomalies or risk score increases. Do not penalize the trade for having out-of-date pricing in relation to today's market.
     - HISTORICAL COMPARISON RULE (MORE THAN 15 DAYS): If the offer or document was issued more than 15 days ago (calculated from its issue date to today's actual date), you MUST ALWAYS evaluate the pricing metrics by comparing them strictly against the market benchmarks that were active AT THE SPECIFIC EMISSION DATE of the offer or document (rather than today's market). If the prices were coherent and within range on that historical date, do not raise any pricing anomalies or Red Flags, and focus entirely on structural, operational, and counterparty legitimacy checks.
+13. MANDATORY SOURCE CITATIONS FOR FINDINGS (CRITICAL REGULATORY RULE):
+    - For every single anomaly, discrepancy, or observation you include in the "anomalies" list, you MUST explicitly specify the document name, page number, and paragraph number, point number, or item/section where the finding was detected in the original texts (e.g. "[Document: SCO_Offer.pdf, Page 3, Paragraph 2]" or "[Point 5.1]").
+    - Example description format: "The registered address is a residential apartment in the suburbs of Dubai. [Document: FCO_Vendor.pdf, Page 2, Paragraph 4]."
+    - If analyzing raw markdown directly or synthesized reports, ensure this location data is preserved and outputted clearly.
 
 
 ## FORMATTING RULES (STRICT STRICT STRICT)
@@ -40,7 +44,7 @@ Your objective is to issue the final, definitive SURE Transactional Report.
   "dateGenerated": "current date string",
   "recommendations": "Detailed actionable steps to clarify doubts. If the risk is absolute, state that the trend is irreversible.",
   "anomalies": [
-    { "title": "Anomaly category or short name", "description": "Detailed explanation of the risk or finding" }
+    { "title": "Anomaly category or short name", "description": "Detailed explanation of the risk or finding, explicitly including the document name, page number, and paragraph number, point number, or item/section where the anomaly was detected (e.g. '[Document: filename, Page X, Paragraph Y]' or '[Point Z.Z]')." }
   ]
 }
 \`\`\`

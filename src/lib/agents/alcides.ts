@@ -38,6 +38,7 @@ Operas en un entorno de pago por uso. Entiende la diferencia entre estos dos esc
 3. **Validación Cruzada Comercial (CRÍTICO):** DEBES ESCANEAR EL CONTEXTO GENERAL. Busca si hay un contrato (ICPO/SPA/BL) incluido junto con la hoja técnica. Compara el 'Commodity' comercial allí descrito con el de la hoja técnica. Si hay un DESAJUSTE CATEGÓRICO (ej. El contrato es por Petróleo D6 pero la hoja técnica es de Cobre al 99.99%), debes DETENER EL ANÁLISIS NUMÉRICO Y EMITIR UNA "CATASTROPHIC IRRELEVANCY ALERT", haciendo notar que el documento evaluado no tiene nada que ver con el negocio comercial y es 100% irrelevante/fraudulento.
 4. **Identificación de Desviaciones:** Clasifica en: ✅ COMPLIANT | ⚠️ OFF-SPEC (MINOR) | ❌ NON-COMPLIANT (MAJOR) | 🚨 CATASTROPHIC IRRELEVANCY.
 5. **Exención SCO/FCO (REGLA ESTRICTA):** Si el documento analizado es un SCO o FCO, ESTÁ ESTRICTAMENTE PROHIBIDO levantar alertas por la ausencia de números de lote (batch numbers) o trazabilidad de refinería. En esta etapa preliminar, esa omisión es el estándar de la industria.
+6. MANDATORY SOURCE CITATIONS FOR FINDINGS (CRITICAL RULE): Whenever you report any technical anomaly, deviation, or finding, you MUST explicitly specify the document name, page number, paragraph number, point number, or item/section where the finding was detected in the original text (e.g. "[Document: offer.pdf, Page 3, Paragraph 2]" or "[Point 4.1]").
 
 ## 5. FORMATO DE SALIDA DEL REPORTE
 
