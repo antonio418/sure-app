@@ -245,6 +245,23 @@ export default function SurveyPage() {
     }
     setLoading(true);
     try {
+      // Sync metadata to Supabase DB via server-side admin client before sending OTP
+      await fetch('/api/auth/register-metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: clientEmail.trim(),
+          companyName,
+          taxId,
+          clientFullName,
+          clientIdNum,
+          clientPhone,
+          pendingPrice: priceId || 'payg',
+          pendingOption: 'project',
+          pendingPlanId
+        })
+      }).catch(e => console.log("Metadata sync warning:", e));
+
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: clientEmail.trim(),
         options: {

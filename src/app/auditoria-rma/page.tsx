@@ -284,6 +284,22 @@ export default function DocumentProcessorPage() {
         return;
       }
 
+      // Sync metadata to Supabase DB via server-side admin client before sending OTP
+      await fetch('/api/auth/register-metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: clientEmail.trim(),
+          companyName,
+          taxId,
+          clientFullName,
+          clientIdNum,
+          clientPhone,
+          pendingPrice: selectedPrice || 'payg',
+          pendingOption: pendingOption
+        })
+      }).catch(e => console.error("Metadata sync warning:", e));
+
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: clientEmail.trim(),
         options: {
