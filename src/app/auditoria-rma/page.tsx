@@ -1498,351 +1498,225 @@ DETALLES ADICIONALES: ${instructions || ''}
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-emerald-500/30 rounded-bl-lg pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-emerald-500/30 rounded-br-lg pointer-events-none" />
 
-          {selectedMode === 'single' ? (
-            /* VISTA DE LISTA CORTA PARA CASO ÚNICO (7 CAMPOS + CONTEXTO) */
-            <div className="space-y-6">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {lt.dataEntryTitleSingle}
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescSingle}</p>
-                </div>
-              </div>
+          {/* VISTA ORIGINAL CON FORMULARIO COMPLETO PARA PROYECTOS / COMPARACIÓN / CASO ÚNICO */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                {lt.dataEntryTitleProject}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescProject}</p>
+            </div>
+            
+            {/* Checkbox: Introducir datos desde un archivo */}
+            <label className="inline-flex items-center gap-2.5 cursor-pointer select-none bg-slate-900/60 border border-white/5 px-4 py-2 rounded-xl hover:border-emerald-500/30 transition-all">
+              <input
+                type="checkbox"
+                checked={importFromFile}
+                onChange={(e) => setImportFromFile(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
+              />
+              <span className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
+                Introducir datos desde un archivo
+              </span>
+            </label>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {/* 1.- Nombre de la Empresa */}
+          {importFromFile ? (
+            /* VISTA DE IMPORTACIÓN DESDE ARCHIVO */
+            <div className="space-y-6 animate-fade-in">
+              <div className="bg-[#1A2C46]/30 border border-white/5 rounded-2xl p-6">
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  El ingreso manual se encuentra **inhabilitado**. Suba un archivo de configuración del proyecto o copie el texto descriptivo a continuación para alimentar el sistema.
+                </p>
+                
+                {/* Drag & drop or upload area inside import */}
+                <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/[0.01] transition-all rounded-xl p-8 text-center cursor-pointer mb-6 flex flex-col items-center justify-center group">
+                  <Upload className="w-8 h-8 text-slate-500 group-hover:text-emerald-400 transition-colors mb-2" />
+                  <span className="text-sm text-slate-300 font-bold block mb-1">
+                    Seleccionar archivo, arrastrar archivo o copiar texto
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Formatos soportados: JSON, TXT, XML, CSV, PDF
+                  </span>
+                </div>
+
+                {/* Textarea for pasting text */}
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.companyNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="MB PROCDI"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 2.- Nº de registro fiscal */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.taxIdLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
-                    placeholder="X1215488"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 3.- Nombre y apellido del Cliente */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.clientNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientFullName}
-                    onChange={(e) => setClientFullName(e.target.value)}
-                    placeholder="Antonio Baronas"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 4.- Nº de identidad del Cliente */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.clientIdLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientIdNum}
-                    onChange={(e) => setClientIdNum(e.target.value)}
-                    placeholder="Nº de identidad"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 5.- Correo electrónico */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.emailLabel}
-                  </label>
-                  <input
-                    type="email"
-                    value={clientEmail}
-                    onChange={(e) => setClientEmail(e.target.value)}
-                    placeholder="antonio@procdi.com"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 6.- Nº de teléfono */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.phoneLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientPhone}
-                    onChange={(e) => setClientPhone(e.target.value)}
-                    placeholder="+37068941110"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 7.- Contexto o Instrucciones Especiales */}
-                <div className="space-y-2 col-span-full">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.contextLabel}
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+                    O pegue el texto descriptivo del proyecto aquí
                   </label>
                   <textarea
-                    rows={3}
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                    placeholder={lt.contextPlaceholder}
+                    rows={4}
+                    value={importText}
+                    onChange={(e) => setImportText(e.target.value)}
+                    placeholder="Ej. Proyecto Petro-Boscan, Modulo Bloque B-74, instalación de tres pozos..."
                     className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
             </div>
           ) : (
-            /* VISTA ORIGINAL CON FORMULARIO COMPLETO PARA PROYECTOS / COMPARACIÓN */
-            <>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {lt.dataEntryTitleProject}
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescProject}</p>
+            /* VISTA MANUAL CON AUTOCOMPLETADO */
+            <div className="space-y-6 animate-fade-in">
+              {/* Pregunta: En qué etapa del proyecto se encuentra */}
+              <div className="space-y-3">
+                <span className="block text-sm md:text-base font-bold text-slate-200">
+                  ¿En qué etapa del proyecto se encuentra?
+                </span>
+                <div className="flex flex-wrap gap-2.5">
+                  {['Precalificación', 'Oferta', 'Ejecución de proyecto', 'Post-venta', 'No aplica'].map((stage) => (
+                    <button
+                      key={stage}
+                      type="button"
+                      onClick={() => setActiveStage(stage)}
+                      className={`px-5 py-2.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 ${
+                        activeStage === stage
+                          ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-black scale-[1.02]'
+                          : 'bg-[#1A2C46]/50 text-slate-300 hover:text-white hover:bg-[#1A2C46] border border-white/5'
+                      }`}
+                    >
+                      {stage}
+                    </button>
+                  ))}
                 </div>
-                
-                {/* Checkbox: Introducir datos desde un archivo */}
-                <label className="inline-flex items-center gap-2.5 cursor-pointer select-none bg-slate-900/60 border border-white/5 px-4 py-2 rounded-xl hover:border-emerald-500/30 transition-all">
-                  <input
-                    type="checkbox"
-                    checked={importFromFile}
-                    onChange={(e) => setImportFromFile(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
-                  />
-                  <span className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-                    {lt.importLabel}
-                  </span>
-                </label>
               </div>
 
-              {importFromFile ? (
-                /* VISTA DE IMPORTACIÓN DESDE ARCHIVO */
-                <div className="space-y-6 animate-fade-in">
-                  <div className="bg-[#1A2C46]/30 border border-white/5 rounded-2xl p-6">
-                    <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                      {lt.importDisabledDesc}
-                    </p>
-                    
-                    {/* Drag & drop or upload area inside import */}
-                    <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/[0.01] transition-all rounded-xl p-8 text-center cursor-pointer mb-6 flex flex-col items-center justify-center group">
-                      <Upload className="w-8 h-8 text-slate-500 group-hover:text-emerald-400 transition-colors mb-2" />
-                      <span className="text-sm text-slate-300 font-bold block mb-1">
-                        {lt.importDropzoneTitle}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        Formatos soportados: JSON, TXT, XML, CSV, PDF
-                      </span>
-                    </div>
-
-                    {/* Textarea for pasting text */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
-                        {lt.importTextareaLabel}
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={importText}
-                        onChange={(e) => setImportText(e.target.value)}
-                        placeholder="Ej. Proyecto Petro-Boscan, Modulo Bloque B-74, instalación de tres pozos..."
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* VISTA MANUAL CON AUTOCOMPLETADO */
-                <div className="space-y-6 animate-fade-in">
-                  {/* Pregunta: En qué etapa del proyecto se encuentra */}
-                  <div className="space-y-3">
-                    <span className="block text-sm md:text-base font-bold text-slate-200">
-                      {lt.stageQuestion}
-                    </span>
-                    <div className="flex flex-wrap gap-2.5">
-                      {['Precalificación', 'Oferta', 'Ejecución de proyecto', 'Post-venta', 'No aplica'].map((stage) => {
-                        const stageLabelMap: Record<string, string> = {
-                          'Precalificación': lt.stagePre,
-                          'Oferta': lt.stageOffer,
-                          'Ejecución de proyecto': lt.stageExec,
-                          'Post-venta': lt.stagePost,
-                          'No aplica': lt.stageNA
-                        };
-                        return (
-                          <button
-                            key={stage}
-                            type="button"
-                            onClick={() => setActiveStage(stage)}
-                            className={`px-5 py-2.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 ${
-                              activeStage === stage
-                                ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-black scale-[1.02]'
-                                : 'bg-[#1A2C46]/50 text-slate-300 hover:text-white hover:bg-[#1A2C46] border border-white/5'
-                            }`}
-                          >
-                            {stageLabelMap[stage] || stage}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Formulario de 6 celdas / inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    
-                    {/* 1.- # del proyecto con Autocompletado */}
-                    <div className="space-y-2 relative">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.projectNumberLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={projectNumber}
-                        onChange={(e) => {
-                          setProjectNumber(e.target.value);
-                          setShowSuggestions(true);
-                        }}
-                        onFocus={() => setShowSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                        placeholder="PB-74-2026 (Escribe 'Petro')"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                      {/* Dropdown Suggestions */}
-                      {showSuggestions && filteredProjects.length > 0 && (
-                        <div className="absolute left-0 right-0 mt-1 bg-[#101F33] border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
-                          {filteredProjects.map((p) => (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onMouseDown={() => handleSelectProject(p)}
-                              className="w-full text-left px-4 py-3 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors border-b border-white/5 last:border-0 flex flex-col gap-0.5"
-                            >
-                              <span className="text-sm font-bold text-white">{p.name}</span>
-                              <span className="text-xs text-slate-400">#{p.projectNumber} • Participante: {p.participant}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 2.- Cliente */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.clientLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={client}
-                        onChange={(e) => setClient(e.target.value)}
-                        placeholder="Nombre del cliente"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
-                    {/* 3.- Participante (razón social) */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.participantLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={participant}
-                        onChange={(e) => setParticipant(e.target.value)}
-                        placeholder="Ej. Consorcio M-89"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
-                    {/* 4.- Bloque o parte del proyecto */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.blockLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={block}
-                        onChange={(e) => setBlock(e.target.value)}
-                        placeholder="Ej. Modulo Bloque B-74"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
-                    {/* 5.- Referencia */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.referenceLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={reference}
-                        onChange={(e) => setReference(e.target.value)}
-                        placeholder="Ej. instalación de tres pozos..."
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
-                    {/* 6.- Monto del contrato (seleccionar moneda) */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.amountLabel}
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          placeholder="Monto"
-                          className="flex-grow bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                        />
-                        <select
-                          value={currency}
-                          onChange={(e) => setCurrency(e.target.value)}
-                          className="bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
+              {/* Formulario de 6 celdas / inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                {/* 1.- # del proyecto con Autocompletado */}
+                <div className="space-y-2 relative">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    # del proyecto / Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    value={projectNumber}
+                    onChange={(e) => {
+                      setProjectNumber(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    placeholder="PB-74-2026 (Escribe 'Petro')"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                  {/* Dropdown Suggestions */}
+                  {showSuggestions && filteredProjects.length > 0 && (
+                    <div className="absolute left-0 right-0 mt-1 bg-[#101F33] border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                      {filteredProjects.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onMouseDown={() => handleSelectProject(p)}
+                          className="w-full text-left px-4 py-3 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors border-b border-white/5 last:border-0 flex flex-col gap-0.5"
                         >
-                          <option value="USD">USD ($)</option>
-                          <option value="EUR">EUR (€)</option>
-                          <option value="MUSD">MUSD ($M)</option>
-                          <option value="GBP">GBP (£)</option>
-                        </select>
-                      </div>
+                          <span className="text-sm font-bold text-white">{p.name}</span>
+                          <span className="text-xs text-slate-400">#{p.projectNumber} • Participante: {p.participant}</span>
+                        </button>
+                      ))}
                     </div>
+                  )}
+                </div>
 
-                    {/* 7.- Contexto o Instrucciones Especiales */}
-                    <div className="space-y-2 col-span-full">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {lt.contextLabel}
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={instructions}
-                        onChange={(e) => setInstructions(e.target.value)}
-                        placeholder={lt.contextPlaceholder}
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
+                {/* 2.- Cliente */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Cliente *
+                  </label>
+                  <input
+                    type="text"
+                    value={client}
+                    onChange={(e) => setClient(e.target.value)}
+                    placeholder="Nombre del cliente"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 3.- Participante (razón social) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Participante (razón social) *
+                  </label>
+                  <input
+                    type="text"
+                    value={participant}
+                    onChange={(e) => setParticipant(e.target.value)}
+                    placeholder="Ej. Consorcio M-89"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 4.- Bloque o parte del proyecto */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Bloque o parte del proyecto
+                  </label>
+                  <input
+                    type="text"
+                    value={block}
+                    onChange={(e) => setBlock(e.target.value)}
+                    placeholder="Ej. Modulo Bloque B-74"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 5.- Referencia */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Referencia
+                  </label>
+                  <input
+                    type="text"
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    placeholder="Ej. instalación de tres pozos..."
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 6.- Monto del contrato (seleccionar moneda) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Monto del contrato *
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Monto"
+                      className="flex-grow bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                    />
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="MUSD">MUSD ($M)</option>
+                      <option value="GBP">GBP (£)</option>
+                    </select>
                   </div>
                 </div>
-              )}
-            </>
+
+                {/* 7.- Contexto o Instrucciones Especiales */}
+                <div className="space-y-2 col-span-full">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder="Ingrese pautas e instrucciones específicas para guiar la auditoría de la IA (ej. enfocarse en regulaciones locales de la Ley de Hidrocarburos, evaluar exclusiones de Chevron)..."
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
