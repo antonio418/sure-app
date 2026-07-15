@@ -25,10 +25,10 @@ const localTranslations: Record<string, Record<string, string>> = {
     modeComparative: 'Comparación de Escenarios (Base vs. Propuesta)',
     singleDescription: 'Auditoría de Caso Único: Use este modo cuando desee evaluar la integridad y viabilidad de una sola entidad, transacción, objeto o escenario. Puede subir múltiples documentos del mismo caso, proveedor o asunto (ej. actas de constitución, solvencia financiera y contratos de un mismo proyecto). El sistema los analizará en conjunto para emitir un único reporte de riesgo integral, como por ejemplo un reporte de Due Diligence.',
     comparativeDescription: 'Comparación de Escenarios: Use este modo para comparar, contrastar contenidos frente a los requisitos (Documentos que Ud. ya cargó en la sección izquierda). Suba la información que se quiere verificar tal como: ofertas, cartas o cualquier otro documento. El sistema buscará diferencias lógicas, exclusiones de alcance, desviaciones técnicas entre otras posibilidades automáticamente.',
-    refColTitle: 'Documentos Base del Proyecto',
-    refColDesc: 'Carga aquí los contratos, pliegos de licitación o documentos de precalificación que servirán como base del proyecto.',
-    evalColTitle: 'Documentos a Comparar',
-    evalColDesc: 'Carga aquí las ofertas, borradores de contratos con subcontratistas o suplidores para compararlos contra los documentos base.',
+    refColTitle: 'ARCHIVOS A SER USADOS COMO REFERENCIA',
+    refColDesc: 'Cargue aquí los documentos que serán la base de comparación Ej. Pliego de licitación, Normas, Procedimientos, Leyes, etc.',
+    evalColTitle: 'ARCHIVOS PARA SER COMPARADOS CON LA REFERENCIA',
+    evalColDesc: 'Cargue aquí aquellos documentos que Ud quiere comparar contra los documentos que cargó en la ventana izquierda (Referencia)',
     dropzoneTitle: 'Arrastra y suelta tus archivos aquí, o haz clic para buscarlos',
     dropzoneDesc: 'Formatos soportados: PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), RTF y TXT',
     confirmTitle: '⚠️ Confirmación de Cambio de Modo',
@@ -126,10 +126,10 @@ const localTranslations: Record<string, Record<string, string>> = {
     modeComparative: 'Scenario Comparison (Base vs. Proposal)',
     singleDescription: 'Single Case Audit: Use this mode to evaluate the integrity and viability of a single entity, transaction, object, or scenario. You can upload multiple documents belonging to the same case, supplier, or matter (e.g., deeds of incorporation, financial records, and contracts). The system will analyze them together to issue a single consolidated risk report, as for example a Due Diligence report.',
     comparativeDescription: 'Scenario Comparison: Use this mode to compare and contrast contents against the requirements (documents uploaded on the left side). Upload the information to be verified, such as offers, letters, or other documents. The system will automatically detect logical differences, scope exclusions, and technical deviations.',
-    refColTitle: 'Project Baseline Documents',
-    refColDesc: 'Upload contracts, tender specifications, or prequalification documents that will serve as the project baseline.',
-    evalColTitle: 'Documents to be Compared',
-    evalColDesc: 'Upload offers, draft subcontracts, or supplier agreements to compare them against the baseline documents.',
+    refColTitle: 'DOCUMENTS TO BE USED AS REFERENCE',
+    refColDesc: 'Upload here the documents that will serve as the comparison baseline, e.g., Bidding terms, Standards, Procedures, Laws, etc.',
+    evalColTitle: 'DOCUMENTS TO BE COMPARED AGAINST REFERENCE',
+    evalColDesc: 'Upload here the documents you want to compare against the reference documents loaded in the left panel (Reference)',
     dropzoneTitle: 'Drag and drop your files here, or click to browse',
     dropzoneDesc: 'Supported formats: PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), RTF, and TXT',
     confirmTitle: '⚠️ Confirm Mode Change',
@@ -774,14 +774,21 @@ export default function DocumentProcessorPage() {
   const runFullAudit = async () => {
     setIsProcessing(true);
     try {
-      // Compile documents markdown (both modes now use reference and evaluation splits)
-      const refDocs = filesRef
-        .map((f, i) => `--- REFERENCE DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
-        .join('\n\n');
-      const evalDocs = filesEval
-        .map((f, i) => `--- EVALUATION DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
-        .join('\n\n');
-      const compiledMarkdown = `[REFERENCE BASELINE DOCUMENTS]\n${refDocs}\n\n[EVALUATION PROPOSALS / SCHEMES TO COMPARE]\n${evalDocs}`;
+      // Compile documents markdown
+      let compiledMarkdown = '';
+      if (selectedMode === 'single') {
+        compiledMarkdown = filesSingle
+          .map((f, i) => `--- DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+      } else {
+        const refDocs = filesRef
+          .map((f, i) => `--- REFERENCE DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+        const evalDocs = filesEval
+          .map((f, i) => `--- EVALUATION DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
+          .join('\n\n');
+        compiledMarkdown = `[REFERENCE BASELINE DOCUMENTS]\n${refDocs}\n\n[EVALUATION PROPOSALS / SCHEMES TO COMPARE]\n${evalDocs}`;
+      }
 
       const userContextStr = `
 PROYECTO: ${projectNumber || 'No especificado'}
@@ -1507,429 +1514,646 @@ DETALLES ADICIONALES: ${instructions || ''}
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-emerald-500/30 rounded-bl-lg pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-emerald-500/30 rounded-br-lg pointer-events-none" />
 
-          {/* VISTA ORIGINAL CON FORMULARIO COMPLETO PARA PROYECTOS / COMPARACIÓN / CASO ÚNICO */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                {lt.dataEntryTitleProject}
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescProject}</p>
-            </div>
-            
-            {/* Checkbox: Introducir datos desde un archivo */}
-            <label className="inline-flex items-center gap-2.5 cursor-pointer select-none bg-slate-900/60 border border-white/5 px-4 py-2 rounded-xl hover:border-emerald-500/30 transition-all">
-              <input
-                type="checkbox"
-                checked={importFromFile}
-                onChange={(e) => setImportFromFile(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
-              />
-              <span className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-                Introducir datos desde un archivo
-              </span>
-            </label>
-          </div>
+          {selectedMode === 'single' ? (
+            /* VISTA DE LISTA CORTA PARA CASO ÚNICO (7 CAMPOS + CONTEXTO) */
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {lt.dataEntryTitleSingle}
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescSingle}</p>
+                </div>
+              </div>
 
-          {importFromFile ? (
-            /* VISTA DE IMPORTACIÓN DESDE ARCHIVO */
-            <div className="space-y-6 animate-fade-in">
-              <div className="bg-[#1A2C46]/30 border border-white/5 rounded-2xl p-6">
-                <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                  El ingreso manual se encuentra **inhabilitado**. Suba un archivo de configuración del proyecto o copie el texto descriptivo a continuación para alimentar el sistema.
-                </p>
-                
-                {/* Drag & drop or upload area inside import */}
-                <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/[0.01] transition-all rounded-xl p-8 text-center cursor-pointer mb-6 flex flex-col items-center justify-center group">
-                  <Upload className="w-8 h-8 text-slate-500 group-hover:text-emerald-400 transition-colors mb-2" />
-                  <span className="text-sm text-slate-300 font-bold block mb-1">
-                    Seleccionar archivo, arrastrar archivo o copiar texto
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    Formatos soportados: JSON, TXT, XML, CSV, PDF
-                  </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {/* 1.- Nombre de la Empresa */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.companyNameLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="MB PROCDI"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
                 </div>
 
-                {/* Textarea for pasting text */}
+                {/* 2.- Nº de registro fiscal */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
-                    O pegue el texto descriptivo del proyecto aquí
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.taxIdLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                    placeholder="X1215488"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 3.- Nombre y apellido del Cliente */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.clientNameLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={clientFullName}
+                    onChange={(e) => setClientFullName(e.target.value)}
+                    placeholder="Antonio Baronas"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 4.- Nº de identidad del Cliente */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.clientIdLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={clientIdNum}
+                    onChange={(e) => setClientIdNum(e.target.value)}
+                    placeholder="Nº de identidad"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 5.- Correo electrónico */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.emailLabel}
+                  </label>
+                  <input
+                    type="email"
+                    value={clientEmail}
+                    onChange={(e) => setClientEmail(e.target.value)}
+                    placeholder="antonio@procdi.com"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 6.- Nº de teléfono */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.phoneLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(e.target.value)}
+                    placeholder="+37068941110"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* 7.- Contexto o Instrucciones Especiales */}
+                <div className="space-y-2 col-span-full">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {lt.contextLabel}
                   </label>
                   <textarea
-                    rows={4}
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder="Ej. Proyecto Petro-Boscan, Modulo Bloque B-74, instalación de tres pozos..."
+                    rows={3}
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder={lt.contextPlaceholder}
                     className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
             </div>
           ) : (
-            /* VISTA MANUAL CON AUTOCOMPLETADO */
-            <div className="space-y-6 animate-fade-in">
-              {/* Pregunta: En qué etapa del proyecto se encuentra */}
-              <div className="space-y-3">
-                <span className="block text-sm md:text-base font-bold text-slate-200">
-                  ¿En qué etapa del proyecto se encuentra?
-                </span>
-                <div className="flex flex-wrap gap-2.5">
-                  {['Precalificación', 'Oferta', 'Ejecución de proyecto', 'Post-venta', 'No aplica'].map((stage) => (
-                    <button
-                      key={stage}
-                      type="button"
-                      onClick={() => setActiveStage(stage)}
-                      className={`px-5 py-2.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 ${
-                        activeStage === stage
-                          ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-black scale-[1.02]'
-                          : 'bg-[#1A2C46]/50 text-slate-300 hover:text-white hover:bg-[#1A2C46] border border-white/5'
-                      }`}
-                    >
-                      {stage}
-                    </button>
-                  ))}
+            /* VISTA ORIGINAL CON FORMULARIO COMPLETO PARA PROYECTOS / COMPARACIÓN */
+            <>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {lt.dataEntryTitleProject}
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescProject}</p>
                 </div>
+                
+                {/* Checkbox: Introducir datos desde un archivo */}
+                <label className="inline-flex items-center gap-2.5 cursor-pointer select-none bg-slate-900/60 border border-white/5 px-4 py-2 rounded-xl hover:border-emerald-500/30 transition-all">
+                  <input
+                    type="checkbox"
+                    checked={importFromFile}
+                    onChange={(e) => setImportFromFile(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
+                  />
+                  <span className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
+                    Introducir datos desde un archivo
+                  </span>
+                </label>
               </div>
 
-              {/* Formulario de 6 celdas / inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                
-                {/* 1.- # del proyecto con Autocompletado */}
-                <div className="space-y-2 relative">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    # del proyecto / Nombre *
-                  </label>
-                  <input
-                    type="text"
-                    value={projectNumber}
-                    onChange={(e) => {
-                      setProjectNumber(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder="PB-74-2026 (Escribe 'Petro')"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                  {/* Dropdown Suggestions */}
-                  {showSuggestions && filteredProjects.length > 0 && (
-                    <div className="absolute left-0 right-0 mt-1 bg-[#101F33] border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
-                      {filteredProjects.map((p) => (
+              {importFromFile ? (
+                /* VISTA DE IMPORTACIÓN DESDE ARCHIVO */
+                <div className="space-y-6 animate-fade-in">
+                  <div className="bg-[#1A2C46]/30 border border-white/5 rounded-2xl p-6">
+                    <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                      El ingreso manual se encuentra **inhabilitado**. Suba un archivo de configuración del proyecto o copie el texto descriptivo a continuación para alimentar el sistema.
+                    </p>
+                    
+                    {/* Drag & drop or upload area inside import */}
+                    <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/[0.01] transition-all rounded-xl p-8 text-center cursor-pointer mb-6 flex flex-col items-center justify-center group">
+                      <Upload className="w-8 h-8 text-slate-500 group-hover:text-emerald-400 transition-colors mb-2" />
+                      <span className="text-sm text-slate-300 font-bold block mb-1">
+                        Seleccionar archivo, arrastrar archivo o copiar texto
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        Formatos soportados: JSON, TXT, XML, CSV, PDF
+                      </span>
+                    </div>
+
+                    {/* Textarea for pasting text */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+                        O pegue el texto descriptivo del proyecto aquí
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                        placeholder="Ej. Proyecto Petro-Boscan, Modulo Bloque B-74, instalación de tres pozos..."
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* VISTA MANUAL CON AUTOCOMPLETADO */
+                <div className="space-y-6 animate-fade-in">
+                  {/* Pregunta: En qué etapa del proyecto se encuentra */}
+                  <div className="space-y-3">
+                    <span className="block text-sm md:text-base font-bold text-slate-200">
+                      ¿En qué etapa del proyecto se encuentra?
+                    </span>
+                    <div className="flex flex-wrap gap-2.5">
+                      {['Precalificación', 'Oferta', 'Ejecución de proyecto', 'Post-venta', 'No aplica'].map((stage) => (
                         <button
-                          key={p.id}
+                          key={stage}
                           type="button"
-                          onMouseDown={() => handleSelectProject(p)}
-                          className="w-full text-left px-4 py-3 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors border-b border-white/5 last:border-0 flex flex-col gap-0.5"
+                          onClick={() => setActiveStage(stage)}
+                          className={`px-5 py-2.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 ${
+                            activeStage === stage
+                              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-black scale-[1.02]'
+                              : 'bg-[#1A2C46]/50 text-slate-300 hover:text-white hover:bg-[#1A2C46] border border-white/5'
+                          }`}
                         >
-                          <span className="text-sm font-bold text-white">{p.name}</span>
-                          <span className="text-xs text-slate-400">#{p.projectNumber} • Participante: {p.participant}</span>
+                          {stage}
                         </button>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* 2.- Cliente */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Cliente *
-                  </label>
-                  <input
-                    type="text"
-                    value={client}
-                    onChange={(e) => setClient(e.target.value)}
-                    placeholder="Nombre del cliente"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                  {/* Formulario de 6 celdas / inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {/* 1.- # del proyecto con Autocompletado */}
+                    <div className="space-y-2 relative">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        # del proyecto / Nombre *
+                      </label>
+                      <input
+                        type="text"
+                        value={projectNumber}
+                        onChange={(e) => {
+                          setProjectNumber(e.target.value);
+                          setShowSuggestions(true);
+                        }}
+                        onFocus={() => setShowSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        placeholder="PB-74-2026 (Escribe 'Petro')"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                      {/* Dropdown Suggestions */}
+                      {showSuggestions && filteredProjects.length > 0 && (
+                        <div className="absolute left-0 right-0 mt-1 bg-[#101F33] border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                          {filteredProjects.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onMouseDown={() => handleSelectProject(p)}
+                              className="w-full text-left px-4 py-3 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors border-b border-white/5 last:border-0 flex flex-col gap-0.5"
+                            >
+                              <span className="text-sm font-bold text-white">{p.name}</span>
+                              <span className="text-xs text-slate-400">#{p.projectNumber} • Participante: {p.participant}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-                {/* 3.- Participante (razón social) */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Participante (razón social) *
-                  </label>
-                  <input
-                    type="text"
-                    value={participant}
-                    onChange={(e) => setParticipant(e.target.value)}
-                    placeholder="Ej. Consorcio M-89"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                    {/* 2.- Cliente */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Cliente *
+                      </label>
+                      <input
+                        type="text"
+                        value={client}
+                        onChange={(e) => setClient(e.target.value)}
+                        placeholder="Nombre del cliente"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
 
-                {/* 4.- Bloque o parte del proyecto */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Bloque o parte del proyecto
-                  </label>
-                  <input
-                    type="text"
-                    value={block}
-                    onChange={(e) => setBlock(e.target.value)}
-                    placeholder="Ej. Modulo Bloque B-74"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                    {/* 3.- Participante (razón social) */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Participante (razón social) *
+                      </label>
+                      <input
+                        type="text"
+                        value={participant}
+                        onChange={(e) => setParticipant(e.target.value)}
+                        placeholder="Ej. Consorcio M-89"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
 
-                {/* 5.- Referencia */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Referencia
-                  </label>
-                  <input
-                    type="text"
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
-                    placeholder="Ej. instalación de tres pozos..."
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                    {/* 4.- Bloque o parte del proyecto */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Bloque o parte del proyecto
+                      </label>
+                      <input
+                        type="text"
+                        value={block}
+                        onChange={(e) => setBlock(e.target.value)}
+                        placeholder="Ej. Modulo Bloque B-74"
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
 
-                {/* 6.- Monto del contrato (seleccionar moneda) */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Monto del contrato *
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="Monto"
-                      className="flex-grow bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                    />
-                    <select
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
-                      className="bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
-                    >
-                      <option value="USD">USD ($)</option>
-                      <option value="EUR">EUR (€)</option>
-                      <option value="MUSD">MUSD ($M)</option>
-                      <option value="GBP">GBP (£)</option>
-                    </select>
+                    {/* 5.- Referencia */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Referencia
+                      </label>
+                      <input
+                        type="text"
+                        value={reference}
+                        onChange={(e) => setReference(e.target.value)}
+                        placeholder="Ej. instalación de tres pozos..."
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    {/* 6.- Monto del contrato (seleccionar moneda) */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Monto del contrato *
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          placeholder="Monto"
+                          className="flex-grow bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                        />
+                        <select
+                          value={currency}
+                          onChange={(e) => setCurrency(e.target.value)}
+                          className="bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
+                        >
+                          <option value="USD">USD ($)</option>
+                          <option value="EUR">EUR (€)</option>
+                          <option value="MUSD">MUSD ($M)</option>
+                          <option value="GBP">GBP (£)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* 7.- Contexto o Instrucciones Especiales */}
+                    <div className="space-y-2 col-span-full">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={instructions}
+                        onChange={(e) => setInstructions(e.target.value)}
+                        placeholder="Ingrese pautas e instrucciones específicas para guiar la auditoría de la IA (ej. enfocarse en regulaciones locales de la Ley de Hidrocarburos, evaluar exclusiones de Chevron)..."
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* 7.- Contexto o Instrucciones Especiales */}
-                <div className="space-y-2 col-span-full">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                    placeholder="Ingrese pautas e instrucciones específicas para guiar la auditoría de la IA (ej. enfocarse en regulaciones locales de la Ley de Hidrocarburos, evaluar exclusiones de Chevron)..."
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
 
         {/* Workspace cards */}
         <div className="w-full grid grid-cols-1 gap-8 mb-12">
-          <div className="w-full bg-[#152338]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-2xl transition-all duration-500">
-            
-            {/* Highlighted explanation text - Med-size and prominent */}
-            <div className="text-slate-200 text-lg md:text-xl mb-8 leading-relaxed font-medium bg-[#1A2C46]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
-              {selectedMode === 'single' ? lt.singleDescription : lt.comparativeDescription}
-            </div>
-
-            {/* Grid with central vertical gradient line */}
-            <div className="flex flex-col md:flex-row gap-8 relative">
+          
+          {/* ================= OPTION 1: AUDITAR CASO ÚNICO ================= */}
+          {selectedMode === 'single' && (
+            <div className="w-full bg-[#152338]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-2xl transition-all duration-500">
               
-              {/* Column 1: Reference Documents */}
-              <div className="flex-1 flex flex-col justify-between">
-                <div className="mb-6">
-                  <h3 className="text-emerald-400 font-extrabold tracking-wide text-lg md:text-xl mb-3">
-                    {lt.refColTitle}
-                  </h3>
-                  <p className="text-sm md:text-base text-slate-300 leading-relaxed mb-4">
-                    {lt.refColDesc}
-                  </p>
-                </div>
+              {/* Highlighted explanation text - Med-size and prominent */}
+              <div className="text-slate-200 text-lg md:text-xl mb-8 leading-relaxed font-medium bg-[#1A2C46]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
+                {lt.singleDescription}
+              </div>
 
-                <div 
-                  onClick={() => inputRefRef.current?.click()}
-                  onDragOver={handleDragOverRef}
-                  onDragLeave={handleDragLeaveRef}
-                  onDrop={handleDropRef}
-                  className={`border-2 border-dashed transition-all duration-300 rounded-2xl p-10 text-center cursor-pointer flex flex-col items-center justify-center group mb-6 ${
-                    isDraggingRef
-                      ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(52,211,153,0.15)] scale-[1.01]'
-                      : 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/[0.02]'
-                  }`}
-                >
-                  <input 
-                    type="file" 
-                    ref={inputRefRef} 
-                    multiple 
-                    className="hidden" 
-                    onChange={(e) => e.target.files && addFilesToState(e.target.files, setFilesRef)}
-                  />
-                  <div className="w-16 h-16 bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/30 group-hover:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-all duration-300 mb-4 shadow-lg">
-                    <Upload className="w-7 h-7" />
-                  </div>
-                  <h4 className="font-bold text-white mb-2 text-base md:text-lg">{lt.dropzoneTitle}</h4>
-                  <p className="text-sm text-slate-400 max-w-xs">{lt.dropzoneDesc}</p>
+              {/* Drag and Drop Zone */}
+              <div 
+                onClick={() => inputSingleRef.current?.click()}
+                onDragOver={handleDragOverSingle}
+                onDragLeave={handleDragLeaveSingle}
+                onDrop={handleDropSingle}
+                className={`border-2 border-dashed transition-all duration-300 rounded-2xl p-14 text-center cursor-pointer flex flex-col items-center justify-center group ${
+                  isDraggingSingle 
+                    ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_20px_rgba(52,211,153,0.15)] scale-[1.01]' 
+                    : 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/[0.02]'
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={inputSingleRef} 
+                  multiple 
+                  className="hidden" 
+                  onChange={(e) => e.target.files && addFilesToState(e.target.files, setFilesSingle)}
+                />
+                <div className="w-20 h-20 bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/30 group-hover:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-all duration-300 mb-4 shadow-lg">
+                  <Upload className="w-9 h-9" />
                 </div>
+                <h3 className="font-bold text-white mb-2 text-xl md:text-2xl">{lt.dropzoneTitle}</h3>
+                <p className="text-sm md:text-base text-slate-400 max-w-md">{lt.dropzoneDesc}</p>
+              </div>
 
-                {/* Reference Files List */}
-                {filesRef.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm font-black text-slate-300 mb-2">
-                      <span>{lt.totalFiles} {filesRef.length}</span>
-                      <button onClick={() => setFilesRef([])} className="text-rose-400 hover:text-rose-300 flex items-center gap-1.5 text-xs md:text-sm font-extrabold">
-                        <Trash2 className="w-3.5 h-3.5" /> {lt.clear}
-                      </button>
-                    </div>
-                    {filesRef.map(file => (
-                      <div key={file.id} className="flex justify-between items-center bg-slate-900/50 border border-white/5 rounded-xl p-3 transition-all duration-300">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
-                            <p className="text-xs font-bold text-slate-400">{file.size}</p>
-                            {file.status === 'error' && file.error && (
-                              <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {file.status === 'uploading' && (
-                            <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
-                          )}
-                          {file.status === 'parsing' && (
-                            <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
-                          )}
-                          {file.status === 'success' && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
-                                <CheckCircle2 className="w-3 h-3" /> {lt.parsedLabel}
-                              </span>
-                              <button
-                                onClick={() => {
-                                  setPreviewFile(file);
-                                  setPreviewTab('formatted');
-                                }}
-                                className="px-2 py-0.5 bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-white hover:text-emerald-400 rounded text-xs md:text-sm font-black transition-all duration-300"
-                              >
-                                {lt.btnPreview}
-                              </button>
-                            </div>
-                          )}
-                          {file.status === 'error' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-extrabold">
-                              <AlertTriangle className="w-3 h-3" /> {lt.statusError}
-                            </span>
+              {/* Files List with dynamic Markdown parsing states */}
+              {filesSingle.length > 0 && (
+                <div className="mt-8 space-y-3">
+                  <h4 className="text-base font-black uppercase tracking-wider text-slate-300 mb-4 flex justify-between">
+                    <span>{lt.totalFiles} {filesSingle.length}</span>
+                    <button onClick={() => setFilesSingle([])} className="text-rose-400 hover:text-rose-300 flex items-center gap-1.5 text-sm font-extrabold">
+                      <Trash2 className="w-4 h-4" /> limpiar
+                    </button>
+                  </h4>
+                  {filesSingle.map(file => (
+                    <div key={file.id} className="flex justify-between items-center bg-slate-900/50 border border-white/5 rounded-xl p-4 transition-all duration-300">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-base font-extrabold text-white max-w-xs md:max-w-md truncate">{file.name}</p>
+                          <p className="text-sm font-bold text-slate-400">{file.size}</p>
+                          {file.status === 'error' && file.error && (
+                            <p className="text-sm font-semibold text-rose-400 mt-1 max-w-xs md:max-w-md truncate">{file.error}</p>
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Clear vertical gradient separation line */}
-              <div className="hidden md:block w-[1px] bg-gradient-to-b from-transparent via-slate-700 to-transparent min-h-[380px] self-stretch mx-4"></div>
-
-              {/* Column 2: Documents to Evaluate */}
-              <div className="flex-1 flex flex-col justify-between">
-                <div className="mb-6">
-                  <h3 className="text-emerald-400 font-extrabold tracking-wide text-lg md:text-xl mb-3">
-                    {lt.evalColTitle}
-                  </h3>
-                  <p className="text-sm md:text-base text-slate-300 leading-relaxed mb-4">
-                    {lt.evalColDesc}
-                  </p>
-                </div>
-
-                <div 
-                  onClick={() => inputEvalRef.current?.click()}
-                  onDragOver={handleDragOverEval}
-                  onDragLeave={handleDragLeaveEval}
-                  onDrop={handleDropEval}
-                  className={`border-2 border-dashed transition-all duration-300 rounded-2xl p-10 text-center cursor-pointer flex flex-col items-center justify-center group mb-6 ${
-                    isDraggingEval
-                      ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(52,211,153,0.15)] scale-[1.01]'
-                      : 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/[0.02]'
-                  }`}
-                >
-                  <input 
-                    type="file" 
-                    ref={inputEvalRef} 
-                    multiple 
-                    className="hidden" 
-                    onChange={(e) => e.target.files && addFilesToState(e.target.files, setFilesEval)}
-                  />
-                  <div className="w-16 h-16 bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/30 group-hover:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-all duration-300 mb-4 shadow-lg">
-                    <Upload className="w-7 h-7" />
-                  </div>
-                  <h4 className="font-bold text-white mb-2 text-base md:text-lg">{lt.dropzoneTitle}</h4>
-                  <p className="text-sm text-slate-400 max-w-xs">{lt.dropzoneDesc}</p>
-                </div>
-
-                {/* Evaluated Files List */}
-                {filesEval.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm font-black text-slate-300 mb-2">
-                      <span>{lt.totalFiles} {filesEval.length}</span>
-                      <button onClick={() => setFilesEval([])} className="text-rose-400 hover:text-rose-300 flex items-center gap-1.5 text-xs md:text-sm font-extrabold">
-                        <Trash2 className="w-3.5 h-3.5" /> {lt.clear}
-                      </button>
-                    </div>
-                    {filesEval.map(file => (
-                      <div key={file.id} className="flex justify-between items-center bg-slate-900/50 border border-white/5 rounded-xl p-3 transition-all duration-300">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
-                            <p className="text-xs font-bold text-slate-400">{file.size}</p>
-                            {file.status === 'error' && file.error && (
-                              <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {file.status === 'uploading' && (
-                            <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
-                          )}
-                          {file.status === 'parsing' && (
-                            <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
-                          )}
-                          {file.status === 'success' && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
-                                <CheckCircle2 className="w-3 h-3" /> {lt.parsedLabel}
-                              </span>
-                              <button
-                                onClick={() => {
-                                  setPreviewFile(file);
-                                  setPreviewTab('formatted');
-                                }}
-                                className="px-2 py-0.5 bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-white hover:text-emerald-400 rounded text-xs md:text-sm font-black transition-all duration-300"
-                              >
-                                {lt.btnPreview}
-                              </button>
-                            </div>
-                          )}
-                          {file.status === 'error' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-extrabold">
-                              <AlertTriangle className="w-3 h-3" /> {lt.statusError}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {file.status === 'uploading' && (
+                          <span className="text-sm font-extrabold text-slate-300 flex items-center gap-1.5">
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-400" /> Subiendo...
+                          </span>
+                        )}
+                        {file.status === 'parsing' && (
+                          <span className="text-sm font-extrabold text-slate-300 flex items-center gap-1.5">
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> {lt.parsingLabel}
+                          </span>
+                        )}
+                        {file.status === 'success' && (
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-extrabold">
+                              <CheckCircle2 className="w-4 h-4" /> {lt.parsedLabel}
                             </span>
-                          )}
-                        </div>
+                            <button
+                              onClick={() => {
+                                setPreviewFile(file);
+                                setPreviewTab('formatted');
+                              }}
+                              className="px-4 py-2 bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-white hover:text-emerald-400 rounded-lg text-sm font-black transition-all duration-300 flex items-center gap-1.5"
+                            >
+                              <Eye className="w-4 h-4" /> {lt.btnPreview}
+                            </button>
+                          </div>
+                        )}
+                        {file.status === 'error' && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm font-extrabold">
+                            <AlertTriangle className="w-4 h-4" /> {lt.statusError}
+                          </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* ================= OPTION 2: COMPARACIÓN DE ESCENARIOS ================= */}
+          {selectedMode === 'comparative' && (
+            <div className="w-full bg-[#152338]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-2xl transition-all duration-500">
+              
+              {/* Highlighted explanation text - Med-size and prominent */}
+              <div className="text-slate-200 text-lg md:text-xl mb-8 leading-relaxed font-medium bg-[#1A2C46]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
+                {lt.comparativeDescription}
+              </div>
+
+              {/* Grid with central vertical gradient line */}
+              <div className="flex flex-col md:flex-row gap-8 relative">
+                
+                {/* Column 1: Reference Documents */}
+                <div className="flex-1 flex flex-col justify-between">
+                  <div className="mb-6">
+                    <h3 className="text-emerald-400 font-extrabold tracking-wide text-lg md:text-xl mb-3">
+                      {lt.refColTitle}
+                    </h3>
+                    <p className="text-sm md:text-base text-slate-300 leading-relaxed mb-4">
+                      {lt.refColDesc}
+                    </p>
+                  </div>
+
+                  <div 
+                    onClick={() => inputRefRef.current?.click()}
+                    onDragOver={handleDragOverRef}
+                    onDragLeave={handleDragLeaveRef}
+                    onDrop={handleDropRef}
+                    className={`border-2 border-dashed transition-all duration-300 rounded-2xl p-10 text-center cursor-pointer flex flex-col items-center justify-center group mb-6 ${
+                      isDraggingRef
+                        ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(52,211,153,0.15)] scale-[1.01]'
+                        : 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/[0.02]'
+                    }`}
+                  >
+                    <input 
+                      type="file" 
+                      ref={inputRefRef} 
+                      multiple 
+                      className="hidden" 
+                      onChange={(e) => e.target.files && addFilesToState(e.target.files, setFilesRef)}
+                    />
+                    <div className="w-16 h-16 bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/30 group-hover:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-all duration-300 mb-4 shadow-lg">
+                      <Upload className="w-7 h-7" />
+                    </div>
+                    <h4 className="font-bold text-white mb-2 text-base md:text-lg">{lt.dropzoneTitle}</h4>
+                    <p className="text-sm text-slate-400 max-w-xs">{lt.dropzoneDesc}</p>
+                  </div>
+
+                  {/* Reference Files List */}
+                  {filesRef.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm font-black text-slate-300 mb-2">
+                        <span>{lt.totalFiles} {filesRef.length}</span>
+                        <button onClick={() => setFilesRef([])} className="text-rose-400 hover:text-rose-300 flex items-center gap-1.5 text-xs md:text-sm font-extrabold">
+                          <Trash2 className="w-3.5 h-3.5" /> limpiar
+                        </button>
+                      </div>
+                      {filesRef.map(file => (
+                        <div key={file.id} className="flex justify-between items-center bg-slate-900/50 border border-white/5 rounded-xl p-3 transition-all duration-300">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              <p className="text-xs font-bold text-slate-400">{file.size}</p>
+                              {file.status === 'error' && file.error && (
+                                <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {file.status === 'uploading' && (
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
+                            )}
+                            {file.status === 'parsing' && (
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
+                            )}
+                            {file.status === 'success' && (
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
+                                  <CheckCircle2 className="w-3 h-3" /> {lt.parsedLabel}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setPreviewFile(file);
+                                    setPreviewTab('formatted');
+                                  }}
+                                  className="px-2 py-0.5 bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-white hover:text-emerald-400 rounded text-xs md:text-sm font-black transition-all duration-300"
+                                >
+                                  {lt.btnPreview}
+                                </button>
+                              </div>
+                            )}
+                            {file.status === 'error' && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-extrabold">
+                                <AlertTriangle className="w-3 h-3" /> {lt.statusError}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Clear vertical gradient separation line */}
+                <div className="hidden md:block w-[1px] bg-gradient-to-b from-transparent via-slate-700 to-transparent min-h-[380px] self-stretch mx-4"></div>
+
+                {/* Column 2: Documents to Evaluate */}
+                <div className="flex-1 flex flex-col justify-between">
+                  <div className="mb-6">
+                    <h3 className="text-emerald-400 font-extrabold tracking-wide text-lg md:text-xl mb-3">
+                      {lt.evalColTitle}
+                    </h3>
+                    <p className="text-sm md:text-base text-slate-300 leading-relaxed mb-4">
+                      {lt.evalColDesc}
+                    </p>
+                  </div>
+
+                  <div 
+                    onClick={() => inputEvalRef.current?.click()}
+                    onDragOver={handleDragOverEval}
+                    onDragLeave={handleDragLeaveEval}
+                    onDrop={handleDropEval}
+                    className={`border-2 border-dashed transition-all duration-300 rounded-2xl p-10 text-center cursor-pointer flex flex-col items-center justify-center group mb-6 ${
+                      isDraggingEval
+                        ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(52,211,153,0.15)] scale-[1.01]'
+                        : 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/[0.02]'
+                    }`}
+                  >
+                    <input 
+                      type="file" 
+                      ref={inputEvalRef} 
+                      multiple 
+                      className="hidden" 
+                      onChange={(e) => e.target.files && addFilesToState(e.target.files, setFilesEval)}
+                    />
+                    <div className="w-16 h-16 bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/30 group-hover:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-all duration-300 mb-4 shadow-lg">
+                      <Upload className="w-7 h-7" />
+                    </div>
+                    <h4 className="font-bold text-white mb-2 text-base md:text-lg">{lt.dropzoneTitle}</h4>
+                    <p className="text-sm text-slate-400 max-w-xs">{lt.dropzoneDesc}</p>
+                  </div>
+
+                  {/* Evaluated Files List */}
+                  {filesEval.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm font-black text-slate-300 mb-2">
+                        <span>{lt.totalFiles} {filesEval.length}</span>
+                        <button onClick={() => setFilesEval([])} className="text-rose-400 hover:text-rose-300 flex items-center gap-1.5 text-xs md:text-sm font-extrabold">
+                          <Trash2 className="w-3.5 h-3.5" /> limpiar
+                        </button>
+                      </div>
+                      {filesEval.map(file => (
+                        <div key={file.id} className="flex justify-between items-center bg-slate-900/50 border border-white/5 rounded-xl p-3 transition-all duration-300">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              <p className="text-xs font-bold text-slate-400">{file.size}</p>
+                              {file.status === 'error' && file.error && (
+                                <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {file.status === 'uploading' && (
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
+                            )}
+                            {file.status === 'parsing' && (
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
+                            )}
+                            {file.status === 'success' && (
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
+                                  <CheckCircle2 className="w-3 h-3" /> {lt.parsedLabel}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setPreviewFile(file);
+                                    setPreviewTab('formatted');
+                                  }}
+                                  className="px-2 py-0.5 bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-white hover:text-emerald-400 rounded text-xs md:text-sm font-black transition-all duration-300"
+                                >
+                                  {lt.btnPreview}
+                                </button>
+                              </div>
+                            )}
+                            {file.status === 'error' && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-extrabold">
+                                <AlertTriangle className="w-3 h-3" /> {lt.statusError}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Action button at the bottom */}
