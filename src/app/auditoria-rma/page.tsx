@@ -895,7 +895,7 @@ DETALLES ADICIONALES: ${instructions || ''}
           },
           {
             title: "Boilerplate procedure cloning",
-            description: "The eight transaction procedures presented are near-verbatim copies of templates circulated across fraudulent SCOs documented by ScamWarners and fuelscamalert.com. Unique identifiers appear inserted into a pre-existing template, consistent with document fabrication methodology."
+            description: "The eight transaction procedures presented show significant structural inconsistencies and resemble template modifications. Unique identifiers appear inserted into a pre-existing template, which suggests a document structure that requires additional validation."
           },
           {
             title: "50/50 commission structure on title page",
