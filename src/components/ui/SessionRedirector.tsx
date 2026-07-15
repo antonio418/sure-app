@@ -31,14 +31,9 @@ export default function SessionRedirector() {
           }
         }
 
-        // Fallback to metadata
+        // Fallback to metadata (safe redirect without premature clearing)
         const meta = session.user.user_metadata;
         if (meta?.pending_price_id) {
-          // Clear metadata first to avoid loop
-          supabase.auth.updateUser({
-            data: { pending_price_id: null, pending_option: null, pending_plan_id: null }
-          });
-
           if (meta.pending_option === 'single') {
             if (window.location.pathname !== '/auditoria-rma') {
               window.location.href = '/auditoria-rma';

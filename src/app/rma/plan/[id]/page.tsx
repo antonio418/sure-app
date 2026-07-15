@@ -121,6 +121,21 @@ export default function PlanPage({ params }: { params: Promise<{ id: string }> }
   const [specialDetails, setSpecialDetails] = useState('');
 
   useEffect(() => {
+    // Clear pending redirect metadata from Supabase database to prevent redirect loops
+    const clearPendingMeta = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.user_metadata?.pending_price_id) {
+          await supabase.auth.updateUser({
+            data: { pending_price_id: null, pending_option: null, pending_plan_id: null }
+          });
+          console.log("Successfully cleared pending project session metadata in plan viewer.");
+        }
+      } catch (e) {
+        console.error("Failed to clear session metadata:", e);
+      }
+    };
+    clearPendingMeta();
     fetchPlan();
   }, [planId]);
 
