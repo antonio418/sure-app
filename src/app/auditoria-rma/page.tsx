@@ -246,13 +246,20 @@ export default function DocumentProcessorPage() {
   const [activePlan, setActivePlan] = useState<string>('none');
   const [loadingCredits, setLoadingCredits] = useState(true);
   const [loadingPrice, setLoadingPrice] = useState<string | null>(null);
-
+  
   // Workflow wizard states
-  const [workflowStep, setWorkflowStep] = useState<'choice' | 'plans-single' | 'plans-project' | 'form-single' | 'check-email' | 'uploader' | 'thank-you'>('choice');
+  const [workflowStep, setWorkflowStep] = useState<'auth' | 'choice' | 'plans-single' | 'plans-project' | 'form-single' | 'check-email' | 'uploader' | 'thank-you'>('auth');
   const [isDraggingSingle, setIsDraggingSingle] = useState(false);
   const [isDraggingRef, setIsDraggingRef] = useState(false);
   const [isDraggingEval, setIsDraggingEval] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+
+  // Authentication states
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccessMsg, setAuthSuccessMsg] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Client info form states
   const [companyName, setCompanyName] = useState('');
@@ -262,6 +269,97 @@ export default function DocumentProcessorPage() {
   const [clientEmail, setClientEmail] = useState('');
   const [clientEmailConfirm, setClientEmailConfirm] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError(null);
+    setAuthSuccessMsg(null);
+
+    try {
+      if (authMode === 'login') {
+        // Conectarse
+        if (authPassword) {
+          // Iniciar sesión con contraseña
+          const { error } = await supabase.auth.signInWithPassword({
+            email: clientEmail.trim(),
+            password: authPassword
+          });
+          if (error) throw error;
+          window.location.reload();
+        } else {
+          // Enlace Mágico (Magic Link)
+          const { error } = await supabase.auth.signInWithOtp({
+            email: clientEmail.trim(),
+            options: {
+              emailRedirectTo: `${window.location.origin}/auditoria-rma`
+            }
+          });
+          if (error) throw error;
+          setAuthSuccessMsg(
+            language === 'es'
+              ? "Enlace mágico enviado. Revisa tu correo para conectarte."
+              : "Magic link sent. Check your email to log in."
+          );
+        }
+      } else {
+        // Registrarse
+        if (!authPassword || authPassword.length < 8) {
+          throw new Error(
+            language === 'es'
+              ? "La contraseña debe tener al menos 8 caracteres."
+              : "Password must be at least 8 characters long."
+          );
+        }
+
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: clientEmail.trim(),
+            password: authPassword,
+            entityType: companyName ? 'COMPANY' : 'INDIVIDUAL',
+            fullName: clientFullName || 'Cliente RMA',
+            companyName,
+            taxId,
+            country: 'ES'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Error al registrar usuario.');
+        }
+
+        // Iniciar sesión automáticamente
+        const { error: loginErr } = await supabase.auth.signInWithPassword({
+          email: clientEmail.trim(),
+          password: authPassword
+        });
+        if (loginErr) throw loginErr;
+
+        window.location.reload();
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Error durante la autenticación.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleAuthGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auditoria-rma`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setAuthError(err.message || 'Error al conectar con Google.');
+    }
+  };
 
   const handleSendSingleOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1072,10 +1170,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                 <button 
                   onClick={() => {
                     setSelectedPrice('payg');
+                    localStorage.setItem('pending_price_id', 'payg');
+                    localStorage.setItem('pending_option', 'single');
                     if (email) {
                       handleBuy(null);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-3 bg-white/10 hover:bg-emerald-500 hover:text-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
@@ -1099,10 +1199,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8Ms8oubYEwHxxrCK6grr2';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'single');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-3 bg-white/10 hover:bg-emerald-500 hover:text-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
@@ -1127,10 +1229,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8ZO8oubYEwHxxo6I8cAc6';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'single');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-8"
@@ -1170,10 +1274,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8nD8oubYEwHxxGnaEY9Di';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'project');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
@@ -1196,10 +1302,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8qO8oubYEwHxxuOcRIKNG';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'project');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
@@ -1212,7 +1320,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                 <div>
                   <h3 className="text-sm font-black text-white">Tier 5</h3>
                   <p className="text-[10px] text-slate-400 mt-0.5">{lt.tier5Sub}</p>
-                  <div className="text-2xl font-black text-white mt-3">$6,000 <span className="text-[10px] text-slate-400 font-normal">/mes</span></div>
+                  <div className="text-2xl font-black text-white mt-3">$6,000 <span className="text-[10px] text-slate-400 font-normal font-bold">/mes</span></div>
                   <ul className="text-[10px] text-slate-300 mt-4 space-y-1.5">
                     <li>• {lt.tier5F1}</li>
                     <li>• {lt.tier5F2}</li>
@@ -1222,10 +1330,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8tM8oubYEwHxxQf5uCyk2';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'project');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
@@ -1249,10 +1359,12 @@ DETALLES ADICIONALES: ${instructions || ''}
                   onClick={() => {
                     const priceId = 'price_1TZ8w98oubYEwHxxW9PxHhXW';
                     setSelectedPrice(priceId);
+                    localStorage.setItem('pending_price_id', priceId);
+                    localStorage.setItem('pending_option', 'project');
                     if (email) {
                       handleBuy(priceId);
                     } else {
-                      setWorkflowStep('form-single');
+                      setWorkflowStep('auth');
                     }
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer mt-6"
@@ -1261,127 +1373,6 @@ DETALLES ADICIONALES: ${instructions || ''}
                 </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Client Info Form Step */}
-        {workflowStep === 'form-single' && (
-          <div className="max-w-md mx-auto w-full px-6 py-12 text-left space-y-6 animate-fade-in bg-[#152338]/30 border border-white/15 rounded-3xl p-8">
-            <button 
-              onClick={() => {
-                const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
-                setWorkflowStep(isProjectPrice ? 'plans-project' : 'plans-single');
-              }} 
-              className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" /> {lt.btnBackWizard || 'Volver'}
-            </button>
-            
-            <div className="text-center">
-              <h2 className="text-2xl font-black text-white uppercase tracking-tight">Información de Contacto y Facturación</h2>
-              <p className="text-xs text-slate-400 mt-1">Ingresa tus datos para registrar tu cuenta de auditoría y proceder al pago.</p>
-            </div>
-
-            <form onSubmit={handleSendSingleOtp} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre de la Empresa (Opcional)</label>
-                <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Ej. Corporación Alpha S.A." className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nº de Registro Fiscal (Opcional)</label>
-                <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} placeholder="Ej. RUC / NIF / Tax ID" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre y Apellido *</label>
-                  <input type="text" required value={clientFullName} onChange={e => setClientFullName(e.target.value)} placeholder="Ej. Carlos Mendoza" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nº de Identidad *</label>
-                  <input type="text" required value={clientIdNum} onChange={e => setClientIdNum(e.target.value)} placeholder="Ej. DNI / Cédula" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Número de Teléfono *</label>
-                <input type="tel" required value={clientPhone} onChange={e => setClientPhone(e.target.value)} placeholder="Ej. +34 600 000 000" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico *</label>
-                <input type="email" required value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="correo@empresa.com" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Confirmar Correo Electrónico *</label>
-                <input type="email" required value={clientEmailConfirm} onChange={e => setClientEmailConfirm(e.target.value)} placeholder="Repetir correo electrónico" className="w-full bg-[#050a15] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
-              </div>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setIsProcessing(true);
-                  try {
-                    // Store pending state in sessionStorage
-                    // Store pending state in sessionStorage
-                    const isProjectPrice = ['price_1TZ8nD8oubYEwHxxGnaEY9Di', 'price_1TZ8qO8oubYEwHxxuOcRIKNG', 'price_1TZ8tM8oubYEwHxxQf5uCyk2', 'price_1TZ8w98oubYEwHxxW9PxHhXW'].includes(selectedPrice || '');
-                    const pendingOption = isProjectPrice ? 'project' : 'single';
-
-                    localStorage.setItem('pending_price_id', selectedPrice || 'payg');
-                    localStorage.setItem('pending_option', pendingOption);
-
-                    const res = await fetch('/api/auth/generate-testing-link', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        email: clientEmail.trim(),
-                        companyName,
-                        taxId,
-                        clientFullName,
-                        clientIdNum,
-                        clientPhone,
-                        selectedPrice: selectedPrice || 'payg',
-                        pendingOption: pendingOption
-                      })
-                    });
-                    const data = await res.json();
-                    if (data.otp) {
-                      // Client-side verification of OTP directly (bypasses redirect/domain limits)
-                      const { error: verifyErr } = await supabase.auth.verifyOtp({
-                        email: clientEmail.trim(),
-                        token: data.otp,
-                        type: 'magiclink'
-                      });
-                      if (verifyErr) throw verifyErr;
-                      
-                      // Trigger manual session check to start Stripe checkout redirect
-                      handleBuy(selectedPrice === 'payg' ? null : selectedPrice);
-                      return;
-                    } else {
-                      throw new Error(data.error || 'Failed to generate testing OTP');
-                    }
-                  } catch (linkErr: any) {
-                    alert("Error al generar enlace de pruebas: " + linkErr.message);
-                  } finally {
-                    setIsProcessing(false);
-                  }
-                }}
-                disabled={isProcessing}
-                className="w-full mb-3 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 border border-amber-400/30"
-              >
-                ⚙️ [Pruebas] Iniciar Sesión Directo e ir a Stripe (Bypass Email)
-              </button>
-
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-transform cursor-pointer"
-              >
-                {isProcessing ? 'Enviando...' : 'Confirmar Email y Proceder al Pago'}
-              </button>
-            </form>
           </div>
         )}
 
@@ -1421,90 +1412,90 @@ DETALLES ADICIONALES: ${instructions || ''}
         {workflowStep === 'uploader' && (
           <>
             {/* Header Block */}
-        <div className="text-center max-w-3xl mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-            <ShieldCheck className="w-4 h-4" />
-            SURE RMA FORENSICS
-          </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
-            {lt.title}
-          </h1>
-          <p className="text-slate-200 text-base md:text-lg font-bold">
-            {lt.subtitle}
-          </p>
-        </div>
-
-        {/* Credit Dashboard banner */}
-        {!loadingCredits && email && (
-          <div className="w-full bg-[#152338]/60 backdrop-blur-md border border-white/10 p-6 rounded-3xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="text-center max-w-3xl mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                <ShieldCheck className="w-4 h-4" />
+                SURE RMA FORENSICS
               </div>
-              <div className="text-left">
-                <p className="text-xs text-slate-400 font-mono">Usuario: {email}</p>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
-                  <span>Plan Activo:</span>
-                  <span className="text-emerald-400 font-black uppercase tracking-wider">
-                    {activePlan === 'none' ? 'Sin Plan Activo' : activePlan}
-                  </span>
-                </h3>
-              </div>
+              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
+                {lt.title}
+              </h1>
+              <p className="text-slate-200 text-base md:text-lg font-bold">
+                {lt.subtitle}
+              </p>
             </div>
-            
-            <div className="flex items-center gap-6">
-              <div className="text-center sm:text-right">
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Operaciones Disponibles</p>
-                <p className="text-3xl font-black text-white mt-1">{credits ?? 0}</p>
+
+            {/* Credit Dashboard banner */}
+            {!loadingCredits && email && (
+              <div className="w-full bg-[#152338]/60 backdrop-blur-md border border-white/10 p-6 rounded-3xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs text-slate-400 font-mono">Usuario: {email}</p>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
+                      <span>Plan Activo:</span>
+                      <span className="text-emerald-400 font-black uppercase tracking-wider">
+                        {activePlan === 'none' ? 'Sin Plan Activo' : activePlan}
+                      </span>
+                    </h3>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                  <div className="text-center sm:text-right">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Operaciones Disponibles</p>
+                    <p className="text-3xl font-black text-white mt-1">{credits ?? 0}</p>
+                  </div>
+                  <button 
+                    onClick={() => setWorkflowStep(selectedMode === 'single' ? 'plans-single' : 'plans-project')}
+                    className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                  >
+                    Comprar Créditos
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={() => setWorkflowStep(selectedMode === 'single' ? 'plans-single' : 'plans-project')}
-                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+            )}
+
+            {!loadingCredits && !email && (
+              <div className="w-full bg-[#152338]/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm text-slate-300">
+                    No has iniciado sesión. Registra una cuenta o ingresa para ver tu saldo y comprar créditos de operaciones.
+                  </span>
+                </div>
+                <Link href="/login" className="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-xs font-bold rounded-xl border border-white/10 transition-colors">
+                  Iniciar Sesión
+                </Link>
+              </div>
+            )}
+
+            {/* Toggle Mode Switcher */}
+            <div className="w-full max-w-2xl bg-slate-900/60 backdrop-blur-md border border-white/5 p-2 rounded-2xl flex gap-2 mb-12">
+              <button
+                onClick={() => handleModeChange('single')}
+                className={`flex-1 py-3 px-4 rounded-xl text-base font-extrabold transition-all duration-300 ${
+                  selectedMode === 'single'
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
               >
-                Comprar Créditos
+                {lt.modeSingle}
+              </button>
+              <button
+                onClick={() => handleModeChange('comparative')}
+                className={`flex-1 py-3 px-4 rounded-xl text-base font-extrabold transition-all duration-300 ${
+                  selectedMode === 'comparative'
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {lt.modeComparative}
               </button>
             </div>
-          </div>
-        )}
-
-        {!loadingCredits && !email && (
-          <div className="w-full bg-[#152338]/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
-              <span className="text-sm text-slate-300">
-                No has iniciado sesión. Registra una cuenta o ingresa para ver tu saldo y comprar créditos de operaciones.
-              </span>
-            </div>
-            <Link href="/login" className="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-xs font-bold rounded-xl border border-white/10 transition-colors">
-              Iniciar Sesión
-            </Link>
-          </div>
-        )}
-
-        {/* Toggle Mode Switcher */}
-        <div className="w-full max-w-2xl bg-slate-900/60 backdrop-blur-md border border-white/5 p-2 rounded-2xl flex gap-2 mb-12">
-          <button
-            onClick={() => handleModeChange('single')}
-            className={`flex-1 py-3 px-4 rounded-xl text-base font-extrabold transition-all duration-300 ${
-              selectedMode === 'single'
-                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {lt.modeSingle}
-          </button>
-          <button
-            onClick={() => handleModeChange('comparative')}
-            className={`flex-1 py-3 px-4 rounded-xl text-base font-extrabold transition-all duration-300 ${
-              selectedMode === 'comparative'
-                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {lt.modeComparative}
-          </button>
-        </div>
 
         {/* ================= SECCIÓN: INGRESO DE DATOS ================= */}
         <div className="w-full bg-[#152338]/40 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl mb-8 transition-all duration-300 relative overflow-hidden">
@@ -1514,121 +1505,8 @@ DETALLES ADICIONALES: ${instructions || ''}
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-emerald-500/30 rounded-bl-lg pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-emerald-500/30 rounded-br-lg pointer-events-none" />
 
-          {selectedMode === 'single' ? (
-            /* VISTA DE LISTA CORTA PARA CASO ÚNICO (7 CAMPOS + CONTEXTO) */
-            <div className="space-y-6">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {lt.dataEntryTitleSingle}
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescSingle}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {/* 1.- Nombre de la Empresa */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.companyNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="MB PROCDI"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 2.- Nº de registro fiscal */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.taxIdLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
-                    placeholder="X1215488"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 3.- Nombre y apellido del Cliente */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.clientNameLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientFullName}
-                    onChange={(e) => setClientFullName(e.target.value)}
-                    placeholder="Antonio Baronas"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 4.- Nº de identidad del Cliente */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.clientIdLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientIdNum}
-                    onChange={(e) => setClientIdNum(e.target.value)}
-                    placeholder="Nº de identidad"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 5.- Correo electrónico */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.emailLabel}
-                  </label>
-                  <input
-                    type="email"
-                    value={clientEmail}
-                    onChange={(e) => setClientEmail(e.target.value)}
-                    placeholder="antonio@procdi.com"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 6.- Nº de teléfono */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.phoneLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={clientPhone}
-                    onChange={(e) => setClientPhone(e.target.value)}
-                    placeholder="+37068941110"
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* 7.- Contexto o Instrucciones Especiales */}
-                <div className="space-y-2 col-span-full">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {lt.contextLabel}
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                    placeholder={lt.contextPlaceholder}
-                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* VISTA ORIGINAL CON FORMULARIO COMPLETO PARA PROYECTOS / COMPARACIÓN */
+          {/* SIEMPRE MOSTRAR FORMULARIO DE PROYECTOS POR INSTRUCCIONES DEL CLIENTE */
+          true && (
             <>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
                 <div>
