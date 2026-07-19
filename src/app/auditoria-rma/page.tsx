@@ -239,6 +239,13 @@ const RMAPdfGenerator = dynamic(
 
 export default function DocumentProcessorPage() {
   const { language } = useLanguage();
+  const [reportLanguage, setReportLanguage] = useState<string>('es');
+
+  useEffect(() => {
+    if (language) {
+      setReportLanguage(language);
+    }
+  }, [language]);
   
   // Credits and billing state
   const [email, setEmail] = useState<string | null>(null);
@@ -928,7 +935,7 @@ DETALLES ADICIONALES: ${instructions || ''}
 
       const formData = new FormData();
       formData.append('agent', 'consolidator');
-      formData.append('targetLanguage', language === 'es' ? 'es' : 'en');
+      formData.append('targetLanguage', reportLanguage);
       formData.append('previousReports', compiledMarkdown);
       formData.append('userContext', userContextStr);
       formData.append('analysisMode', selectedMode);
@@ -2003,6 +2010,28 @@ DETALLES ADICIONALES: ${instructions || ''}
                           <option value="GBP">GBP (£)</option>
                         </select>
                       </div>
+                    </div>
+
+                    {/* Idioma del Reporte (9 idiomas) */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {language === 'es' ? 'Idioma del Reporte *' : 'Report Language *'}
+                      </label>
+                      <select
+                        value={reportLanguage}
+                        onChange={(e) => setReportLanguage(e.target.value)}
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
+                      >
+                        <option value="es" className="bg-[#0B192C]">🇪🇸 Español</option>
+                        <option value="en" className="bg-[#0B192C]">🇺🇸 English</option>
+                        <option value="fr" className="bg-[#0B192C]">🇫🇷 Français</option>
+                        <option value="de" className="bg-[#0B192C]">🇩🇪 Deutsch</option>
+                        <option value="pt" className="bg-[#0B192C]">🇧🇷 Português</option>
+                        <option value="zh" className="bg-[#0B192C]">🇨🇳 中文</option>
+                        <option value="ru" className="bg-[#0B192C]">🇷🇺 Русский</option>
+                        <option value="ar" className="bg-[#0B192C]">🇦🇪 العربية</option>
+                        <option value="hi" className="bg-[#0B192C]">🇮🇳 हिन्दी</option>
+                      </select>
                     </div>
 
                     {/* 7.- Contexto o Instrucciones Especiales */}
