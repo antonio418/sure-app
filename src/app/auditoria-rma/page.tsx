@@ -126,6 +126,14 @@ const localTranslations: Record<string, Record<string, string>> = {
     stageHelpText: 'Puede escribir o seleccionar una etapa. Puede reutilizar proyectos de la lista y editar libremente cualquiera de los campos para crear nuevos casos de auditoría.',
     reportLanguageLabel: 'Idioma del Reporte *',
     importLabel: 'Introducir datos desde un archivo',
+    startFromScratch: '{lt.startFromScratch}',
+    userLabel: 'Usuario:',
+    activePlanLabel: 'Plan Activo:',
+    noActivePlan: 'Sin Plan Activo',
+    availableOps: 'Operaciones Disponibles',
+    buyCredits: 'Comprar Créditos',
+    notLoggedIn: '{lt.notLoggedIn}',
+    loginButton: 'Iniciar Sesión',
     importDisabledDesc: 'El ingreso manual se encuentra inhabilitado. Suba un archivo de configuración del proyecto o copie el texto descriptivo a continuación para alimentar el sistema.',
     importDropzoneTitle: 'Seleccionar archivo, arrastrar archivo o copiar texto',
     importTextareaLabel: 'O pegue el texto descriptivo del proyecto aquí'
@@ -239,6 +247,14 @@ const localTranslations: Record<string, Record<string, string>> = {
     stageHelpText: 'You can type or select a stage. You can reuse projects from the list and edit any field freely to create new audit cases.',
     reportLanguageLabel: 'Report Language *',
     importLabel: 'Import data from a file',
+    startFromScratch: '🔄 Start from Scratch',
+    userLabel: 'User:',
+    activePlanLabel: 'Active Plan:',
+    noActivePlan: 'No Active Plan',
+    availableOps: 'Available Operations',
+    buyCredits: 'Buy Credits',
+    notLoggedIn: 'You are not logged in. Register an account or log in to check your balance and purchase operation credits.',
+    loginButton: 'Log In',
     importDisabledDesc: 'Manual entry is disabled. Upload a project configuration file or copy the descriptive text below to feed the system.',
     importDropzoneTitle: 'Select file, drag file, or paste text',
     importTextareaLabel: 'Or paste the descriptive project text here'
@@ -1758,11 +1774,11 @@ DETALLES ADICIONALES: ${instructions || ''}
                     <ShieldCheck className="w-6 h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="text-xs text-slate-400 font-mono">Usuario: {email}</p>
+                    <p className="text-xs text-slate-400 font-mono">{lt.userLabel} {email}</p>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
-                      <span>Plan Activo:</span>
+                      <span>{lt.activePlanLabel}</span>
                       <span className="text-emerald-400 font-black uppercase tracking-wider">
-                        {activePlan === 'none' ? 'Sin Plan Activo' : activePlan}
+                        {activePlan === 'none' ? lt.noActivePlan : activePlan}
                       </span>
                     </h3>
                   </div>
@@ -1770,14 +1786,14 @@ DETALLES ADICIONALES: ${instructions || ''}
                 
                 <div className="flex items-center gap-6">
                   <div className="text-center sm:text-right">
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Operaciones Disponibles</p>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{lt.availableOps}</p>
                     <p className="text-3xl font-black text-white mt-1">{credits ?? 0}</p>
                   </div>
                   <button 
                     onClick={() => setWorkflowStep(selectedMode === 'single' ? 'plans-single' : 'plans-project')}
                     className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                   >
-                    Comprar Créditos
+                    {lt.buyCredits}
                   </button>
                 </div>
               </div>
@@ -1792,7 +1808,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                   </span>
                 </div>
                 <Link href="/login" className="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-xs font-bold rounded-xl border border-white/10 transition-colors">
-                  Iniciar Sesión
+                  {lt.loginButton}
                 </Link>
               </div>
             )}
@@ -1850,7 +1866,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                     className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
                   />
                   <span className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-                    Introducir datos desde un archivo
+                    {lt.importLabel}
                   </span>
                 </label>
               </div>
