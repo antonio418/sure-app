@@ -31,19 +31,19 @@ const localTranslations: Record<string, Record<string, string>> = {
     evalColDesc: 'Cargue aquí aquellos documentos que Ud quiere comparar contra los documentos que cargó en la ventana izquierda (Referencia)',
     dropzoneTitle: 'Arrastra y suelta tus archivos aquí, o haz clic para buscarlos',
     dropzoneDesc: 'Formatos soportados: PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), RTF y TXT',
-    confirmTitle: '⚠️ Confirmación de Cambio de Modo',
-    confirmMessage: 'Ud está cambiando de opción, la información que ha cargado hasta ahora será desechada ¿Desechar Si/no?',
-    btnYes: 'Sí, desechar',
+    confirmTitle: '⚠️ Confirmar Cambio de Modo',
+    confirmMessage: 'Está cambiando de opción. La información cargada hasta el momento se descartará. ¿Descartar y cambiar Sí/No?',
+    btnYes: 'Sí, descartar',
     btnNo: 'No, cancelar',
     btnStartAudit: 'Iniciar Auditoría de Caso Único',
     btnStartComparison: 'Procesar Comparación de Escenarios',
     parsedLabel: 'Markdown Convertido',
     parsingLabel: 'Convirtiendo a Markdown...',
-    noFilesYet: 'No se han subido archivos',
-    backToHub: 'Volver al Hub',
+    noFilesYet: 'Aún no se han subido archivos',
+    backToHub: 'Volver al Centro de Control',
     processingSuccess: '¡Procesamiento Completado!',
-    processingMessage: 'Los documentos han sido convertidos a Markdown y el informe de riesgo ha sido generado.',
-    totalFiles: 'Archivos totales:',
+    processingMessage: 'Los documentos se han convertido exitosamente a Markdown y el informe de riesgos ha sido generado.',
+    totalFiles: 'Total de archivos:',
     btnPreview: 'Ver Markdown',
     previewTitle: 'Vista Previa del Documento Convertido',
     tabFormatted: 'Formateado',
@@ -51,17 +51,19 @@ const localTranslations: Record<string, Record<string, string>> = {
     btnCopy: 'Copiar',
     copied: '¡Copiado!',
     btnBack: 'Cerrar',
-    statusError: 'Error al procesar',
+    statusError: 'Error al convertir',
     clear: 'limpiar',
     choiceTitle: 'SURE RMA — PLATAFORMA DE AUDITORÍA',
-    choiceSubtitle: 'Selecciona la modalidad de auditoría documental que mejor se adapte a tu volumen de operaciones.',
-    cardSingleTitle: '1. Single Case Audit',
-    cardSingleDesc: 'Auditoría documental y mitigación de riesgos para un caso de negocio individual (Due Diligence, ofertas, contratos). Ideal para uso eventual o transaccional.',
-    cardBtnSelectTariff: 'Seleccionar Tarifa',
-    cardProjectTitle: '2. Project Assessment Tool',
-    cardProjectDesc: 'Espacio de trabajo continuo para la gestión de riesgos y planes de contingencia en grandes proyectos de infraestructura, commodities y licitaciones masivas.',
-    btnBackWizard: 'Volver',
-    plansSingleTitle: 'Seleccione su Tarifa de Caso Único',
+    choiceSubtitle: 'Seleccione el modo de auditoría de documentos que mejor se adapte a su volumen operativo.',
+    cardSingleTitle: '1. Auditoría de Caso Único',
+    cardSingleDesc: 'Auditoría documental y mitigación de riesgos para un caso de negocio único (Due Diligence, ofertas, contratos). Ideal para uso ocasional o transaccional.',
+    cardBtnSelectTariff: 'Seleccionar Plan',
+    cardProjectTitle: '2. Herramienta de Evaluación de Proyectos',
+    cardProjectDesc: 'Espacio de trabajo continuo para la gestión de riesgos y planes de contingencia en megaproyectos de infraestructura, commodities y licitaciones masivas.',
+    btnBackWizard: 'Atrás',
+    btnPayAndStartSingle: 'Pagar $50 para Iniciar Auditoría',
+    btnPayAndStartComparative: 'Comprar Plan para Iniciar Comparación',
+    plansSingleTitle: 'Seleccione su Plan de Caso Único',
     basicSub: 'Pago por uso',
     basicF1: '$50.00 por operación',
     basicF2: 'Conversión a Markdown',
@@ -69,14 +71,14 @@ const localTranslations: Record<string, Record<string, string>> = {
     btnSelectPlan: 'Seleccionar',
     tier1Sub: 'Hasta 25 operaciones',
     tier1F1: '$48.40 costo unitario',
-    tier1F2: 'Ahorro del 3.2%',
+    tier1F2: '3.2% de ahorro',
     tier1F3: 'Reporte forense completo',
     tier2Sub: 'Hasta 50 operaciones',
     tier2F1: '$47.50 costo unitario',
-    tier2F2: 'Ahorro del 5.0%',
+    tier2F2: '5.0% de ahorro',
     tier2F3: 'Soporte premium prioritario',
     plansProjectTitle: 'Seleccione su Plan de Grandes Proyectos',
-    plansProjectSubtitle: 'Planes de gran volumen con memoria de contexto permanente y auditoría continua.',
+    plansProjectSubtitle: 'Planes de alto volumen con memoria de contexto permanente y auditoría continua.',
     tier3Sub: 'Hasta 75 operaciones',
     tier3F1: '$45.00 costo unitario',
     tier3F2: 'Memoria permanente',
@@ -102,17 +104,27 @@ const localTranslations: Record<string, Record<string, string>> = {
     contextLabel: 'Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)',
     contextPlaceholder: 'Ingrese pautas e instrucciones específicas para guiar la auditoría de la IA...',
     projectNumberLabel: '# del proyecto / Nombre *',
+    projectNumberPlaceholder: 'PB-74-2026 (Escribe "Petro")',
     clientLabel: 'Cliente *',
-    participantLabel: 'Participante (razón social) *',
+    clientPlaceholder: 'Nombre del cliente',
+    participantLabel: 'Licitante (razón social) *',
+    participantPlaceholder: 'Ej. Consorcio M-89',
     blockLabel: 'Bloque o parte del proyecto',
+    blockPlaceholder: 'Ej. Modulo Bloque B-74',
     referenceLabel: 'Referencia',
+    referencePlaceholder: 'Ej. instalación de tres pozos...',
     amountLabel: 'Monto del contrato *',
+    amountPlaceholder: 'Monto',
+    stageLabel: 'Etapa del Proyecto *',
+    stagePlaceholder: 'Escriba o seleccione una etapa...',
     stageQuestion: '¿En qué etapa del proyecto se encuentra?',
     stagePre: 'Precalificación',
     stageOffer: 'Oferta',
     stageExec: 'Ejecución de proyecto',
     stagePost: 'Post-venta',
     stageNA: 'No aplica',
+    stageHelpText: 'Puede escribir o seleccionar una etapa. Puede reutilizar proyectos de la lista y editar libremente cualquiera de los campos para crear nuevos casos de auditoría.',
+    reportLanguageLabel: 'Idioma del Reporte *',
     importLabel: 'Introducir datos desde un archivo',
     importDisabledDesc: 'El ingreso manual se encuentra inhabilitado. Suba un archivo de configuración del proyecto o copie el texto descriptivo a continuación para alimentar el sistema.',
     importDropzoneTitle: 'Seleccionar archivo, arrastrar archivo o copiar texto',
@@ -205,17 +217,27 @@ const localTranslations: Record<string, Record<string, string>> = {
     contextLabel: 'Context or Special Instructions for Analysis (Context Window)',
     contextPlaceholder: 'Enter guidelines and specific instructions to steer the AI audit...',
     projectNumberLabel: 'Project # / Name *',
+    projectNumberPlaceholder: 'PB-74-2026 (e.g. "Petro")',
     clientLabel: 'Client *',
-    participantLabel: 'Participant (Company Name) *',
+    clientPlaceholder: 'Client name',
+    participantLabel: 'Bidder (Company Name) *',
+    participantPlaceholder: 'e.g. Consortium M-89',
     blockLabel: 'Block or Part of the Project',
+    blockPlaceholder: 'e.g. Block Module B-74',
     referenceLabel: 'Reference',
+    referencePlaceholder: 'e.g. installation of three wells...',
     amountLabel: 'Contract Amount *',
-    stageQuestion: 'What stage of the project are you in?',
+    amountPlaceholder: 'Amount',
+    stageLabel: 'Project Stage *',
+    stagePlaceholder: 'Type or select a stage...',
+    stageQuestion: 'What stage of the project is it in?',
     stagePre: 'Pre-qualification',
     stageOffer: 'Bidding / Offer',
     stageExec: 'Project Execution',
     stagePost: 'Post-sale',
     stageNA: 'Not Applicable',
+    stageHelpText: 'You can type or select a stage. You can reuse projects from the list and edit any field freely to create new audit cases.',
+    reportLanguageLabel: 'Report Language *',
     importLabel: 'Import data from a file',
     importDisabledDesc: 'Manual entry is disabled. Upload a project configuration file or copy the descriptive text below to feed the system.',
     importDropzoneTitle: 'Select file, drag file, or paste text',
@@ -1873,43 +1895,94 @@ DETALLES ADICIONALES: ${instructions || ''}
                   {/* Pregunta: En qué etapa del proyecto se encuentra */}
                   <div className="space-y-3">
                     <span className="block text-sm md:text-base font-bold text-slate-200">
-                      ¿En qué etapa del proyecto se encuentra?
+                      {lt.stageQuestion}
                     </span>
                     <div className="flex flex-wrap gap-2.5">
-                      {['Precalificación', 'Oferta', 'Ejecución de proyecto', 'Post-venta', 'No aplica'].map((stage) => (
+                      {[
+                        { key: 'Precalificación', label: lt.stagePre },
+                        { key: 'Oferta', label: lt.stageOffer },
+                        { key: 'Ejecución de proyecto', label: lt.stageExec },
+                        { key: 'Post-venta', label: lt.stagePost },
+                        { key: 'No aplica', label: lt.stageNA }
+                      ].map((stageObj) => (
                         <button
-                          key={stage}
+                          key={stageObj.key}
                           type="button"
-                          onClick={() => setActiveStage(stage)}
+                          onClick={() => setActiveStage(stageObj.label)}
                           className={`px-5 py-2.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 ${
-                            activeStage === stage
+                            activeStage === stageObj.label
                               ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 font-black scale-[1.02]'
                               : 'bg-[#1A2C46]/50 text-slate-300 hover:text-white hover:bg-[#1A2C46] border border-white/5'
                           }`}
                         >
-                          {stage}
+                          {stageObj.label}
                         </button>
                       ))}
                     </div>
+
+                    {/* Input de etapa editable */}
+                    <div className="mt-3 max-w-md space-y-1.5">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {lt.stageLabel}
+                      </label>
+                      <input
+                        type="text"
+                        value={activeStage}
+                        onChange={(e) => setActiveStage(e.target.value)}
+                        placeholder={lt.stagePlaceholder}
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                      <p className="text-[10px] text-slate-500 leading-normal">
+                        {lt.stageHelpText}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Formulario de 6 celdas / inputs */}
+                  {/* Formulario de 7 celdas / inputs ordenados exactamente */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {/* 1.- # del proyecto con Autocompletado */}
+                    {/* 1.- Licitante (razón social) */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {lt.participantLabel}
+                      </label>
+                      <input
+                        type="text"
+                        value={participant}
+                        onChange={(e) => setParticipant(e.target.value)}
+                        placeholder={lt.participantPlaceholder}
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    {/* 2.- Cliente */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {lt.clientLabel}
+                      </label>
+                      <input
+                        type="text"
+                        value={client}
+                        onChange={(e) => setClient(e.target.value)}
+                        placeholder={lt.clientPlaceholder}
+                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    {/* 3.- # del proyecto con Autocompletado */}
                     <div className="space-y-2 relative">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        # del proyecto / Nombre *
+                        {lt.projectNumberLabel}
                       </label>
                       <input
                         type="text"
                         value={projectNumber}
                         onChange={(e) => {
                           setProjectNumber(e.target.value);
-                          setShowSuggestions(true);
+                           setShowSuggestions(true);
                         }}
                         onFocus={() => setShowSuggestions(true)}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                        placeholder="PB-74-2026 (Escribe 'Petro')"
+                        placeholder={lt.projectNumberPlaceholder}
                         className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                       />
                       {/* Dropdown Suggestions */}
@@ -1923,51 +1996,23 @@ DETALLES ADICIONALES: ${instructions || ''}
                               className="w-full text-left px-4 py-3 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors border-b border-white/5 last:border-0 flex flex-col gap-0.5"
                             >
                               <span className="text-sm font-bold text-white">{p.name}</span>
-                              <span className="text-xs text-slate-400">#{p.projectNumber} • Participante: {p.participant}</span>
+                              <span className="text-xs text-slate-400">#{p.projectNumber} • {language === 'es' ? 'Licitante' : 'Bidder'}: {p.participant}</span>
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
 
-                    {/* 2.- Cliente */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Cliente *
-                      </label>
-                      <input
-                        type="text"
-                        value={client}
-                        onChange={(e) => setClient(e.target.value)}
-                        placeholder="Nombre del cliente"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
-                    {/* 3.- Participante (razón social) */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Participante (razón social) *
-                      </label>
-                      <input
-                        type="text"
-                        value={participant}
-                        onChange={(e) => setParticipant(e.target.value)}
-                        placeholder="Ej. Consorcio M-89"
-                        className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
                     {/* 4.- Bloque o parte del proyecto */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Bloque o parte del proyecto
+                        {lt.blockLabel}
                       </label>
                       <input
                         type="text"
                         value={block}
                         onChange={(e) => setBlock(e.target.value)}
-                        placeholder="Ej. Modulo Bloque B-74"
+                        placeholder={lt.blockPlaceholder}
                         className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
@@ -1975,13 +2020,13 @@ DETALLES ADICIONALES: ${instructions || ''}
                     {/* 5.- Referencia */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Referencia
+                        {lt.referenceLabel}
                       </label>
                       <input
                         type="text"
                         value={reference}
                         onChange={(e) => setReference(e.target.value)}
-                        placeholder="Ej. instalación de tres pozos..."
+                        placeholder={lt.referencePlaceholder}
                         className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
@@ -1989,14 +2034,14 @@ DETALLES ADICIONALES: ${instructions || ''}
                     {/* 6.- Monto del contrato (seleccionar moneda) */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Monto del contrato *
+                        {lt.amountLabel}
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
-                          placeholder="Monto"
+                          placeholder={lt.amountPlaceholder}
                           className="flex-grow bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                         />
                         <select
@@ -2012,10 +2057,10 @@ DETALLES ADICIONALES: ${instructions || ''}
                       </div>
                     </div>
 
-                    {/* Idioma del Reporte (9 idiomas) */}
+                    {/* 7.- Idioma del Reporte (9 idiomas) */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {language === 'es' ? 'Idioma del Reporte *' : 'Report Language *'}
+                        {lt.reportLanguageLabel}
                       </label>
                       <select
                         value={reportLanguage}
@@ -2034,16 +2079,16 @@ DETALLES ADICIONALES: ${instructions || ''}
                       </select>
                     </div>
 
-                    {/* 7.- Contexto o Instrucciones Especiales */}
+                    {/* 8.- Contexto o Instrucciones Especiales */}
                     <div className="space-y-2 col-span-full">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)
+                        {lt.contextLabel}
                       </label>
                       <textarea
                         rows={3}
                         value={instructions}
                         onChange={(e) => setInstructions(e.target.value)}
-                        placeholder="Ingrese pautas e instrucciones específicas para guiar la auditoría de la IA (ej. enfocarse en regulaciones locales de la Ley de Hidrocarburos, evaluar exclusiones de Chevron)..."
+                        placeholder={lt.contextPlaceholder}
                         className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
