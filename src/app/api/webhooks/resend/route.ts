@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     
     // Validate signature if secret is defined
     const secret = process.env.RESEND_WEBHOOK_SECRET;
-    let svixId = crypto.randomUUID(); // Fallback if no secret configured
+    let svixId: string = crypto.randomUUID(); // Fallback if no secret configured
     
     if (secret) {
       try {
