@@ -258,12 +258,35 @@ export async function POST(req: NextRequest) {
                       });
                    }
                 } else {
-                   // Si hay un error con Hunter, lo guardamos por si acaso
-                   verifiedLeads.push(lead);
+                   // FALLO SEGURO: Hunter no devolvió estado (p. ej. cuota agotada o
+                   // respuesta inválida). NO asumimos que el correo es bueno: lo aparcamos.
+                   console.warn(`Hunter.io sin estado para ${lead.email} (posible cuota agotada). Aparcando por seguridad.`);
+                   const cleanWebsite = (lead.website || 'unknown.com')
+                     .replace(/^https?:\/\/(www\.)?/, '')
+                     .split('/')[0];
+                   const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
+                   const originalEmail = lead.email;
+                   verifiedLeads.push({
+                      ...lead,
+                      email: `no-email-${uniqueId}@${cleanWebsite}`,
+                      status: 'PARKED',
+                      nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo sin verificar (Hunter no disponible): ${originalEmail}`
+                   });
                 }
              } catch (err) {
-                console.error("Error verificando con Hunter:", err);
-                verifiedLeads.push(lead); // En caso de fallo de red, asumimos que es bueno
+                // FALLO SEGURO: error de red/timeout con Hunter. Aparcamos en vez de enviar.
+                console.error("Error verificando con Hunter (aparcando por seguridad):", err);
+                const cleanWebsite = (lead.website || 'unknown.com')
+                  .replace(/^https?:\/\/(www\.)?/, '')
+                  .split('/')[0];
+                const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
+                const originalEmail = lead.email;
+                verifiedLeads.push({
+                   ...lead,
+                   email: `no-email-${uniqueId}@${cleanWebsite}`,
+                   status: 'PARKED',
+                   nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo sin verificar (error de Hunter): ${originalEmail}`
+                });
              }
           }
        } else {
