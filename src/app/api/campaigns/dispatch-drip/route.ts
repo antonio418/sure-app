@@ -287,6 +287,36 @@ async function handleDispatch(req: NextRequest) {
       }
 
       try {
+        // ============================================================
+        // VERIFICACIÓN PRE-ENVÍO (Hunter.io) — FALLO SEGURO
+        // Solo se envía a correos confirmados como 'valid'. Si Hunter
+        // no lo confirma (inválido, catch-all, error o cuota agotada),
+        // se aparca el lead (PARKED) y se salta el envío. Bajo volumen
+        // (lote diario), encaja en la cuota de verificación.
+        // ============================================================
+        const hunterKey = process.env.HUNTER_API_KEY;
+        if (hunterKey && lead.email && !lead.email.startsWith('no-email-')) {
+          let isValid = false;
+          try {
+            const vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
+            const vdata = await vres.json();
+            isValid = !!(vdata && vdata.data && vdata.data.status === 'valid');
+          } catch (e) {
+            isValid = false; // fallo seguro: si Hunter falla, no enviamos
+          }
+          if (!isValid) {
+            await supabaseAdmin
+              .from('leads_campaign')
+              .update({
+                status: 'PARKED',
+                nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Aparcado en el envío: correo no verificado por Hunter (${lead.email})`
+              })
+              .eq('id', lead.id);
+            console.log(`[Drip Engine] Aparcado por verificación pre-envío (no válido/no confirmado): ${lead.email}`);
+            continue;
+          }
+        }
+
         let emailSubject = "";
         let emailBody = "";
 
