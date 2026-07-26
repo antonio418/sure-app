@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { authedFetch } from '@/lib/apiClient';
 import { useRouter } from 'next/navigation';
-import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive, Send } from 'lucide-react';
+import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive, Send, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -114,13 +114,32 @@ export default function AlfredoAdminPage() {
       
       setLeads(data || []);
       
-      const s = { total: data.length, new: 0, sent: 0, converted: 0, cold: 0 };
+      const s = { 
+        total: data.length, 
+        new: 0, 
+        sent: 0, 
+        converted: 0, 
+        cold: 0,
+        bounced: 0,
+        complained: 0,
+        suppressed: 0,
+        totalSent: 0
+      };
       data.forEach((l: any) => {
         if (l.status === 'lead_nuevo' || l.status === 'NEW') s.new++;
-        else if (l.status === 'email_1_enviado' || l.status === 'email_2_enviado' || l.status === 'DRAFT' || l.status === 'APPROVED') s.sent++;
-        else if (l.status === 'convertido') s.converted++;
-        else if (l.status === 'cold') s.cold++;
+        else if (l.status === 'convertido' || l.has_replied === true) s.converted++;
+        else if (l.status === 'REJECTED' || l.status === 'cold') s.cold++;
+        
+        if (l.status === 'BOUNCED' || l.resend_status === 'bounced') s.bounced++;
+        if (l.resend_status === 'complained' || l.complaint === true) s.complained++;
+        if (l.status === 'SUPPRESSED' || l.resend_status === 'suppressed' || l.suppression_reason) s.suppressed++;
+        
+        if (l.email_1_enviado_at || l.email_2_enviado_at || l.email_3_enviado_at || (l.resend_status && l.resend_status !== 'pending' && l.resend_status !== 'suppressed')) {
+          s.totalSent++;
+        }
       });
+      // Keep sent status count for backward compatibility metrics card rendering
+      s.sent = data.filter((l: any) => l.status === 'email_1_enviado' || l.status === 'email_2_enviado' || l.status === 'DRAFT' || l.status === 'APPROVED').length;
       setStats(s);
     } catch (e) {
       console.error(e);
@@ -460,6 +479,8 @@ export default function AlfredoAdminPage() {
     if (statusFilter === 'BOUNCED') return lead.status === 'BOUNCED' || lead.resend_status === 'bounced';
     if (statusFilter === 'REPLIED') return lead.status === 'convertido' || lead.has_replied === true;
     if (statusFilter === 'REJECTED') return lead.status === 'REJECTED' || lead.status === 'cold';
+    if (statusFilter === 'COMPLAINED') return lead.resend_status === 'complained' || lead.complaint === true;
+    if (statusFilter === 'SUPPRESSED') return lead.status === 'SUPPRESSED' || lead.resend_status === 'suppressed' || lead.suppression_reason;
     return true;
   });
 
@@ -642,24 +663,47 @@ export default function AlfredoAdminPage() {
         </div>
 
         {/* Telemetry Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-            <div className="flex items-center justify-between mb-4"><Users className="w-6 h-6 text-blue-400" /><span className="text-2xl font-bold">{stats.total}</span></div>
-            <p className="text-gray-400 text-sm font-mono uppercase">Total Proyecto</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-            <div className="flex items-center justify-between mb-4"><Target className="w-6 h-6 text-[var(--color-sure-accent)]" /><span className="text-2xl font-bold">{stats.new}</span></div>
-            <p className="text-gray-400 text-sm font-mono uppercase">Pendientes (NEW)</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-            <div className="flex items-center justify-between mb-4"><Mail className="w-6 h-6 text-purple-400" /><span className="text-2xl font-bold">{stats.sent}</span></div>
-            <p className="text-gray-400 text-sm font-mono uppercase">Correos Activos</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-            <div className="flex items-center justify-between mb-4"><TrendingUp className="w-6 h-6 text-green-400" /><span className="text-2xl font-bold">{stats.converted}</span></div>
-            <p className="text-gray-400 text-sm font-mono uppercase">Respuestas</p>
-          </div>
-        </div>
+        {(() => {
+          const bounceRate = stats.totalSent > 0 ? (stats.bounced / stats.totalSent) * 100 : 0;
+          const complaintRate = stats.totalSent > 0 ? (stats.complained / stats.totalSent) * 100 : 0;
+          return (
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-6 mb-10">
+              <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-4"><Users className="w-6 h-6 text-blue-400" /><span className="text-2xl font-bold">{stats.total}</span></div>
+                <p className="text-gray-400 text-sm font-mono uppercase">Total Proyecto</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-4"><Target className="w-6 h-6 text-[var(--color-sure-accent)]" /><span className="text-2xl font-bold">{stats.new}</span></div>
+                <p className="text-gray-400 text-sm font-mono uppercase">Pendientes</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-4"><Mail className="w-6 h-6 text-purple-400" /><span className="text-2xl font-bold">{stats.totalSent}</span></div>
+                <p className="text-gray-400 text-sm font-mono uppercase">Enviados (Total)</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-4"><TrendingUp className="w-6 h-6 text-green-400" /><span className="text-2xl font-bold">{stats.converted}</span></div>
+                <p className="text-gray-400 text-sm font-mono uppercase">Respuestas</p>
+              </div>
+              <div className={`p-6 rounded-2xl border transition-all ${
+                bounceRate > 3
+                  ? 'bg-red-950/30 border-red-500/40 text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
+                  : 'bg-white/5 border border-white/10'
+              }`}>
+                <div className="flex items-center justify-between mb-4">
+                  <AlertTriangle className={`w-6 h-6 ${bounceRate > 3 ? 'text-red-400 font-bold animate-bounce' : 'text-yellow-400'}`} />
+                  <span className="text-2xl font-bold">{bounceRate.toFixed(1)}%</span>
+                </div>
+                <p className={`text-[10px] font-mono uppercase ${bounceRate > 3 ? 'text-red-400 font-bold animate-pulse' : 'text-gray-400'}`}>
+                  Rebotes ({stats.bounced})
+                </p>
+              </div>
+              <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-4"><AlertTriangle className="w-6 h-6 text-orange-400" /><span className="text-2xl font-bold">{stats.complained}</span></div>
+                <p className="text-gray-400 text-sm font-mono uppercase">Quejas ({complaintRate.toFixed(2)}%)</p>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ALFREDO ORIGINATION NODE */}
         <div className="bg-black/30 border border-[var(--color-sure-accent)]/30 rounded-3xl overflow-hidden mb-10 shadow-[0_0_30px_rgba(0,229,255,0.05)] relative p-8">
@@ -734,6 +778,8 @@ export default function AlfredoAdminPage() {
                { id: 'APPROVED', label: '⏳ Aprobados', count: leads.filter(l => l.status === 'APPROVED').length },
                { id: 'SENT', label: '✉️ Enviados', count: leads.filter(l => l.status === 'email_1_enviado' || l.status === 'email_2_enviado').length },
                { id: 'BOUNCED', label: '🚨 Rebotados', count: leads.filter(l => l.status === 'BOUNCED' || l.resend_status === 'bounced').length },
+               { id: 'COMPLAINED', label: '🔥 Spam / Queja', count: leads.filter(l => l.resend_status === 'complained' || l.complaint === true).length },
+               { id: 'SUPPRESSED', label: '🚫 Suprimidos', count: leads.filter(l => l.status === 'SUPPRESSED' || l.resend_status === 'suppressed' || l.suppression_reason).length },
                { id: 'REPLIED', label: '🎉 Recibidos', count: leads.filter(l => l.status === 'convertido' || l.has_replied === true).length },
                { id: 'REJECTED', label: '🗑️ Descartados', count: leads.filter(l => l.status === 'REJECTED' || l.status === 'cold').length },
              ].map(tab => (
@@ -757,151 +803,154 @@ export default function AlfredoAdminPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-400">
-              <thead className="bg-white/5 text-xs uppercase font-mono">
-                <tr>
-                  <th className="px-6 py-4">
-                     <input 
-                       type="checkbox" 
-                       className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
-                       checked={filteredLeads.length > 0 && filteredLeads.every(l => selectedLeads.includes(l.id))}
-                       onChange={(e) => {
-                         if (e.target.checked) {
-                           const newSelected = Array.from(new Set([...selectedLeads, ...filteredLeads.map(l => l.id)]));
-                           setSelectedLeads(newSelected);
-                         } else {
-                           const filteredIds = filteredLeads.map(l => l.id);
-                           setSelectedLeads(selectedLeads.filter(id => !filteredIds.includes(id)));
-                         }
-                       }}
-                     />
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('empresa')}>
-                    <div className="flex items-center gap-1">Empresa {sortConfig?.key === 'empresa' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('nombre_contacto')}>
-                    <div className="flex items-center gap-1">Contacto {sortConfig?.key === 'nombre_contacto' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
-                    <div className="flex items-center gap-1">Email {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
-                    <div className="flex items-center gap-1">Sector {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
-                    <div className="flex items-center gap-1">Fecha {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('status')}>
-                    <div className="flex items-center gap-1">Status Motor Drip {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                  </th>
-                  <th className="px-6 py-4">Última Acción</th>
-                </tr>
-              </thead>
+             <table className="min-w-[1000px] w-full text-left text-sm text-gray-400">
+               <thead className="bg-white/5 text-xs uppercase font-mono">
+                 <tr>
+                   <th className="px-3 py-3 w-12 text-center">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
+                        checked={filteredLeads.length > 0 && filteredLeads.every(l => selectedLeads.includes(l.id))}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const newSelected = Array.from(new Set([...selectedLeads, ...filteredLeads.map(l => l.id)]));
+                            setSelectedLeads(newSelected);
+                          } else {
+                            const filteredIds = filteredLeads.map(l => l.id);
+                            setSelectedLeads(selectedLeads.filter(id => !filteredIds.includes(id)));
+                          }
+                        }}
+                      />
+                   </th>
+                   <th className="px-3 py-3 w-40 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('empresa')}>
+                     <div className="flex items-center gap-1">Empresa {sortConfig?.key === 'empresa' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-40 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('nombre_contacto')}>
+                     <div className="flex items-center gap-1">Contacto {sortConfig?.key === 'nombre_contacto' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-48 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
+                     <div className="flex items-center gap-1">Email {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
+                     <div className="flex items-center gap-1">Sector {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
+                     <div className="flex items-center gap-1">Fecha {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-44 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('status')}>
+                     <div className="flex items-center gap-1">Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-28">Última Acción</th>
+                 </tr>
+               </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
                    <tr><td colSpan={8} className="px-6 py-10 text-center font-mono font-bold text-slate-500">No hay contactos {statusFilter !== 'ALL' ? 'con este estado' : ''} en este proyecto.</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
-                       <td className="px-6 py-4">
-                          <input 
-                            type="checkbox" 
-                            className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
-                            checked={selectedLeads.includes(lead.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedLeads([...selectedLeads, lead.id]);
-                              } else {
-                                setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
-                              }
-                            }}
-                          />
-                       </td>
-                      <td className="px-6 py-4 font-bold text-white">
-                        <div className="flex items-center gap-2">
-                          <span>{lead.empresa}</span>
-                          {lead.website && (
-                            <a 
-                              href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`}
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-emerald-400 hover:text-emerald-300 transition-colors flex-shrink-0"
-                              title="Visitar Sitio Web"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                                <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5.172 8.354a2 2 0 11-2.828-2.828l3-3a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5z" clipRule="evenodd" />
-                              </svg>
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-200">
-                        <div className="flex items-center gap-2">
-                          <span>{lead.nombre_contacto || 'Equipo Directivo'}</span>
-                          {lead.nombre_contacto && (
-                            <a 
-                              href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((lead.nombre_contacto || '') + " " + (lead.empresa || ''))}`}
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-[#0077b5] hover:text-[#00a0dc] transition-colors flex-shrink-0"
-                              title="Buscar en LinkedIn"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                              </svg>
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {lead.email?.startsWith('no-email-') ? (
-                          <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title="No se encontró o no superó la verificación de Hunter.io.">Sin correo verificado</span>
-                        ) : (
-                          lead.email
-                        )}
-                      </td>
-                      <td className="px-6 py-4">{lead.sector}</td>
-                      <td className="px-6 py-4 text-xs font-mono text-slate-400 whitespace-nowrap">
-                         {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-2 items-start">
-                          {lead.status === 'DRAFT' ? (
-                            <button 
-                              onClick={() => setActiveDraft(lead)}
-                              className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-colors cursor-pointer border border-yellow-500/30"
-                            >
-                              REVISAR DRAFT
-                            </button>
-                           ) : (() => {
-                             const badge = getStatusBadge(lead.status);
-                             return (
-                               <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${badge.className}`}>
-                                 {badge.label}
-                               </span>
-                             );
-                           })()}
-                           
-                           {lead.resend_status && lead.resend_status !== 'pending' && (
-                              <span className={`px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border ${
-                                 lead.resend_status === 'delivered' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                                 lead.resend_status === 'bounced' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                                 lead.resend_status === 'opened' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                                 lead.resend_status === 'clicked' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' :
-                                 lead.resend_status === 'complained' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' :
-                                 'bg-gray-500/10 text-gray-400 border-gray-500/30'
-                              }`}>
-                                {lead.resend_status === 'opened' && lead.has_opened ? '👀 OPENED' : 
-                                 lead.resend_status === 'delivered' ? '✓ DELIVERED' : 
-                                 lead.resend_status.toUpperCase()}
-                              </span>
+                        <td className="px-3 py-2.5 text-center">
+                           <input 
+                             type="checkbox" 
+                             className="w-4 h-4 rounded bg-black/50 border-white/20 text-[var(--color-sure-accent)] focus:ring-[var(--color-sure-accent)]"
+                             checked={selectedLeads.includes(lead.id)}
+                             onChange={(e) => {
+                               if (e.target.checked) {
+                                 setSelectedLeads([...selectedLeads, lead.id]);
+                               } else {
+                                 setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
+                               }
+                             }}
+                           />
+                        </td>
+                       <td className="px-3 py-2.5 font-bold text-white max-w-[160px] truncate" title={lead.empresa}>
+                         <div className="flex items-center gap-2 truncate">
+                           <span className="truncate">{lead.empresa}</span>
+                           {lead.website && (
+                             <a 
+                               href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`}
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="text-emerald-400 hover:text-emerald-300 transition-colors flex-shrink-0"
+                               title="Visitar Sitio Web"
+                             >
+                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                                 <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5.172 8.354a2 2 0 11-2.828-2.828l3-3a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5z" clipRule="evenodd" />
+                               </svg>
+                             </a>
                            )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-mono">
-                        {lead.status === 'email_1_enviado' && lead.email_1_enviado_at ? new Date(lead.email_1_enviado_at).toLocaleDateString() : '-'}
-                      </td>
-                    </tr>
+                         </div>
+                       </td>
+                       <td className="px-3 py-2.5 text-slate-200 max-w-[160px] truncate" title={lead.nombre_contacto || 'Equipo Directivo'}>
+                         <div className="flex items-center gap-2 truncate">
+                           <span className="truncate">{lead.nombre_contacto || 'Equipo Directivo'}</span>
+                           {lead.nombre_contacto && (
+                             <a 
+                               href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((lead.nombre_contacto || '') + " " + (lead.empresa || ''))}`}
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="text-[#0077b5] hover:text-[#00a0dc] transition-colors flex-shrink-0"
+                               title="Buscar en LinkedIn"
+                             >
+                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                               </svg>
+                             </a>
+                           )}
+                         </div>
+                       </td>
+                       <td className="px-3 py-2.5 max-w-[180px] truncate" title={lead.email}>
+                         {lead.email?.startsWith('no-email-') ? (
+                           <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title="No se encontró o no superó la verificación de Hunter.io.">Sin correo verificado</span>
+                         ) : (
+                           lead.email
+                         )}
+                       </td>
+                       <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
+                       <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
+                          {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                       </td>
+                       <td className="px-3 py-2.5">
+                         <div className="flex flex-col gap-1.5 items-start">
+                           {lead.status === 'DRAFT' ? (
+                             <button 
+                               onClick={() => setActiveDraft(lead)}
+                               className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-colors cursor-pointer border border-yellow-500/30"
+                             >
+                               REVISAR DRAFT
+                             </button>
+                            ) : (() => {
+                              const badge = getStatusBadge(lead.status);
+                              return (
+                                <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${badge.className}`}>
+                                  {badge.label}
+                                </span>
+                              );
+                            })()}
+                            
+                            {lead.resend_status && lead.resend_status !== 'pending' && (
+                               <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider border ${
+                                  lead.resend_status === 'delivered' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                  lead.resend_status === 'bounced' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                  lead.resend_status === 'opened' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                  lead.resend_status === 'clicked' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' :
+                                  lead.resend_status === 'complained' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' :
+                                  lead.resend_status === 'suppressed' ? 'bg-red-950/20 text-red-400 border-red-950/30' :
+                                  'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                               }`} title={lead.suppression_reason ? `Razón: ${lead.suppression_reason}` : undefined}>
+                                 {lead.resend_status === 'opened' && lead.has_opened ? '👀 OPENED' : 
+                                  lead.resend_status === 'delivered' ? '✓ DELIVERED' : 
+                                  lead.resend_status === 'suppressed' ? `🚫 SUPRIMIDO (${lead.suppression_reason === 'queja_previa' ? 'Queja' : 'Rebote'})` :
+                                  lead.resend_status === 'complained' ? '🔥 SPAM' :
+                                  lead.resend_status.toUpperCase()}
+                               </span>
+                            )}
+                         </div>
+                       </td>
+                       <td className="px-3 py-2.5 text-xs font-mono">
+                         {lead.status === 'email_1_enviado' && lead.email_1_enviado_at ? new Date(lead.email_1_enviado_at).toLocaleDateString() : '-'}
+                       </td>
+                     </tr>
                   ))
                 )}
               </tbody>

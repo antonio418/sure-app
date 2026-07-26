@@ -419,6 +419,23 @@ async function handleDispatch(req: NextRequest) {
         const { data: resendData, error: resendError } = await resend.emails.send(sendPayload);
 
         if (resendError) {
+           const errMsg = resendError.message || '';
+           const isSuppressed = errMsg.toLowerCase().includes('suppress') || errMsg.toLowerCase().includes('block');
+           
+           if (isSuppressed) {
+              console.log(`[Drip Engine] Resend suppression detected for ${lead.email}: ${errMsg}`);
+              const reason = errMsg.toLowerCase().includes('complaint') ? 'queja_previa' : 'rebote_previo';
+              
+              await supabaseAdmin
+                 .from('leads_campaign')
+                 .update({
+                    status: 'BOUNCED',
+                    resend_status: 'suppressed',
+                    suppression_reason: reason,
+                    last_event_at: new Date().toISOString()
+                 })
+                 .eq('id', lead.id);
+           }
            throw new Error(`Error de Resend: ${resendError.message}`);
         }
 
@@ -429,11 +446,29 @@ async function handleDispatch(req: NextRequest) {
         let updatePayload: any = {};
 
         if (nextStep === 1) {
-          updatePayload = { status: 'email_1_enviado', drip_step: 1, email_1_enviado_at: now };
+          updatePayload = { 
+             status: 'email_1_enviado', 
+             drip_step: 1, 
+             email_1_enviado_at: now,
+             resend_email_id: resendData?.id,
+             last_event_at: now
+          };
         } else if (nextStep === 2) {
-          updatePayload = { status: 'email_2_enviado', drip_step: 2, email_2_enviado_at: now };
+          updatePayload = { 
+             status: 'email_2_enviado', 
+             drip_step: 2, 
+             email_2_enviado_at: now,
+             resend_email_id: resendData?.id,
+             last_event_at: now
+          };
         } else if (nextStep === 3) {
-          updatePayload = { status: 'drip_completado', drip_step: 3, email_3_enviado_at: now };
+          updatePayload = { 
+             status: 'drip_completado', 
+             drip_step: 3, 
+             email_3_enviado_at: now,
+             resend_email_id: resendData?.id,
+             last_event_at: now
+          };
         }
 
         const { error: dbError } = await supabaseAdmin

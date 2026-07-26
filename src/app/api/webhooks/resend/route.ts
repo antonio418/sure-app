@@ -1,65 +1,191 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import crypto from 'crypto';
+
+function verifySvixSignature(payloadString: string, headers: Headers, secret: string) {
+  const svixId = headers.get('webhook-id') || headers.get('svix-id');
+  const svixTimestamp = headers.get('webhook-timestamp') || headers.get('svix-timestamp');
+  const svixSignature = headers.get('webhook-signature') || headers.get('svix-signature');
+
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    throw new Error('Missing svix headers');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const timestamp = parseInt(svixTimestamp, 10);
+  if (isNaN(timestamp) || Math.abs(now - timestamp) > 300) {
+    throw new Error('Timestamp drift too large');
+  }
+
+  const signatures = svixSignature.split(' ');
+  const toSign = `${svixId}.${svixTimestamp}.${payloadString}`;
+  
+  const secretKey = secret.startsWith('whsec_') ? secret.substring(6) : secret;
+  const secretBuffer = Buffer.from(secretKey, 'base64');
+
+  const expectedSignature = crypto
+    .createHmac('sha256', secretBuffer)
+    .update(toSign)
+    .digest('base64');
+
+  const match = signatures.some(sig => {
+    const parts = sig.split(',');
+    if (parts.length === 2 && parts[0] === 'v1') {
+      return parts[1] === expectedSignature;
+    }
+    return false;
+  });
+
+  if (!match) {
+    throw new Error('Signature mismatch');
+  }
+  return svixId;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
-    const { type, data } = payload;
+    const rawBody = await req.text();
+    
+    // Validate signature if secret is defined
+    const secret = process.env.RESEND_WEBHOOK_SECRET;
+    let svixId = crypto.randomUUID(); // Fallback if no secret configured
+    
+    if (secret) {
+      try {
+        svixId = verifySvixSignature(rawBody, req.headers, secret);
+      } catch (err: any) {
+        console.error('[Webhook Signature Validation Failed]:', err.message);
+        return NextResponse.json({ error: 'Firma inválida' }, { status: 401 });
+      }
+    }
 
-    if (!type || !data || !data.to || data.to.length === 0) {
+    const payload = JSON.parse(rawBody);
+    const { type, data, created_at } = payload;
+
+    if (!type || !data) {
       return NextResponse.json({ error: 'Payload inválido' }, { status: 400 });
     }
 
-    const email = data.to[0];
-    let updatePayload: any = {};
+    // Idempotency check
+    const { data: existingEvent } = await supabaseAdmin
+      .from('processed_webhook_events')
+      .select('event_id')
+      .eq('event_id', svixId)
+      .single();
+
+    if (existingEvent) {
+      console.log(`[Webhook] Evento duplicado omitido: ${svixId}`);
+      return NextResponse.json({ success: true, message: 'Evento ya procesado (Idempotente)' });
+    }
+
+    const email = (data.to && data.to.length > 0) ? data.to[0] : null;
+    const resendEmailId = data.id;
+
+    if (!resendEmailId && !email) {
+      return NextResponse.json({ error: 'No se pudo identificar el correo ni el ID' }, { status: 400 });
+    }
+
+    const now = created_at || new Date().toISOString();
+    let updatePayload: any = {
+      last_event_at: now
+    };
 
     switch (type) {
+      case 'email.sent':
+        updatePayload.resend_status = 'sent';
+        break;
       case 'email.delivered':
-        updatePayload = { resend_status: 'delivered' };
+        updatePayload.resend_status = 'delivered';
         break;
       case 'email.bounced':
-        // Si rebota, marcamos el lead como BOUNCED
-        updatePayload = { resend_status: 'bounced', status: 'BOUNCED' };
-        break;
-      case 'email.opened':
-        updatePayload = { resend_status: 'opened', has_opened: true };
-        break;
-      case 'email.clicked':
-        updatePayload = { resend_status: 'clicked', has_clicked: true };
+        updatePayload.resend_status = 'bounced';
+        updatePayload.status = 'BOUNCED';
+        if (data.bounce && data.bounce.type) {
+          updatePayload.bounce_type = data.bounce.type.toLowerCase(); // 'hard' or 'soft'
+        }
         break;
       case 'email.complained':
-        updatePayload = { resend_status: 'complained', status: 'BOUNCED' };
+        updatePayload.resend_status = 'complained';
+        updatePayload.status = 'BOUNCED'; // Keep status in sync with legacy BOUNCED filter
+        updatePayload.complaint = true;
+        break;
+      case 'email.delivery_delayed':
+        updatePayload.resend_status = 'delayed';
         break;
       default:
-        return NextResponse.json({ success: true, message: 'Evento ignorado' });
+        // Ignore opened/clicked in stats or just log it
+        if (type === 'email.opened') {
+          updatePayload.resend_status = 'opened';
+          updatePayload.has_opened = true;
+        } else if (type === 'email.clicked') {
+          updatePayload.resend_status = 'clicked';
+          updatePayload.has_clicked = true;
+        } else {
+          return NextResponse.json({ success: true, message: 'Evento ignorado' });
+        }
     }
 
-    // Update the database matching by email
-    const { error } = await supabaseAdmin
+    // Correlation logic: first by resend_email_id, then fallback to email address
+    let leadToUpdate = null;
+    if (resendEmailId) {
+      const { data: matchedLeads } = await supabaseAdmin
+        .from('leads_campaign')
+        .select('id, email')
+        .eq('resend_email_id', resendEmailId)
+        .limit(1);
+
+      if (matchedLeads && matchedLeads.length > 0) {
+        leadToUpdate = matchedLeads[0];
+      }
+    }
+
+    if (!leadToUpdate && email) {
+      const { data: matchedLeads } = await supabaseAdmin
+        .from('leads_campaign')
+        .select('id, email')
+        .eq('email', email)
+        .limit(1);
+
+      if (matchedLeads && matchedLeads.length > 0) {
+        leadToUpdate = matchedLeads[0];
+      }
+    }
+
+    if (!leadToUpdate) {
+      console.warn(`[Webhook] No match found in leads_campaign for resend_email_id: ${resendEmailId}, email: ${email}`);
+      return NextResponse.json({ success: true, message: 'Evento recibido pero sin destinatario coincidente en BD' });
+    }
+
+    // Perform database update
+    const { error: dbError } = await supabaseAdmin
       .from('leads_campaign')
       .update(updatePayload)
-      .eq('email', email);
+      .eq('id', leadToUpdate.id);
 
-    if (error) {
-      console.error('Error updating lead from webhook:', error);
-      throw error;
+    if (dbError) {
+      console.error('Error updating lead from webhook:', dbError);
+      throw dbError;
     }
+
+    // Save webhook event to processed events for idempotency
+    await supabaseAdmin
+      .from('processed_webhook_events')
+      .insert({ event_id: svixId });
 
     // =========================================================================
     // AUTO-CUARENTENA DE DOMINIO (2 Strikes para Rebotes, 1 Strike para Quejas)
     // =========================================================================
-    if (type === 'email.bounced' || type === 'email.complained') {
-      const domain = email.split('@')[1];
+    const targetEmail = leadToUpdate.email || email;
+    if (targetEmail && (type === 'email.bounced' || type === 'email.complained')) {
+      const domain = targetEmail.split('@')[1];
       if (domain) {
          let shouldQuarantine = false;
          let quarantineReason = '';
 
          if (type === 'email.complained') {
-            // Instant quarantine for spam complaints
             shouldQuarantine = true;
             quarantineReason = 'Auto-Congelado (Spam): Un contacto en este dominio marcó el correo como Spam.';
          } else {
-            // 2 Strikes rule for regular bounces
             const { data: bounces } = await supabaseAdmin
               .from('leads_campaign')
               .select('id')
