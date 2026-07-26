@@ -6,31 +6,32 @@ import { useRouter } from 'next/navigation';
 import { Users, Mail, TrendingUp, PlayCircle, Loader2, UploadCloud, Target, Plus, Folder, ArrowLeft, Trash2, ChevronUp, ChevronDown, CheckCircle, Snowflake, RefreshCcw, Pencil, Archive, Send, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { alfredoTranslations, languageNames, Language } from '@/lib/translations';
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, t: Record<string, string>) => {
   switch (status) {
     case 'NEW':
     case 'lead_nuevo':
-      return { label: '🆕 NUEVO', className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' };
+      return { label: t.s_new, className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' };
     case 'DRAFT':
-      return { label: '📝 BORRADOR', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' };
+      return { label: t.s_draft, className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' };
     case 'APPROVED':
-      return { label: '⏳ APROBADO', className: 'bg-orange-500/20 text-orange-400 border border-orange-500/30' };
+      return { label: t.s_approved, className: 'bg-orange-500/20 text-orange-400 border border-orange-500/30' };
     case 'PARKED':
-      return { label: '⏸️ APARCADO', className: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' };
+      return { label: t.s_parked, className: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' };
     case 'email_1_enviado':
-      return { label: '✉️ ENVIADO 1', className: 'bg-purple-500/20 text-purple-400 border border-purple-500/30' };
+      return { label: t.s_sent1, className: 'bg-purple-500/20 text-purple-400 border border-purple-500/30' };
     case 'email_2_enviado':
-      return { label: '✉️ ENVIADO 2', className: 'bg-pink-500/20 text-pink-400 border border-pink-500/30' };
+      return { label: t.s_sent2, className: 'bg-pink-500/20 text-pink-400 border border-pink-500/30' };
     case 'convertido':
-      return { label: '🎉 RECIBIDO', className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' };
+      return { label: t.s_received, className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' };
     case 'BOUNCED':
-      return { label: '🚨 REBOTADO', className: 'bg-red-500/20 text-red-400 border border-red-500/50' };
+      return { label: t.s_bounced, className: 'bg-red-500/20 text-red-400 border border-red-500/50' };
     case 'REJECTED':
     case 'cold':
-      return { label: '🗑️ DESCARTADO', className: 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30' };
+      return { label: t.s_discarded, className: 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30' };
     default:
-      return { label: status || 'DESCONOCIDO', className: 'bg-gray-500/20 text-gray-400 border border-gray-500/30' };
+      return { label: status || t.s_unknown, className: 'bg-gray-500/20 text-gray-400 border border-gray-500/30' };
   }
 };
 
@@ -65,7 +66,20 @@ export default function AlfredoAdminPage() {
   const [targetLeadsCount, setTargetLeadsCount] = useState(20);
   const [currentIteration, setCurrentIteration] = useState(0);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
-  
+
+  // UI language (interface only — email content stays lead-language based)
+  const [uiLang, setUiLang] = useState<Language>('en');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem('alfredo_ui_lang');
+    if (saved && saved in alfredoTranslations) setUiLang(saved as Language);
+  }, []);
+  const changeLang = (lng: Language) => {
+    setUiLang(lng);
+    if (typeof window !== 'undefined') window.localStorage.setItem('alfredo_ui_lang', lng);
+  };
+  const t: Record<string, string> = { ...alfredoTranslations.en, ...(alfredoTranslations[uiLang] || {}) };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -484,7 +498,7 @@ export default function AlfredoAdminPage() {
     return true;
   });
 
-  if (loading) return <div className="min-h-screen bg-[#050a14] flex items-center justify-center text-[var(--color-sure-accent)] font-mono">LOADING ALFREDO SECURE NODE...</div>;
+  if (loading) return <div className="min-h-screen bg-[#050a14] flex items-center justify-center text-[var(--color-sure-accent)] font-mono">{t.loading}</div>;
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -494,16 +508,26 @@ export default function AlfredoAdminPage() {
       <nav className="w-full px-8 py-4 flex justify-between items-center border-b border-white/5 bg-black/40">
         <div className="flex items-center gap-6">
           <Link href="/admin" className="flex items-center gap-3 hover:text-[var(--color-sure-accent)] transition-colors text-slate-400">
-             <ArrowLeft className="w-5 h-5" /> 
-             <span className="font-bold tracking-widest uppercase text-xs">Volver al Hub</span>
+             <ArrowLeft className="w-5 h-5" />
+             <span className="font-bold tracking-widest uppercase text-xs">{t.back_to_hub}</span>
           </Link>
           <div className="h-6 w-[1px] bg-white/10 hidden md:block"></div>
           <Image src="/logo-sure.png" alt="SURE Logo" width={32} height={32} className="object-contain hidden md:block" priority />
         </div>
         <div className="flex items-center gap-4">
+           <select
+             value={uiLang}
+             onChange={(e) => changeLang(e.target.value as Language)}
+             title={t.select_language}
+             className="bg-black/50 border border-white/10 rounded-lg py-1.5 px-3 text-white text-xs font-bold focus:outline-none focus:border-[var(--color-sure-accent)] cursor-pointer"
+           >
+             {Object.entries(languageNames).map(([code, info]) => (
+               <option key={code} value={code}>{info.flag} {info.name}</option>
+             ))}
+           </select>
            <div className="flex items-center gap-2 bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-xs font-bold uppercase border border-green-500/20">
              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-             CRON ACTIVO (Vercel)
+             {t.cron_active}
            </div>
            <div className="text-xs font-mono text-gray-500">{user?.email}</div>
         </div>
@@ -545,9 +569,9 @@ export default function AlfredoAdminPage() {
                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
                        : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
                    }`}
-                   title={activeProject.status === 'active' ? 'Campaña de envío automática activa' : 'Campaña de envío automática pausada'}
+                   title={activeProject.status === 'active' ? t.tip_sends_active : t.tip_sends_paused}
                  >
-                   {activeProject.status === 'active' ? '● Envíos Activos' : '○ Envíos Pausados'}
+                   {activeProject.status === 'active' ? t.sends_active : t.sends_paused}
                  </button>
                )}
            </div>
@@ -555,7 +579,7 @@ export default function AlfredoAdminPage() {
            <div className="flex items-center gap-4 w-full md:w-auto justify-between">
               {activeProject && (
                 <div className="text-xs text-slate-400 hidden lg:block max-w-sm truncate">
-                  <span className="text-white font-bold">Objetivo:</span> {activeProject.objective}
+                  <span className="text-white font-bold">{t.objective}</span> {activeProject.objective}
                 </div>
               )}
               <button 
@@ -566,7 +590,7 @@ export default function AlfredoAdminPage() {
                 }}
                 className="bg-[var(--color-sure-accent)]/10 text-[var(--color-sure-accent)] hover:bg-[var(--color-sure-accent)] hover:text-black border border-[var(--color-sure-accent)]/50 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors ml-auto"
               >
-                <Plus className="w-4 h-4" /> Nuevo Proyecto
+                <Plus className="w-4 h-4" /> {t.new_project}
               </button>
               {activeProject && (
                 <button 
@@ -583,7 +607,7 @@ export default function AlfredoAdminPage() {
                   }}
                   className="bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors ml-4"
                 >
-                  <Pencil className="w-4 h-4" /> Editar
+                  <Pencil className="w-4 h-4" /> {t.edit}
                 </button>
               )}
            </div>
@@ -591,8 +615,8 @@ export default function AlfredoAdminPage() {
 
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-montserrat font-black uppercase tracking-wider mb-2">Sales Pipeline</h1>
-            <p className="text-gray-400 text-sm">Mostrando datos exclusivamente para el proyecto seleccionado.</p>
+            <h1 className="text-3xl font-montserrat font-black uppercase tracking-wider mb-2">{t.pipeline_title}</h1>
+            <p className="text-gray-400 text-sm">{t.pipeline_subtitle}</p>
           </div>
           <div className="flex gap-4">
              {selectedLeads.length > 0 && (
@@ -603,7 +627,7 @@ export default function AlfredoAdminPage() {
                    className="bg-green-500/20 text-green-400 hover:bg-green-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-green-500/30"
                  >
                    {approvingBatch ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                   Aprobar {leads.filter(l => selectedLeads.includes(l.id) && l.status === 'DRAFT').length} Draft{leads.filter(l => selectedLeads.includes(l.id) && l.status === 'DRAFT').length !== 1 ? 's' : ''}
+                   {t.approve} {leads.filter(l => selectedLeads.includes(l.id) && l.status === 'DRAFT').length} Draft{leads.filter(l => selectedLeads.includes(l.id) && l.status === 'DRAFT').length !== 1 ? 's' : ''}
                  </button>
                  <button 
                    onClick={handleDeleteSelected}
@@ -611,7 +635,7 @@ export default function AlfredoAdminPage() {
                    className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-red-500/30"
                  >
                    {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                   Eliminar
+                   {t.delete_btn}
                  </button>
                  <button 
                    onClick={() => handleUpdateStatusBatch('PARKED')}
@@ -619,7 +643,7 @@ export default function AlfredoAdminPage() {
                    className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-blue-500/30"
                  >
                    {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Snowflake className="w-4 h-4" />}
-                   Congelar
+                   {t.freeze}
                  </button>
                  <button 
                    onClick={() => handleUpdateStatusBatch('NEW')}
@@ -627,7 +651,7 @@ export default function AlfredoAdminPage() {
                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-purple-500/30"
                  >
                    {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
-                   Reactivar
+                   {t.reactivate}
                  </button>
                  <button 
                     onClick={() => handleUpdateStatusBatch('REJECTED')}
@@ -635,21 +659,21 @@ export default function AlfredoAdminPage() {
                     className="bg-zinc-500/20 text-zinc-400 hover:bg-zinc-500/40 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-zinc-500/30"
                   >
                     {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
-                    Descartar
+                    {t.discard}
                   </button>
                </>
              )}
              <label className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                Subir Contactos (CSV)
+                {t.upload_csv}
                 <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
              </label>
              <button onClick={exportToCSV} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 border border-emerald-500/30 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                Exportar CSV
+                {t.export_csv}
              </button>
              <button onClick={triggerCampaign} disabled={sending || !activeProjectId} className="bg-[var(--color-sure-accent)] text-black hover:bg-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
-                Generar Correos (Draft)
+                {t.generate_drafts}
              </button>
              <button 
                 onClick={handleDispatchDrip} 
@@ -657,7 +681,7 @@ export default function AlfredoAdminPage() {
                 className="bg-blue-600 text-white hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.2)]"
              >
                 {dispatching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                ⚡ Despachar Cola
+                {t.dispatch_queue}
              </button>
           </div>
         </div>
@@ -670,19 +694,19 @@ export default function AlfredoAdminPage() {
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-6 mb-10">
               <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-4"><Users className="w-6 h-6 text-blue-400" /><span className="text-2xl font-bold">{stats.total}</span></div>
-                <p className="text-gray-400 text-sm font-mono uppercase">Total Proyecto</p>
+                <p className="text-gray-400 text-sm font-mono uppercase">{t.stat_total}</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-4"><Target className="w-6 h-6 text-[var(--color-sure-accent)]" /><span className="text-2xl font-bold">{stats.new}</span></div>
-                <p className="text-gray-400 text-sm font-mono uppercase">Pendientes</p>
+                <p className="text-gray-400 text-sm font-mono uppercase">{t.stat_pending}</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-4"><Mail className="w-6 h-6 text-purple-400" /><span className="text-2xl font-bold">{stats.totalSent}</span></div>
-                <p className="text-gray-400 text-sm font-mono uppercase">Enviados (Total)</p>
+                <p className="text-gray-400 text-sm font-mono uppercase">{t.stat_sent_total}</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-4"><TrendingUp className="w-6 h-6 text-green-400" /><span className="text-2xl font-bold">{stats.converted}</span></div>
-                <p className="text-gray-400 text-sm font-mono uppercase">Respuestas</p>
+                <p className="text-gray-400 text-sm font-mono uppercase">{t.stat_replies}</p>
               </div>
               <div className={`p-6 rounded-2xl border transition-all ${
                 bounceRate > 3
@@ -694,12 +718,12 @@ export default function AlfredoAdminPage() {
                   <span className="text-2xl font-bold">{bounceRate.toFixed(1)}%</span>
                 </div>
                 <p className={`text-[10px] font-mono uppercase ${bounceRate > 3 ? 'text-red-400 font-bold animate-pulse' : 'text-gray-400'}`}>
-                  Rebotes ({stats.bounced})
+                  {t.stat_bounces} ({stats.bounced})
                 </p>
               </div>
               <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-4"><AlertTriangle className="w-6 h-6 text-orange-400" /><span className="text-2xl font-bold">{stats.complained}</span></div>
-                <p className="text-gray-400 text-sm font-mono uppercase">Quejas ({complaintRate.toFixed(2)}%)</p>
+                <p className="text-gray-400 text-sm font-mono uppercase">{t.stat_complaints} ({complaintRate.toFixed(2)}%)</p>
               </div>
             </div>
           );
@@ -718,27 +742,27 @@ export default function AlfredoAdminPage() {
                  </div>
               </div>
               <p className="text-gray-400 text-sm mb-6 max-w-3xl leading-relaxed">
-                 Alfredo analizará automáticamente el objetivo de este proyecto. Si lo deseas, puedes añadir restricciones geográficas o condiciones exclusivas abajo.
+                 {t.agent_desc}
               </p>
               
               <div className="flex flex-col gap-4">
                  <textarea 
                     value={supplementaryInfo}
                     onChange={(e) => setSupplementaryInfo(e.target.value)}
-                    placeholder="Información Suplementaria (Opcional) - Ej: Solo buscar empresas en Alemania y Francia, evitar brokers..." 
+                    placeholder={t.supp_placeholder}
                     className="w-full bg-white/5 border border-[var(--color-sure-accent)]/30 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--color-sure-accent)] focus:bg-white/10 transition-colors font-mono text-sm h-24 resize-none"
                  />
                  <div className="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5 flex-wrap gap-4">
                    <div className="flex items-center gap-3">
-                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Leads a extraer:</label>
+                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.leads_to_extract}</label>
                      <select 
                        value={targetLeadsCount} 
                        onChange={(e) => setTargetLeadsCount(Number(e.target.value))}
                        className="bg-black/50 border border-white/10 rounded-lg py-1.5 px-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)] text-sm font-bold"
                      >
-                        <option value={20}>20 Leads (Rápido)</option>
-                        <option value={50}>50 Leads (Estándar)</option>
-                        <option value={100}>100 Leads (Profundo)</option>
+                        <option value={20}>{t.leads_fast}</option>
+                        <option value={50}>{t.leads_standard}</option>
+                        <option value={100}>{t.leads_deep}</option>
                      </select>
                    </div>
                    
@@ -747,7 +771,7 @@ export default function AlfredoAdminPage() {
                       disabled={alfredoLoading || !activeProjectId} 
                       className="bg-[var(--color-sure-accent)] text-black px-8 py-3 rounded-xl font-bold hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full md:w-auto"
                    >
-                      {alfredoLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> {targetLeadsCount > 20 ? `SCANNING BATCH ${currentIteration}/${Math.ceil(targetLeadsCount/20)}...` : 'SCANNING...'}</> : <><PlayCircle className="w-5 h-5" /> DEPLOY ALFREDO</>}
+                      {alfredoLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> {targetLeadsCount > 20 ? `${t.scanning_batch} ${currentIteration}/${Math.ceil(targetLeadsCount/20)}...` : t.scanning}</> : <><PlayCircle className="w-5 h-5" /> {t.deploy_alfredo}</>}
                    </button>
                  </div>
               </div>
@@ -758,30 +782,30 @@ export default function AlfredoAdminPage() {
         <div className="bg-black/40 border border-white/10 rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-white/5 flex justify-between items-center flex-wrap gap-4">
              <div>
-                <h2 className="text-lg font-bold">Contactos del Proyecto</h2>
-                <div className="text-xs text-slate-500 font-mono">Mostrando registros vinculados a: {activeProject?.name}</div>
+                <h2 className="text-lg font-bold">{t.contacts_title}</h2>
+                <div className="text-xs text-slate-500 font-mono">{t.showing_linked} {activeProject?.name}</div>
              </div>
              <div className="text-xs font-mono text-slate-400 flex gap-4">
-                <div>Total: <span className="text-white font-bold">{leads.length}</span></div>
-                <div>Filtrados: <span className="text-[var(--color-sure-accent)] font-bold">{filteredLeads.length}</span></div>
+                <div>{t.total} <span className="text-white font-bold">{leads.length}</span></div>
+                <div>{t.filtered} <span className="text-[var(--color-sure-accent)] font-bold">{filteredLeads.length}</span></div>
              </div>
           </div>
           
           {/* Status Filter Tab Bar */}
           <div className="p-6 border-b border-white/5 flex flex-wrap gap-2 items-center bg-white/5">
-             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Filtrar por Estado:</span>
+             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">{t.filter_by_status}</span>
              {[
-               { id: 'ALL', label: 'Todos', count: leads.length },
-               { id: 'NEW', label: '🆕 Nuevos', count: leads.filter(l => l.status === 'NEW' || l.status === 'lead_nuevo').length },
-               { id: 'PARKED', label: '⏸️ Aparcados', count: leads.filter(l => l.status === 'PARKED').length },
-               { id: 'DRAFT', label: '📝 Borradores', count: leads.filter(l => l.status === 'DRAFT').length },
-               { id: 'APPROVED', label: '⏳ Aprobados', count: leads.filter(l => l.status === 'APPROVED').length },
-               { id: 'SENT', label: '✉️ Enviados', count: leads.filter(l => l.status === 'email_1_enviado' || l.status === 'email_2_enviado').length },
-               { id: 'BOUNCED', label: '🚨 Rebotados', count: leads.filter(l => l.status === 'BOUNCED' || l.resend_status === 'bounced').length },
-               { id: 'COMPLAINED', label: '🔥 Spam / Queja', count: leads.filter(l => l.resend_status === 'complained' || l.complaint === true).length },
-               { id: 'SUPPRESSED', label: '🚫 Suprimidos', count: leads.filter(l => l.status === 'SUPPRESSED' || l.resend_status === 'suppressed' || l.suppression_reason).length },
-               { id: 'REPLIED', label: '🎉 Recibidos', count: leads.filter(l => l.status === 'convertido' || l.has_replied === true).length },
-               { id: 'REJECTED', label: '🗑️ Descartados', count: leads.filter(l => l.status === 'REJECTED' || l.status === 'cold').length },
+               { id: 'ALL', label: t.f_all, count: leads.length },
+               { id: 'NEW', label: t.f_new, count: leads.filter(l => l.status === 'NEW' || l.status === 'lead_nuevo').length },
+               { id: 'PARKED', label: t.f_parked, count: leads.filter(l => l.status === 'PARKED').length },
+               { id: 'DRAFT', label: t.f_drafts, count: leads.filter(l => l.status === 'DRAFT').length },
+               { id: 'APPROVED', label: t.f_approved, count: leads.filter(l => l.status === 'APPROVED').length },
+               { id: 'SENT', label: t.f_sent, count: leads.filter(l => l.status === 'email_1_enviado' || l.status === 'email_2_enviado').length },
+               { id: 'BOUNCED', label: t.f_bounced, count: leads.filter(l => l.status === 'BOUNCED' || l.resend_status === 'bounced').length },
+               { id: 'COMPLAINED', label: t.f_spam, count: leads.filter(l => l.resend_status === 'complained' || l.complaint === true).length },
+               { id: 'SUPPRESSED', label: t.f_suppressed, count: leads.filter(l => l.status === 'SUPPRESSED' || l.resend_status === 'suppressed' || l.suppression_reason).length },
+               { id: 'REPLIED', label: t.f_replied, count: leads.filter(l => l.status === 'convertido' || l.has_replied === true).length },
+               { id: 'REJECTED', label: t.f_rejected, count: leads.filter(l => l.status === 'REJECTED' || l.status === 'cold').length },
              ].map(tab => (
                <button
                  key={tab.id}
@@ -823,29 +847,29 @@ export default function AlfredoAdminPage() {
                       />
                    </th>
                    <th className="px-3 py-3 w-40 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('empresa')}>
-                     <div className="flex items-center gap-1">Empresa {sortConfig?.key === 'empresa' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_company} {sortConfig?.key === 'empresa' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-40 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('nombre_contacto')}>
-                     <div className="flex items-center gap-1">Contacto {sortConfig?.key === 'nombre_contacto' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_contact} {sortConfig?.key === 'nombre_contacto' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-48 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
-                     <div className="flex items-center gap-1">Email {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_email} {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
-                     <div className="flex items-center gap-1">Sector {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
-                     <div className="flex items-center gap-1">Fecha {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_date} {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-44 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('status')}>
-                     <div className="flex items-center gap-1">Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                     <div className="flex items-center gap-1">{t.th_status} {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
-                   <th className="px-3 py-3 w-28">Última Acción</th>
+                   <th className="px-3 py-3 w-28">{t.th_last_action}</th>
                  </tr>
                </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
-                   <tr><td colSpan={8} className="px-6 py-10 text-center font-mono font-bold text-slate-500">No hay contactos {statusFilter !== 'ALL' ? 'con este estado' : ''} en este proyecto.</td></tr>
+                   <tr><td colSpan={8} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
@@ -881,9 +905,9 @@ export default function AlfredoAdminPage() {
                            )}
                          </div>
                        </td>
-                       <td className="px-3 py-2.5 text-slate-200 max-w-[160px] truncate" title={lead.nombre_contacto || 'Equipo Directivo'}>
+                       <td className="px-3 py-2.5 text-slate-200 max-w-[160px] truncate" title={lead.nombre_contacto || t.default_contact}>
                          <div className="flex items-center gap-2 truncate">
-                           <span className="truncate">{lead.nombre_contacto || 'Equipo Directivo'}</span>
+                           <span className="truncate">{lead.nombre_contacto || t.default_contact}</span>
                            {lead.nombre_contacto && (
                              <a 
                                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((lead.nombre_contacto || '') + " " + (lead.empresa || ''))}`}
@@ -901,7 +925,7 @@ export default function AlfredoAdminPage() {
                        </td>
                        <td className="px-3 py-2.5 max-w-[180px] truncate" title={lead.email}>
                          {lead.email?.startsWith('no-email-') ? (
-                           <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title="No se encontró o no superó la verificación de Hunter.io.">Sin correo verificado</span>
+                           <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title={t.no_verified_email_tip}>{t.no_verified_email}</span>
                          ) : (
                            lead.email
                          )}
@@ -917,10 +941,10 @@ export default function AlfredoAdminPage() {
                                onClick={() => setActiveDraft(lead)}
                                className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-colors cursor-pointer border border-yellow-500/30"
                              >
-                               REVISAR DRAFT
+                               {t.review_draft}
                              </button>
                             ) : (() => {
-                              const badge = getStatusBadge(lead.status);
+                              const badge = getStatusBadge(lead.status, t);
                               return (
                                 <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${badge.className}`}>
                                   {badge.label}
@@ -937,11 +961,11 @@ export default function AlfredoAdminPage() {
                                   lead.resend_status === 'complained' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' :
                                   lead.resend_status === 'suppressed' ? 'bg-red-950/20 text-red-400 border-red-950/30' :
                                   'bg-gray-500/10 text-gray-400 border-gray-500/30'
-                               }`} title={lead.suppression_reason ? `Razón: ${lead.suppression_reason}` : undefined}>
-                                 {lead.resend_status === 'opened' && lead.has_opened ? '👀 OPENED' : 
-                                  lead.resend_status === 'delivered' ? '✓ DELIVERED' : 
-                                  lead.resend_status === 'suppressed' ? `🚫 SUPRIMIDO (${lead.suppression_reason === 'queja_previa' ? 'Queja' : 'Rebote'})` :
-                                  lead.resend_status === 'complained' ? '🔥 SPAM' :
+                               }`} title={lead.suppression_reason ? `${t.rs_reason_prefix} ${lead.suppression_reason}` : undefined}>
+                                 {lead.resend_status === 'opened' && lead.has_opened ? t.rs_opened :
+                                  lead.resend_status === 'delivered' ? t.rs_delivered :
+                                  lead.resend_status === 'suppressed' ? `${t.rs_suppressed} (${lead.suppression_reason === 'queja_previa' ? t.rs_reason_complaint : t.rs_reason_bounce})` :
+                                  lead.resend_status === 'complained' ? t.rs_spam :
                                   lead.resend_status.toUpperCase()}
                                </span>
                             )}
@@ -963,27 +987,27 @@ export default function AlfredoAdminPage() {
       {showNewProjectModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
            <div className="bg-[#0a101f] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-              <h2 className="text-xl font-bold mb-4 font-montserrat">{editingProjectId ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h2>
+              <h2 className="text-xl font-bold mb-4 font-montserrat">{editingProjectId ? t.modal_edit : t.modal_new}</h2>
               <div className="space-y-4">
                  <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Nombre del Proyecto</label>
-                    <input type="text" value={newProject.name} onChange={e => setNewProject({...newProject, name: e.target.value})} placeholder="Ej: Medidores Asia Q3" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)]" />
+                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t.pname_label}</label>
+                    <input type="text" value={newProject.name} onChange={e => setNewProject({...newProject, name: e.target.value})} placeholder={t.pname_ph} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)]" />
                  </div>
                  <div>
-                    <label className="block text-xs font-bold text-[var(--color-sure-accent)] mb-1 uppercase">Modelo / Condiciones Estrictas del Correo</label>
-                    <textarea value={newProject.objective} onChange={e => setNewProject({...newProject, objective: e.target.value})} placeholder="PEGA AQUÍ EL MODELO EXACTO Y CONDICIONES. Ej: Estimado {contacto}, somos compradores de cobre puro bajo estas condiciones: 1. Pureza 99.9%. 2. CIF Rotterdam..." className="w-full bg-black/50 border border-[var(--color-sure-accent)]/30 rounded-lg p-3 text-white h-40 focus:outline-none focus:border-[var(--color-sure-accent)]" />
+                    <label className="block text-xs font-bold text-[var(--color-sure-accent)] mb-1 uppercase">{t.pmodel_label}</label>
+                    <textarea value={newProject.objective} onChange={e => setNewProject({...newProject, objective: e.target.value})} placeholder={t.pmodel_ph} className="w-full bg-black/50 border border-[var(--color-sure-accent)]/30 rounded-lg p-3 text-white h-40 focus:outline-none focus:border-[var(--color-sure-accent)]" />
                  </div>
                  <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Originador (Tu Nombre)</label>
-                    <input type="text" value={newProject.originator} onChange={e => setNewProject({...newProject, originator: e.target.value})} placeholder="Ej: Antonio" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)]" />
+                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t.porig_label}</label>
+                    <input type="text" value={newProject.originator} onChange={e => setNewProject({...newProject, originator: e.target.value})} placeholder={t.porig_ph} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)]" />
                  </div>
                  <div>
-                    <label className="block text-xs font-bold text-blue-400 mb-1 uppercase">Enlace a Documento / LOI (Opcional)</label>
-                    <input type="text" value={newProject.attachment_url} onChange={e => setNewProject({...newProject, attachment_url: e.target.value})} placeholder="Ej: https://drive.google.com/tu-loi.pdf" className="w-full bg-black/50 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" />
-                    <p className="text-[10px] text-slate-500 mt-1">Pega el link de Google Drive o OneDrive. La IA lo insertará en el correo. Seguro contra Spam.</p>
+                    <label className="block text-xs font-bold text-blue-400 mb-1 uppercase">{t.pdoc_label}</label>
+                    <input type="text" value={newProject.attachment_url} onChange={e => setNewProject({...newProject, attachment_url: e.target.value})} placeholder={t.pdoc_ph} className="w-full bg-black/50 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500" />
+                    <p className="text-[10px] text-slate-500 mt-1">{t.pdoc_note}</p>
                  </div>
                  <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Idioma de la Campaña</label>
+                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">{t.plang_label}</label>
                     <select 
                       value={newProject.language || 'en'} 
                       onChange={e => setNewProject({...newProject, language: e.target.value})} 
@@ -1003,9 +1027,9 @@ export default function AlfredoAdminPage() {
                  </div>
               </div>
               <div className="flex justify-end gap-3 mt-6">
-                 <button onClick={() => { setShowNewProjectModal(false); setEditingProjectId(null); setNewProject({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' }); }} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">Cancelar</button>
+                 <button onClick={() => { setShowNewProjectModal(false); setEditingProjectId(null); setNewProject({ name: '', objective: '', originator: '', attachment_url: '', language: 'en' }); }} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">{t.cancel}</button>
                  <button onClick={handleCreateProject} disabled={creatingProject} className="bg-[var(--color-sure-accent)] text-black font-bold px-6 py-2 rounded-lg hover:bg-white transition-colors disabled:opacity-50">
-                    {creatingProject ? 'Guardando...' : 'Guardar Proyecto'}
+                    {creatingProject ? t.saving : t.save_project}
                  </button>
               </div>
            </div>
