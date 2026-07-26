@@ -52,7 +52,7 @@ export default function AlfredoAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [dispatching, setDispatching] = useState(false);
-  const [stats, setStats] = useState({ total: 0, new: 0, sent: 0, converted: 0, cold: 0 });
+  const [stats, setStats] = useState({ total: 0, new: 0, sent: 0, converted: 0, cold: 0, bounced: 0, complained: 0, suppressed: 0, totalSent: 0 });
   const [activeDraft, setActiveDraft] = useState<any>(null);
   const [approving, setApproving] = useState(false);
   const [approvingBatch, setApprovingBatch] = useState(false);
