@@ -407,7 +407,7 @@ const pdfTranslations: Record<string, any> = {
     msaContractor: "CONTRACTOR: MB PROCDI",
     msa1Title: "1. Scope of Services",
     msa1Desc1: "MB Procdi agrees to provide an autonomous multi-agent intelligence analysis (RMA) on the documents submitted by the Client through its SURE Forensics platform. The result of this service is a \"B2B Risk Certificate\" that details possible anomalies, contractual asymmetries, and technical inconsistencies.",
-    msa1Desc2: "Furthermore, for the acquisition of technological products, we complement this algorithmic shielding with a deep audit of intellectual property rights, specifically verifying the existence of valid patents and their respective jurisdictions. To this end, we deploy an elite human intelligence team composed of former patent directors and researchers from recognized European universities.",
+    msa1Desc2: "Furthermore, for the acquisition of technological products, we complement this algorithmic shielding with a deep audit of intellectual property rights, specifically verifying the existence of valid patents and their respective jurisdictions.",
     msa2Title: "2. Limitation of Liability and \"Good Faith\" Clause (CRITICAL CLAUSE)",
     msa2Desc1: "The B2B Risk Certificate is generated autonomously and in \"Good Faith\" by artificial intelligence algorithms, based on network data cross-referencing, semantic analysis, and probability matrices. MB Procdi (operating entity of the SURE Forensics platform) is an Operational Intelligence Provider, not a registered financial advisor, law firm, or regulatory entity.",
     msa2Desc2: "The Client acknowledges and agrees that:",

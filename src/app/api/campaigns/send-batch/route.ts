@@ -229,12 +229,12 @@ Kaunas, Lithuania`;
             
             Estructura JSON estricta requerida:
             {
-               "email_1_subject": "SURE: Protección Forense de Capital - ${cleanEmpresaName}",
+               "email_1_subject": "SURE: Forensic Capital Protection - ${cleanEmpresaName}",
                "email_1_content": "UNA SOLA ORACIÓN (el ice-breaker en ${languageName}).",
                "translated_sector": "Traduce de forma muy breve (2-4 palabras) el sector '${lead.sector}' al ${languageName}.",
-               "email_2_subject": "Re: SURE: Protección Forense de Capital",
+               "email_2_subject": "Re: SURE: Forensic Capital Protection",
                "email_2_content": "Seguimiento corto (2 líneas) en ${languageName}.",
-               "email_3_subject": "Cerrando expediente forense: ${cleanEmpresaName}",
+               "email_3_subject": "Closing forensic review: ${cleanEmpresaName}",
                "email_3_content": "Correo de despedida en ${languageName}."
             }
             `;

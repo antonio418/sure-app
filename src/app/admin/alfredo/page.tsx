@@ -1190,8 +1190,7 @@ Imagine this for a second:
 3. What if it crossed data on international sanctions and geographic technical impossibilities in real-time?
 We have it, that's how SURE FORENSICS (RMA Project) was born.
 Hiring traditional Due Diligence can cost tens of thousands of dollars and paralyze a business for weeks. SURE does the work of a team of 20 analysts in exactly 7 minutes.
-Furthermore, for the acquisition of technological products, we complement this algorithmic shield with a deep audit of intellectual property rights, especially checking if there are valid patents and in which countries. For this, we have an elite human team made up of former patent directors and researchers from recognized European universities.
-To prove it, I recently wanted to play around and test our new technological architecture. I started throwing old files from my own archives at it: SCO contracts, ICPO, Letters of Credit, BLs...
+Furthermore, for the acquisition of technological products, we complement this algorithmic shield with a deep audit of intellectual property rights, especially checking if there are valid patents and in which countries.To prove it, I recently wanted to play around and test our new technological architecture. I started throwing old files from my own archives at it: SCO contracts, ICPO, Letters of Credit, BLs...
 What I discovered was terrifying. The rate of undetectable falsehoods that had gone unnoticed by the human eye was immense.
 Is Artificial Intelligence infallible? Absolutely NOT. But by giving you 90% certainty with objectively verifiable and mathematical evidence, it collapses any narrative defense of the transgressor.
 The pragmatism is simple: Suppose you receive offers from 20 different suppliers for a critical acquisition. Instead of spending weeks analyzing blindly, you run the files through SURE FORENSIC. The system detects anomalies and assigns a Critical Risk Level to 17 of them.
@@ -1215,8 +1214,7 @@ Imagínate esto por un segundo:
 3. ¿Y si cruzara datos de sanciones internacionales e imposibilidades técnicas geográficas en tiempo real?
 Lo tenemos, así nació SURE FORENSICS (Proyecto RMA).
 Contratar una Due Diligence tradicional puede costar decenas de miles de dólares y paralizar un negocio durante semanas. SURE hace el trabajo de un equipo de 20 analistas en exactamente 7 minutos.
-Además, para la adquisición de productos tecnológicos, complementamos este blindaje algorítmico con una auditoría profunda de derechos de propiedad intelectual y especialmente si existen patentes vigentes y en cuales países. Para ello, contamos con un equipo humano élite conformado por ex-directores de patentes e investigadores de reconocidas universidades europeas.
-Para comprobarlo, hace poco quise jugar a poner a prueba nuestra nueva arquitectura tecnológica. Empecé a lanzarle expedientes antiguos de mis propios archivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
+Además, para la adquisición de productos tecnológicos, complementamos este blindaje algorítmico con una auditoría profunda de derechos de propiedad intelectual y especialmente si existen patentes vigentes y en cuales países.Para comprobarlo, hace poco quise jugar a poner a prueba nuestra nueva arquitectura tecnológica. Empecé a lanzarle expedientes antiguos de mis propios archivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
 Lo que descubrí fue aterrador. La tasa de falsedades indetectables que habían pasado desapercibidas ante el ojo humano era inmensa.
 ¿Es la Inteligencia Artificial infalible? Rotundamente NO. Pero al entregarte un 90% de certeza con evidencia objetivamente comprobable y matemática, derrumba cualquier defensa narrativa del transgresor.
 El pragmatismo es simple: Supongamos que recibes ofertas de 20 proveedores distintos para una adquisición crítica. En lugar de gastar semanas analizando a ciegas, pasas los expedientes por SURE FORENSIC. El sistema detecta anomalías y asigna un Nivel de Risco Crítico a 17 de ellos.
@@ -1240,8 +1238,7 @@ Imagine isso por um segundo:
 3. E se cruzasse dados de sanções internacionais e impossibilidades técnicas geográficas em tempo real?
 Nós temos, assim nasceu SURE FORENSICS (Projeto RMA).
 Contratar uma Due Diligence tradicional pode costar dezenas de milhares de dólares e paralisar um negócio por semanas. SURE faz o trabalho de uma equipe de 20 analistas em exatamente 7 minutos.
-Além disso, para a aquisição de produtos tecnológicos, complementamos esta blindagem algorítmica com uma auditoria profunda de direitos de propriedade intelectual e especialmente se existem patentes vigentes e em quais países. Para isso, contamos com uma equipe humana de elite formada por ex-diretores de patentes e pesquisadores de renomadas universidades europeias.
-Para comprovar, recentemente quis brincar de testar nossa nova arquitetura tecnológica. Comecei a enviar arquivos antigos dos meus próprios arquivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
+Além disso, para a aquisição de produtos tecnológicos, complementamos esta blindagem algorítmica com uma auditoria profunda de direitos de propriedade intelectual e especialmente se existem patentes vigentes e em quais países.Para comprovar, recentemente quis brincar de testar nossa nova arquitetura tecnológica. Comecei a enviar arquivos antigos dos meus próprios arquivos: contratos SCO, ICPO, Cartas de Crédito, BLs…
 O que descobri foi assustador. A taxa de falsidades indetectáveis que passaram despercebidas pelo olho humano era imensa.
 A Inteligência Artificial é infalível? Rotundamente NÃO. Mas ao entregar 90% de certeza com evidências objetivamente comprováveis e matemáticas, derruba qualquer defesa narrativa do transgressor.
 O pragmatismo é simples: Suponha que você receba ofertas de 20 fornecedores diferentes para uma aquisição crítica. Em vez de passar semanas analisando às cegas, você passa os arquivos pelo SURE FORENSIC. O sistema detecta anomalias e atribui um Nivel de Risco Crítico a 17 de eles.
