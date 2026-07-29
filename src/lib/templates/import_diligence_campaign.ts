@@ -14,7 +14,7 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
   
   let emailBody = `
     <p>Is it possible to detect an international scammer with 90% precision before signing?</p>
-    <p>I have worked for years in international trade and dealt with hundreds of fake sellers and buyers. Today, scammers are not novices. They are extremely convincing, know the technical jargon perfectly, and present masterfully forged documents: from fake KEMA certificates to supposed bank guarantees.<br>
+    <p>I have worked for years in international trade and dealt with hundreds of fake sellers and buyers. Today, scammers are not novices. They are extremely convincing, know the technical jargon perfectly, and present masterfully forged documents: from fake SGS certificates to supposed bank guarantees.<br>
     There are even real suppliers faking documents to meet requirements they lack.</p>
     <p>In this industry, an authentic buyer or seller is a treasure. But a single failed operation is enough to lose it all. Reputation and trust evaporate in a second. Faced with this terror, companies have reacted by creating lists of almost abusive requirements, generating a paranoia that ends up blocking 100% legitimate operations. Distrust reigns.</p>
     <p>The problem with traditional due diligence is human fragility. An analyst reads one line at a time and must rely on their memory to recall what they read three hours or several days ago. The human eye gets tired after 40 pages and inevitably gets distracted by what happens around them in the office.</p>
@@ -44,7 +44,7 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
     
     emailBody = `
       <p>¿Es posible detectar a un estafador internacional con un 90% de precisión antes de firmar?</p>
-      <p>He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados KEMA hasta supuestas garantías bancarias.<br>
+      <p>He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados SGS hasta supuestas garantías bancarias.<br>
       Incluso hay proveedores reales falseando documentos para cumplir con requisitos de los cuales carecen.</p>
       <p>En esta industria, un comprador o vendedor auténtico es un tesoro. Pero basta una sola operación fallida para perderlo todo. La reputación y la confianza se evaporan en un segundo. Ante este terror, las empresas han reaccionado creando listas de requisitos casi abusivos, lo que ha generado una paranoia que termina bloqueando operaciones 100% legítimas. La desconfianza reina.</p>
       <p>El problema de la debida diligencia tradicional es la fragilidad humana. Un analista lee una línea a la vez y debe confiar en su memoria para recordar lo que leyó hace tres horas o varios días atrás. El ojo humano se cansa después de 40 páginas y se distrae inevitablemente con lo que ocurre a su alrededor en la oficina.</p>
@@ -73,7 +73,7 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
     
     emailBody = `
       <p>É possível detectar um fraudador internacional com 90% de precisão antes de assinar?</p>
-      <p>Trabalho há anos no comércio exterior e lidei com centenas de falsos vendedores e compradores. Hoje em dia, os fraudadores não são novatos. São extremamente convincentes, conhecem o jargão técnico com perfeição e apresentam documentos magistralmente falsificados: de falsos certificados KEMA a supostas garantias bancárias.<br>
+      <p>Trabalho há anos no comércio exterior e lidei com centenas de falsos vendedores e compradores. Hoje em dia, os fraudadores não são novatos. São extremamente convincentes, conhecem o jargão técnico com perfeição e apresentam documentos magistralmente falsificados: de falsos certificados SGS a supostas garantias bancárias.<br>
       Existem até fornecedores reais falsificando documentos para cumprir requisitos que não possuem.</p>
       <p>Nesta indústria, um comprador ou vendedor autêntico é um tesouro. Mas basta uma única operação falha para perder tudo. A reputação e a confiança evaporam num segundo. Diante desse terror, as empresas reagiram criando listas de requisitos quase abusivos, gerando uma paranoia que acaba bloqueando operações 100% legítimas. A desconfiança reina.</p>
       <p>O problema da due diligence tradicional é a fragilidade humana. Um analista lê uma linha de cada vez e deve confiar na memória para lembrar o que leu há três horas ou vários dias atrás. O olho humano se cansa após 40 páginas e inevitavelmente se distrai com o que acontece ao redor no escritório.</p>
