@@ -210,6 +210,12 @@ Kaunas, Lithuania`;
             }
             `;
          } else if (isImportDiligence) {
+            const dilSubjects: Record<string, { s1: string; s2: string; s3: string }> = {
+               en: { s1: `SURE: Forensic Capital Protection - ${cleanEmpresaName}`, s2: `Re: SURE: Forensic Capital Protection`, s3: `Closing forensic review: ${cleanEmpresaName}` },
+               es: { s1: `SURE: Protección Forense del Capital - ${cleanEmpresaName}`, s2: `Re: SURE: Protección Forense del Capital`, s3: `Cerrando revisión forense: ${cleanEmpresaName}` },
+               pt: { s1: `SURE: Proteção Forense de Capital - ${cleanEmpresaName}`, s2: `Re: SURE: Proteção Forense de Capital`, s3: `Encerrando revisão forense: ${cleanEmpresaName}` }
+            };
+            const dilSub = dilSubjects[languageCode] || dilSubjects.en;
             promptText = `
             Eres el Director de Riesgo Forense. Estamos automatizando nuestro acercamiento a la empresa ${cleanEmpresaName}.
             Ellos son importadores o distribuidores del sector ${lead.sector}.
@@ -229,12 +235,12 @@ Kaunas, Lithuania`;
             
             Estructura JSON estricta requerida:
             {
-               "email_1_subject": "SURE: Forensic Capital Protection - ${cleanEmpresaName}",
+               "email_1_subject": "${dilSub.s1}",
                "email_1_content": "UNA SOLA ORACIÓN (el ice-breaker en ${languageName}).",
                "translated_sector": "Traduce de forma muy breve (2-4 palabras) el sector '${lead.sector}' al ${languageName}.",
-               "email_2_subject": "Re: SURE: Forensic Capital Protection",
+               "email_2_subject": "${dilSub.s2}",
                "email_2_content": "Seguimiento corto (2 líneas) en ${languageName}.",
-               "email_3_subject": "Closing forensic review: ${cleanEmpresaName}",
+               "email_3_subject": "${dilSub.s3}",
                "email_3_content": "Correo de despedida en ${languageName}."
             }
             `;
