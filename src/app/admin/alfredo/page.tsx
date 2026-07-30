@@ -892,6 +892,7 @@ export default function AlfredoAdminPage() {
                      <div className="flex items-center gap-1">{t.th_email} {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-16 text-center">País</th>
+                   <th className="px-3 py-3 w-40">Web</th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
                      <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
@@ -906,7 +907,7 @@ export default function AlfredoAdminPage() {
                </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
-                   <tr><td colSpan={9} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
+                   <tr><td colSpan={10} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
@@ -968,6 +969,15 @@ export default function AlfredoAdminPage() {
                          )}
                        </td>
                        <td onClick={() => handleUpdateCountry(lead.id, lead.pais || getCountryCode(lead.email))} className="px-3 py-2.5 text-center font-mono text-xs text-slate-300 cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Clic para editar el país">{lead.pais || getCountryCode(lead.email)}</td>
+                       <td className="px-3 py-2.5 max-w-[150px] truncate">
+                         {lead.website ? (
+                           <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline" title={lead.website}>
+                             {lead.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                           </a>
+                         ) : (
+                           <span className="text-slate-500">—</span>
+                         )}
+                       </td>
                        <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
                        <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
                           {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
