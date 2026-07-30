@@ -363,6 +363,24 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateCountry = async (leadId: string, currentVal: string) => {
+    const input = window.prompt('Código de país ISO (ej. US, CN, ES). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
+    if (input === null) return; // cancelado
+    const pais = input.trim().toUpperCase().slice(0, 2);
+    try {
+      const res = await authedFetch('/api/campaigns/update-country', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, pais })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el país");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, pais: pais || null } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateStatusBatch = async (newStatus: string) => {
     if (selectedLeads.length === 0) return;
     if (!confirm(`¿Estás seguro de cambiar el estado de ${selectedLeads.length} lead(s) a ${newStatus}?`)) return;
@@ -949,7 +967,7 @@ export default function AlfredoAdminPage() {
                            lead.email
                          )}
                        </td>
-                       <td className="px-3 py-2.5 text-center font-mono text-xs text-slate-300" title={lead.email?.split('@')[1] || ''}>{getCountryCode(lead.email)}</td>
+                       <td onClick={() => handleUpdateCountry(lead.id, lead.pais || getCountryCode(lead.email))} className="px-3 py-2.5 text-center font-mono text-xs text-slate-300 cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Clic para editar el país">{lead.pais || getCountryCode(lead.email)}</td>
                        <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
                        <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
                           {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
