@@ -934,11 +934,11 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
                      <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
-                   <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
-                     <div className="flex items-center gap-1">{t.th_date} {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
-                   </th>
                    <th className="px-3 py-3 w-44 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('status')}>
                      <div className="flex items-center gap-1">{t.th_status} {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
+                   <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
+                     <div className="flex items-center gap-1">{t.th_date} {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
                    <th className="px-3 py-3 w-28">{t.th_last_action}</th>
                  </tr>
@@ -1029,9 +1029,6 @@ export default function AlfredoAdminPage() {
                          {lead.comentario ? <span className="text-xs text-slate-200">{lead.comentario}</span> : <span className="text-slate-500 text-xs italic">+ comentario</span>}
                        </td>
                        <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
-                       <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
-                          {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                       </td>
                        <td className="px-3 py-2.5">
                          <div className="flex flex-col gap-1.5 items-start">
                            {lead.status === 'DRAFT' ? (
@@ -1068,6 +1065,9 @@ export default function AlfredoAdminPage() {
                                </span>
                             )}
                          </div>
+                       </td>
+                       <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
+                          {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                        </td>
                        <td className="px-3 py-2.5 text-xs font-mono">
                          {lead.status === 'email_1_enviado' && lead.email_1_enviado_at ? new Date(lead.email_1_enviado_at).toLocaleDateString() : '-'}
