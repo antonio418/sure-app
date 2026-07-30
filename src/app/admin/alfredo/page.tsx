@@ -605,7 +605,7 @@ export default function AlfredoAdminPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-10">
+      <div className="max-w-full mx-auto px-4 py-10">
         
         {/* Project Selector Bar */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
