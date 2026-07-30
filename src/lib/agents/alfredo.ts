@@ -66,7 +66,7 @@ El formato exacto por cada objeto del array debe ser:
     "nota_contacto": "Nota breve sobre la persona a contactar, tal como puede aparecer en su perfil de LinkedIn (ej. trayectoria, responsabilidad clave)",
     "email": "Email DIRECTO del tomador de decisiones (C-Level). Busca si hay correos electrónicos reales expuestos públicamente en los resultados de búsqueda. Si no encuentras uno real, puedes proponer el patrón de correo corporativo más probable basado en el nombre del contacto y el dominio web oficial de la empresa, pero solo si es un dominio real y activo. Si no tienes bases sólidas, deja el campo vacío ''.",
     "telefono": "Teléfono corporativo REAL. Si no tienes certeza absoluta del teléfono, DEJA ESTE CAMPO VACÍO ''. ESTÁ ESTRICTAMENTE PROHIBIDO inventar números de teléfono.",
-    "pais": "País donde operan",
+    "pais": "País donde opera la empresa, escrito SIEMPRE en INGLÉS (ej. Germany, Spain, United States, United Kingdom, China)",
     "sector": "Industria o commodity específico (ej. 'Traders de Acero')",
     "linkedin": "URL del LinkedIn de la empresa o del contacto (preferible). Si no lo tienes, deja vacío.",
     "website": "¡CRÍTICO! URL de la página web oficial de la empresa. ESTRICTAMENTE OBLIGATORIO. Si no puedes encontrar y verificar una página web corporativa real y activa para esta empresa, DESCÁRTALA INMEDIATAMENTE. Cero tolerancia a empresas fantasma sin dominio web."

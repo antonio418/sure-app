@@ -364,9 +364,9 @@ export default function AlfredoAdminPage() {
   };
 
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
-    const input = window.prompt('Código de país ISO (ej. US, CN, ES). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
+    const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
-    const pais = input.trim().toUpperCase().slice(0, 2);
+    const pais = input.trim();
     try {
       const res = await authedFetch('/api/campaigns/update-country', {
         method: 'POST',

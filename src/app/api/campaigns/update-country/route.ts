@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
       throw new Error("Falta lead_id");
     }
 
-    // Normalizamos a 2 letras mayúsculas (código ISO), o null si viene vacío.
-    const cleanPais = (pais || '').toString().trim().toUpperCase().slice(0, 2) || null;
+    // Guardamos el nombre del país tal cual (en inglés), recortado por seguridad, o null si viene vacío.
+    const cleanPais = (pais || '').toString().trim().slice(0, 60) || null;
 
     const { error } = await supabaseAdmin
       .from('leads_campaign')
