@@ -217,81 +217,10 @@ export async function POST(req: NextRequest) {
 
     // Insert into Supabase directly
     if (sanitizedLeads.length > 0) {
-       // --- HUNTER.IO VERIFICATION ---
-       const hunterKey = process.env.HUNTER_API_KEY;
-       let verifiedLeads = sanitizedLeads;
-       
-       if (hunterKey) {
-          console.log("Iniciando verificación con Hunter.io...");
-          verifiedLeads = [];
-          for (const lead of sanitizedLeads) {
-             // Si el correo ya es autogenerado por no tener email, lo dejamos en PARKED y continuamos
-             if (lead.email.startsWith('no-email-')) {
-                verifiedLeads.push(lead);
-                continue;
-             }
-
-             try {
-                const res = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
-                const data = await res.json();
-                if (data && data.data && data.data.status) {
-                   const status = data.data.status;
-                   // Solo los correos 100% válidos son seguros para envío automatizado.
-                   // Los catch-all (accept_all) se marcan como PARKED para verificación manual.
-                   if (status === 'valid') {
-                      verifiedLeads.push(lead);
-                   } else {
-                      const isCatchAll = status === 'accept_all';
-                      console.log(`Hunter.io detectó correo ${isCatchAll ? 'Catch-All' : 'inválido'}: ${lead.email} (Status: ${status}). Guardando como PARKED.`);
-                      const cleanWebsite = (lead.website || 'unknown.com')
-                        .replace(/^https?:\/\/(www\.)?/, '')
-                        .split('/')[0];
-                      const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
-                      const originalEmail = lead.email;
-                      const label = isCatchAll ? 'Correo original no verificado (Catch-All)' : 'Correo original no verificado';
-                      
-                      verifiedLeads.push({
-                         ...lead,
-                         email: `no-email-${uniqueId}@${cleanWebsite}`,
-                         status: 'PARKED',
-                         nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}${label}: ${originalEmail}`
-                      });
-                   }
-                } else {
-                   // FALLO SEGURO: Hunter no devolvió estado (p. ej. cuota agotada o
-                   // respuesta inválida). NO asumimos que el correo es bueno: lo aparcamos.
-                   console.warn(`Hunter.io sin estado para ${lead.email} (posible cuota agotada). Aparcando por seguridad.`);
-                   const cleanWebsite = (lead.website || 'unknown.com')
-                     .replace(/^https?:\/\/(www\.)?/, '')
-                     .split('/')[0];
-                   const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
-                   const originalEmail = lead.email;
-                   verifiedLeads.push({
-                      ...lead,
-                      email: `no-email-${uniqueId}@${cleanWebsite}`,
-                      status: 'PARKED',
-                      nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo sin verificar (Hunter no disponible): ${originalEmail}`
-                   });
-                }
-             } catch (err) {
-                // FALLO SEGURO: error de red/timeout con Hunter. Aparcamos en vez de enviar.
-                console.error("Error verificando con Hunter (aparcando por seguridad):", err);
-                const cleanWebsite = (lead.website || 'unknown.com')
-                  .replace(/^https?:\/\/(www\.)?/, '')
-                  .split('/')[0];
-                const uniqueId = Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
-                const originalEmail = lead.email;
-                verifiedLeads.push({
-                   ...lead,
-                   email: `no-email-${uniqueId}@${cleanWebsite}`,
-                   status: 'PARKED',
-                   nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Correo sin verificar (error de Hunter): ${originalEmail}`
-                });
-             }
-          }
-       } else {
-          console.warn("No se encontró HUNTER_API_KEY. Saltando verificación de correos.");
-       }
+       // Verificación de correos MOVIDA al despacho (dispatch-drip) para no exceder el
+       // límite de 60s de la función de prospección (Vercel Hobby). Insertamos los leads
+       // tal cual; Hunter valida cada correo justo antes de enviar (fallo seguro).
+       const verifiedLeads = sanitizedLeads;
 
        if (verifiedLeads.length === 0) {
            return NextResponse.json({ success: true, count: 0, leads: [], message: 'Todos los leads fueron filtrados/procesados.' });
