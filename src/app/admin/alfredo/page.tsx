@@ -363,6 +363,42 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleToggleForm = async (leadId: string, current: boolean) => {
+    const nuevo = !current;
+    // Actualización optimista (se ve al instante); si falla, revertimos.
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, form_enviado: nuevo } : l));
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, form_enviado: nuevo })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando");
+    } catch (err: any) {
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, form_enviado: current } : l));
+      alert("Error: " + err.message);
+    }
+  };
+
+  const handleUpdateComment = async (leadId: string, current: string) => {
+    const input = window.prompt('Comentario breve (ej. "Proveedor de 100 TM de oro/día"). Vacío para borrar:', current || '');
+    if (input === null) return; // cancelado
+    const comentario = input.trim();
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, comentario })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el comentario");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, comentario: comentario || null } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
     const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
@@ -893,6 +929,8 @@ export default function AlfredoAdminPage() {
                    </th>
                    <th className="px-3 py-3 w-16 text-center">País</th>
                    <th className="px-3 py-3 w-40">Web</th>
+                   <th className="px-3 py-3 w-16 text-center">Form ✓</th>
+                   <th className="px-3 py-3 w-52">Comentario</th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
                      <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
@@ -907,7 +945,7 @@ export default function AlfredoAdminPage() {
                </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
-                   <tr><td colSpan={10} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
+                   <tr><td colSpan={12} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
@@ -977,6 +1015,18 @@ export default function AlfredoAdminPage() {
                          ) : (
                            <span className="text-slate-500">—</span>
                          )}
+                       </td>
+                       <td className="px-3 py-2.5 text-center">
+                         <input
+                           type="checkbox"
+                           className="w-4 h-4 rounded bg-black/50 border-white/20 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                           checked={!!lead.form_enviado}
+                           onChange={() => handleToggleForm(lead.id, !!lead.form_enviado)}
+                           title="Marca cuando hayas rellenado su formulario de contacto"
+                         />
+                       </td>
+                       <td onClick={() => handleUpdateComment(lead.id, lead.comentario || '')} className="px-3 py-2.5 max-w-[200px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.comentario || 'Clic para añadir un comentario'}>
+                         {lead.comentario ? <span className="text-xs text-slate-200">{lead.comentario}</span> : <span className="text-slate-500 text-xs italic">+ comentario</span>}
                        </td>
                        <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
                        <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
