@@ -8,6 +8,24 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { alfredoTranslations, languageNames, Language } from '@/lib/translations';
 
+// Mapa de dominios de país (ccTLD) a código ISO. Los genéricos (.com, .net, .io, .co, .ai...) devuelven "—".
+const CC_TLD_TO_ISO: Record<string, string> = {
+  es:'ES', de:'DE', fr:'FR', it:'IT', pt:'PT', nl:'NL', be:'BE', pl:'PL', se:'SE', no:'NO',
+  dk:'DK', fi:'FI', at:'AT', ch:'CH', cz:'CZ', sk:'SK', hu:'HU', ro:'RO', bg:'BG', gr:'GR',
+  ie:'IE', tr:'TR', ru:'RU', ua:'UA', uk:'GB', cn:'CN', jp:'JP', kr:'KR', in:'IN', id:'ID',
+  th:'TH', vn:'VN', my:'MY', sg:'SG', ph:'PH', pk:'PK', br:'BR', mx:'MX', ar:'AR', cl:'CL',
+  pe:'PE', ve:'VE', uy:'UY', ec:'EC', bo:'BO', py:'PY', za:'ZA', eg:'EG', ma:'MA', ng:'NG',
+  ke:'KE', ae:'AE', sa:'SA', qa:'QA', il:'IL', au:'AU', nz:'NZ', ca:'CA', us:'US'
+};
+
+const getCountryCode = (email?: string): string => {
+  if (!email || email.startsWith('no-email-')) return '—';
+  const domain = email.split('@')[1]?.toLowerCase().trim();
+  if (!domain) return '—';
+  const tld = domain.split('.').pop() || '';
+  return CC_TLD_TO_ISO[tld] || '—';
+};
+
 const getStatusBadge = (status: string, t: Record<string, string>) => {
   switch (status) {
     case 'NEW':
@@ -855,6 +873,7 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-48 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
                      <div className="flex items-center gap-1">{t.th_email} {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
+                   <th className="px-3 py-3 w-16 text-center">País</th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
                      <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
@@ -869,7 +888,7 @@ export default function AlfredoAdminPage() {
                </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
-                   <tr><td colSpan={8} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
+                   <tr><td colSpan={9} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
@@ -930,6 +949,7 @@ export default function AlfredoAdminPage() {
                            lead.email
                          )}
                        </td>
+                       <td className="px-3 py-2.5 text-center font-mono text-xs text-slate-300" title={lead.email?.split('@')[1] || ''}>{getCountryCode(lead.email)}</td>
                        <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
                        <td className="px-3 py-2.5 text-xs font-mono text-slate-400 whitespace-nowrap">
                           {new Date(lead.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
