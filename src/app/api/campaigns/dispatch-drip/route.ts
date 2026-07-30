@@ -437,7 +437,10 @@ async function handleDispatch(req: NextRequest) {
            from: fromEmail,
            to: lead.email,
            subject: subject,
-           bcc: bccEmail
+           bcc: bccEmail,
+           // Espaciado anti-spam: cada correo del lote se entrega 5 min despues del anterior
+           // (Resend scheduledAt). Protege la reputacion del dominio sin bloquear la funcion.
+           scheduledAt: new Date(Date.now() + index * 5 * 60 * 1000).toISOString()
         };
         
         if (isHtml) {
