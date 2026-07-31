@@ -218,8 +218,15 @@ Kaunas, Lithuania`;
                `${cleanEmpresaName}: el punto ciego al comprar a granel`
             ];
             const esPick = esOptions[Math.floor(Math.random() * esOptions.length)];
+            const enOptions = [
+               `Who verifies your suppliers before you sign?`,
+               `Verify a supplier in 7 minutes`,
+               `When the offers pile up, who checks them?`,
+               `${cleanEmpresaName}: the blind spot in bulk trade`
+            ];
+            const enPick = enOptions[Math.floor(Math.random() * enOptions.length)];
             const dilSubjects: Record<string, { s1: string; s2: string; s3: string }> = {
-               en: { s1: `SURE: Forensic Capital Protection - ${cleanEmpresaName}`, s2: `Re: SURE: Forensic Capital Protection`, s3: `Closing forensic review: ${cleanEmpresaName}` },
+               en: { s1: enPick, s2: `Re: ${enPick}`, s3: `Closing forensic review: ${cleanEmpresaName}` },
                es: { s1: esPick, s2: `Re: ${esPick}`, s3: `Cerrando revisión forense: ${cleanEmpresaName}` },
                pt: { s1: `SURE: Proteção Forense de Capital - ${cleanEmpresaName}`, s2: `Re: SURE: Proteção Forense de Capital`, s3: `Encerrando revisão forense: ${cleanEmpresaName}` }
             };
