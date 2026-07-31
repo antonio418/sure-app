@@ -210,9 +210,17 @@ Kaunas, Lithuania`;
             }
             `;
          } else if (isImportDiligence) {
+            // Rotación de asuntos (A/B): cada lead recibe uno de estos al azar.
+            const esOptions = [
+               `¿Quién verifica a sus proveedores antes de firmar?`,
+               `Verificar a un proveedor en 7 minutos`,
+               `Cuando llegan muchas ofertas, ¿quién las revisa?`,
+               `${cleanEmpresaName}: el punto ciego al comprar a granel`
+            ];
+            const esPick = esOptions[Math.floor(Math.random() * esOptions.length)];
             const dilSubjects: Record<string, { s1: string; s2: string; s3: string }> = {
                en: { s1: `SURE: Forensic Capital Protection - ${cleanEmpresaName}`, s2: `Re: SURE: Forensic Capital Protection`, s3: `Closing forensic review: ${cleanEmpresaName}` },
-               es: { s1: `SURE: Protección Forense del Capital - ${cleanEmpresaName}`, s2: `Re: SURE: Protección Forense del Capital`, s3: `Cerrando revisión forense: ${cleanEmpresaName}` },
+               es: { s1: esPick, s2: `Re: ${esPick}`, s3: `Cerrando revisión forense: ${cleanEmpresaName}` },
                pt: { s1: `SURE: Proteção Forense de Capital - ${cleanEmpresaName}`, s2: `Re: SURE: Proteção Forense de Capital`, s3: `Encerrando revisão forense: ${cleanEmpresaName}` }
             };
             const dilSub = dilSubjects[languageCode] || dilSubjects.en;
