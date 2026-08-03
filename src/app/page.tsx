@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import { 
-  ShieldCheck, Network, Cpu, FileSignature, Target, ArrowRight, ShieldAlert, CheckCircle2, ChevronRight
+  ShieldCheck, Network, Cpu, FileSignature, ArrowRight, ShieldAlert, CheckCircle2, ChevronRight
 } from 'lucide-react';
 
 export default function Home() {
@@ -51,19 +51,6 @@ export default function Home() {
       btnBg: "bg-purple-600 hover:bg-purple-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.2)]",
       href: "/rma/contingencia",
       icon: <FileSignature className="w-8 h-8" />
-    },
-    {
-      id: "alfredo",
-      title: "SURE ALFREDO",
-      subtitle: language === 'es' ? "Prospección de Leads B2B" : "B2B Lead Generation",
-      desc: language === 'es'
-        ? "Campañas automatizadas de prospección e identificación autónoma de C-Levels en el mercado internacional."
-        : "Automated prospecting campaigns and autonomous C-Level identification in international markets.",
-      color: "text-amber-400 border-amber-500/25 bg-amber-500/[0.03] hover:border-amber-500/50 hover:shadow-[0_0_50px_rgba(245,158,11,0.15)]",
-      iconBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
-      btnBg: "bg-amber-500 hover:bg-amber-400 text-black shadow-[0_0_20px_rgba(245,158,11,0.2)]",
-      href: "/admin/alfredo",
-      icon: <Target className="w-8 h-8" />
     }
   ];
 
@@ -149,6 +136,15 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Mención sobria: herramienta interna de prospección */}
+      <section className="px-6 pb-16 z-10 w-full max-w-3xl mx-auto text-center">
+        <p className="text-slate-500 text-sm font-light">
+          {language === 'es'
+            ? "También operamos SURE Alfredo, nuestro motor propio de prospección B2B con IA — disponible para clientes selectos bajo consulta."
+            : "We also operate SURE Alfredo, our proprietary AI-driven B2B prospecting engine — available to select clients on request."}
+        </p>
       </section>
 
       {/* Footer Minimalista */}
