@@ -21,9 +21,9 @@ const localTranslations: Record<string, Record<string, string>> = {
     title: 'SURE RMA — Procesador de Documentos',
     subtitle: 'Auditoría documental y mitigación de riesgos transaccionales con inteligencia artificial.',
     toggleLabel: 'Seleccione el Modo de Auditoría',
-    modeSingle: 'Auditar Caso Único (Multi-documento)',
+    modeSingle: 'Due Diligence (Multi-documento)',
     modeComparative: 'Comparación de Escenarios (Base vs. Propuesta)',
-    singleDescription: 'Auditoría de Caso Único: Use este modo cuando desee evaluar la integridad y viabilidad de una sola entidad, transacción, objeto o escenario. Puede subir múltiples documentos del mismo caso, proveedor o asunto (ej. actas de constitución, solvencia financiera y contratos de un mismo proyecto). El sistema los analizará en conjunto para emitir un único reporte de riesgo integral, como por ejemplo un reporte de Due Diligence.',
+    singleDescription: 'Due Diligence: Use este modo cuando desee evaluar la integridad y viabilidad de una sola entidad, transacción, objeto o escenario. Puede subir múltiples documentos del mismo caso, proveedor o asunto (ej. actas de constitución, solvencia financiera y contratos de un mismo proyecto). El sistema los analizará en conjunto para emitir un único reporte de riesgo integral, como por ejemplo un reporte de Due Diligence.',
     comparativeDescription: 'Comparación de Escenarios: Use este modo para comparar, contrastar contenidos frente a los requisitos (Documentos que Ud. ya cargó en la sección izquierda). Suba la información que se quiere verificar tal como: ofertas, cartas o cualquier otro documento. El sistema buscará diferencias lógicas, exclusiones de alcance, desviaciones técnicas entre otras posibilidades automáticamente.',
     refColTitle: 'ARCHIVOS A SER USADOS COMO REFERENCIA',
     refColDesc: 'Cargue aquí los documentos que serán la base de comparación Ej. Pliego de licitación, Normas, Procedimientos, Leyes, etc.',
@@ -35,7 +35,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     confirmMessage: 'Está cambiando de opción. La información cargada hasta el momento se descartará. ¿Descartar y cambiar Sí/No?',
     btnYes: 'Sí, descartar',
     btnNo: 'No, cancelar',
-    btnStartAudit: 'Iniciar Auditoría de Caso Único',
+    btnStartAudit: 'Iniciar Due Diligence',
     btnStartComparison: 'Procesar Comparación de Escenarios',
     parsedLabel: 'Markdown Convertido',
     parsingLabel: 'Convirtiendo a Markdown...',
@@ -55,7 +55,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     clear: 'limpiar',
     choiceTitle: 'SURE RMA — PLATAFORMA DE AUDITORÍA',
     choiceSubtitle: 'Seleccione el modo de auditoría de documentos que mejor se adapte a su volumen operativo.',
-    cardSingleTitle: '1. Auditoría de Caso Único',
+    cardSingleTitle: '1. Due Diligence',
     cardSingleDesc: 'Auditoría documental y mitigación de riesgos para un caso de negocio único (Due Diligence, ofertas, contratos). Ideal para uso ocasional o transaccional.',
     cardBtnSelectTariff: 'Seleccionar Plan',
     cardProjectTitle: '2. Herramienta de Evaluación de Proyectos',
@@ -63,7 +63,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     btnBackWizard: 'Atrás',
     btnPayAndStartSingle: 'Pagar $50 para Iniciar Auditoría',
     btnPayAndStartComparative: 'Comprar Plan para Iniciar Comparación',
-    plansSingleTitle: 'Seleccione su Plan de Caso Único',
+    plansSingleTitle: 'Seleccione su Plan de Due Diligence',
     basicSub: 'Pago por uso',
     basicF1: '$50.00 por operación',
     basicF2: 'Conversión a Markdown',
@@ -91,14 +91,14 @@ const localTranslations: Record<string, Record<string, string>> = {
     tier6Sub: '200 operaciones',
     tier6F1: '$37.50 costo unitario',
     tier6F2: 'SLA corporativo',
-    dataEntryTitleSingle: 'Ingreso de Datos de la Transacción / Caso Único',
+    dataEntryTitleSingle: 'Ingreso de Datos — Due Diligence',
     dataEntryDescSingle: 'Detalle la información de contacto y facturación para este análisis.',
     dataEntryTitleProject: 'Ingreso de Datos del Proyecto',
     dataEntryDescProject: 'Configure o seleccione un proyecto para auditar sus transacciones.',
     companyNameLabel: 'Nombre de la Empresa (Opcional)',
-    taxIdLabel: 'Nº de registro fiscal (Opcional)',
-    clientNameLabel: 'Nombre y apellido del Cliente *',
-    clientIdLabel: 'Nº de identidad del Cliente *',
+    taxIdLabel: 'Nº de registro de la Empresa (Opcional)',
+    clientNameLabel: 'Nombre y apellido del Solicitante *',
+    clientIdLabel: 'Nº de identidad del Solicitante *',
     emailLabel: 'Correo electrónico *',
     phoneLabel: 'Nº de teléfono *',
     contextLabel: 'Contexto o Instrucciones Especiales para el Análisis (Ventana de Contexto)',
@@ -142,9 +142,9 @@ const localTranslations: Record<string, Record<string, string>> = {
     title: 'SURE RMA — Document Processor',
     subtitle: 'Document auditing and transactional risk mitigation powered by AI.',
     toggleLabel: 'Select Audit Mode',
-    modeSingle: 'Single Case Audit (Multi-document)',
+    modeSingle: 'Due Diligence (Multi-document)',
     modeComparative: 'Scenario Comparison (Base vs. Proposal)',
-    singleDescription: 'Single Case Audit: Use this mode to evaluate the integrity and viability of a single entity, transaction, object, or scenario. You can upload multiple documents belonging to the same case, supplier, or matter (e.g., deeds of incorporation, financial records, and contracts). The system will analyze them together to issue a single consolidated risk report, as for example a Due Diligence report.',
+    singleDescription: 'Due Diligence: Use this mode to evaluate the integrity and viability of a single entity, transaction, object, or scenario. You can upload multiple documents belonging to the same case, supplier, or matter (e.g., deeds of incorporation, financial records, and contracts). The system will analyze them together to issue a single consolidated risk report, as for example a Due Diligence report.',
     comparativeDescription: 'Scenario Comparison: Use this mode to compare and contrast contents against the requirements (documents uploaded on the left side). Upload the information to be verified, such as offers, letters, or other documents. The system will automatically detect logical differences, scope exclusions, and technical deviations.',
     refColTitle: 'DOCUMENTS TO BE USED AS REFERENCE',
     refColDesc: 'Upload here the documents that will serve as the comparison baseline, e.g., Bidding terms, Standards, Procedures, Laws, etc.',
@@ -156,7 +156,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     confirmMessage: 'You are switching options. The information uploaded so far will be discarded. Discard and switch Yes/No?',
     btnYes: 'Yes, discard',
     btnNo: 'No, cancel',
-    btnStartAudit: 'Start Single Case Audit',
+    btnStartAudit: 'Start Due Diligence',
     btnStartComparison: 'Process Scenario Comparison',
     parsedLabel: 'Markdown Parsed',
     parsingLabel: 'Converting to Markdown...',
@@ -176,7 +176,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     clear: 'clear',
     choiceTitle: 'SURE RMA — AUDITING PLATFORM',
     choiceSubtitle: 'Select the document auditing mode that best fits your operational volume.',
-    cardSingleTitle: '1. Single Case Audit',
+    cardSingleTitle: '1. Due Diligence',
     cardSingleDesc: 'Document auditing and risk mitigation for a single business case (Due Diligence, offers, contracts). Ideal for occasional or transactional use.',
     cardBtnSelectTariff: 'Select Plan',
     cardProjectTitle: '2. Project Assessment Tool',
@@ -184,7 +184,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     btnBackWizard: 'Back',
     btnPayAndStartSingle: 'Pay $50 to Start Audit',
     btnPayAndStartComparative: 'Buy Plan to Start Comparison',
-    plansSingleTitle: 'Select Your Single Case Plan',
+    plansSingleTitle: 'Select Your Due Diligence Plan',
     basicSub: 'Pay per use',
     basicF1: '$50.00 per operation',
     basicF2: 'Markdown conversion',
@@ -212,14 +212,14 @@ const localTranslations: Record<string, Record<string, string>> = {
     tier6Sub: '200 operations',
     tier6F1: '$37.50 unit cost',
     tier6F2: 'Corporate SLA',
-    dataEntryTitleSingle: 'Transaction / Single Case Data Entry',
+    dataEntryTitleSingle: 'Due Diligence Data Entry',
     dataEntryDescSingle: 'Provide contact and billing details for this analysis.',
     dataEntryTitleProject: 'Project Data Entry',
     dataEntryDescProject: 'Configure or select a project to audit its transactions.',
     companyNameLabel: 'Company Name (Optional)',
-    taxIdLabel: 'Tax ID / Registration Number (Optional)',
-    clientNameLabel: 'Client Full Name *',
-    clientIdLabel: 'Client ID Number *',
+    taxIdLabel: 'Company Registration Number (Optional)',
+    clientNameLabel: 'Requester Full Name *',
+    clientIdLabel: 'Requester ID Number *',
     emailLabel: 'Email Address *',
     phoneLabel: 'Phone Number *',
     contextLabel: 'Context or Special Instructions for Analysis (Context Window)',
@@ -962,7 +962,17 @@ export default function DocumentProcessorPage() {
         compiledMarkdown = `[REFERENCE BASELINE DOCUMENTS]\n${refDocs}\n\n[EVALUATION PROPOSALS / SCHEMES TO COMPARE]\n${evalDocs}`;
       }
 
-      const userContextStr = `
+      // Contexto para la IA. En Due Diligence (single) NO se envían datos personales
+      // del solicitante (nombre, teléfono) ni el Nº de identidad — solo la EMPRESA
+      // solicitante + las instrucciones. Así nunca aparecen en el informe emitido.
+      let userContextStr = '';
+      if (selectedMode === 'single') {
+        userContextStr = `
+EMPRESA SOLICITANTE DEL REPORTE: ${companyName || 'No especificada'}
+INSTRUCCIONES PARA EL ANÁLISIS: ${instructions || 'Ninguna'}
+`;
+      } else {
+        userContextStr = `
 PROYECTO: ${projectNumber || 'No especificado'}
 CLIENTE/COMPRADOR: ${client || 'No especificado'}
 PARTICIPANTE/EMISOR: ${participant || 'No especificado'}
@@ -970,6 +980,7 @@ MONTO: ${amount || 'No especificado'} ${currency || 'USD'}
 ETAPA: ${activeStage || 'No especificada'}
 DETALLES ADICIONALES: ${instructions || ''}
 `;
+      }
 
       const formData = new FormData();
       formData.append('agent', 'consolidator');
@@ -1224,7 +1235,7 @@ DETALLES ADICIONALES: ${instructions || ''}
               <button onClick={() => setWorkflowStep('choice')} className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">
                 <ArrowLeft className="w-4 h-4" /> {lt.btnBackWizard}
               </button>
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Single Case Plans</span>
+              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Due Diligence Plans</span>
             </div>
             
             <h2 className="text-3xl font-black text-white uppercase tracking-tight">{lt.plansSingleTitle}</h2>
@@ -1845,8 +1856,8 @@ DETALLES ADICIONALES: ${instructions || ''}
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-emerald-500/30 rounded-bl-lg pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-emerald-500/30 rounded-br-lg pointer-events-none" />
 
-          {/* SIEMPRE MOSTRAR FORMULARIO DE PROYECTOS POR INSTRUCCIONES DEL CLIENTE */
-          true && (
+          {/* Formulario de PROYECTOS: solo en modo Proyectos (comparative) */
+          selectedMode === 'comparative' && (
             <>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
                 <div>
@@ -2113,6 +2124,114 @@ DETALLES ADICIONALES: ${instructions || ''}
               )}
             </>
           )}
+
+          {/* Formulario de DUE DILIGENCE: solo en modo DD (single) */}
+          {selectedMode === 'single' && (
+            <>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/5 pb-4">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {lt.dataEntryTitleSingle}
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">{lt.dataEntryDescSingle}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {/* Nombre y apellido del Solicitante */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.clientNameLabel}</label>
+                  <input
+                    type="text"
+                    value={clientFullName}
+                    onChange={(e) => setClientFullName(e.target.value)}
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Nombre de la Empresa (opcional) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.companyNameLabel}</label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Nº de registro de la Empresa (opcional) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.taxIdLabel}</label>
+                  <input
+                    type="text"
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Nº de identidad del Solicitante (INTERNO) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.clientIdLabel}</label>
+                  <input
+                    type="text"
+                    value={clientIdNum}
+                    onChange={(e) => setClientIdNum(e.target.value)}
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                  <p className="text-[10px] text-amber-400/80 leading-normal">
+                    {language === 'es' ? '🔒 Uso interno — no se mostrará en el informe emitido.' : '🔒 Internal use — it will not be shown in the issued report.'}
+                  </p>
+                </div>
+
+                {/* Correo electrónico (de la cuenta, solo lectura) */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.emailLabel}</label>
+                  <input
+                    type="email"
+                    value={email || ''}
+                    readOnly
+                    disabled
+                    className="w-full bg-[#0B192C]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-400 cursor-not-allowed font-medium"
+                  />
+                </div>
+
+                {/* Nº de teléfono */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.phoneLabel}</label>
+                  <input
+                    type="tel"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(e.target.value)}
+                    placeholder="+34 xxx xx xx xx"
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Idioma del Reporte */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.reportLanguageLabel}</label>
+                  <select
+                    value={reportLanguage}
+                    onChange={(e) => setReportLanguage(e.target.value)}
+                    className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors cursor-pointer font-bold focus:ring-1 focus:ring-emerald-500"
+                  >
+                    <option value="es" className="bg-[#0B192C]">🇪🇸 Español</option>
+                    <option value="en" className="bg-[#0B192C]">🇺🇸 English</option>
+                    <option value="fr" className="bg-[#0B192C]">🇫🇷 Français</option>
+                    <option value="de" className="bg-[#0B192C]">🇩🇪 Deutsch</option>
+                    <option value="pt" className="bg-[#0B192C]">🇧🇷 Português</option>
+                    <option value="zh" className="bg-[#0B192C]">🇨🇳 中文</option>
+                    <option value="ru" className="bg-[#0B192C]">🇷🇺 Русский</option>
+                    <option value="ar" className="bg-[#0B192C]">🇦🇪 العربية</option>
+                    <option value="hi" className="bg-[#0B192C]">🇮🇳 हिन्दी</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Workspace cards */}
@@ -2211,6 +2330,18 @@ DETALLES ADICIONALES: ${instructions || ''}
                   ))}
                 </div>
               )}
+
+              {/* Instrucciones para el análisis (misma ventana de carga) */}
+              <div className="mt-8 space-y-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{lt.contextLabel}</label>
+                <textarea
+                  rows={3}
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  placeholder={lt.contextPlaceholder}
+                  className="w-full bg-[#0B192C] border border-white/10 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors shadow-inner font-medium placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
             </div>
           )}
 
