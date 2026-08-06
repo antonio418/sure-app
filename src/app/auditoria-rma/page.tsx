@@ -9,6 +9,7 @@ import LanguageSelector from '@/components/ui/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { 
   ShieldCheck, ArrowLeft, Upload, FileText, CheckCircle2, 
   AlertTriangle, Trash2, ArrowRight, Loader2, HelpCircle,
@@ -291,6 +292,10 @@ export default function DocumentProcessorPage() {
   const [activePlan, setActivePlan] = useState<string>('none');
   const [loadingCredits, setLoadingCredits] = useState(true);
   const [loadingPrice, setLoadingPrice] = useState<string | null>(null);
+
+  // Enrutado por URL: /auditoria-rma/proyectos => Proyectos; /auditoria-rma => Due Diligence.
+  const pathname = usePathname();
+  const isProyectos = (pathname || '').endsWith('/proyectos');
   
   // Workflow wizard states
   const [workflowStep, setWorkflowStep] = useState<'auth' | 'choice' | 'plans-single' | 'plans-project' | 'form-single' | 'check-email' | 'uploader' | 'thank-you'>('auth');
@@ -298,6 +303,13 @@ export default function DocumentProcessorPage() {
   const [isDraggingRef, setIsDraggingRef] = useState(false);
   const [isDraggingEval, setIsDraggingEval] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+
+  // Con URLs separadas, saltar la pantalla de elección: cada URL entra directo a su herramienta.
+  useEffect(() => {
+    if (workflowStep === 'choice') {
+      setWorkflowStep(isProyectos ? 'plans-project' : 'plans-single');
+    }
+  }, [workflowStep, isProyectos]);
 
   // Authentication states
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot'>('login');
@@ -581,11 +593,8 @@ export default function DocumentProcessorPage() {
             
             if (data.available_credits > 0 || data.active_plan !== 'none') {
               setWorkflowStep('uploader');
-              if (['Tier 3', 'Tier 4', 'Tier 5', 'Tier 6'].includes(data.active_plan)) {
-                setSelectedMode('comparative');
-              } else {
-                setSelectedMode('single');
-              }
+              // El modo lo decide la URL (públicos separados), no el tier del plan.
+              setSelectedMode(isProyectos ? 'comparative' : 'single');
             } else {
               // Database says 0 credits and no plan
               if (sessionStorage.getItem('rma_payment_success') !== 'true') {
