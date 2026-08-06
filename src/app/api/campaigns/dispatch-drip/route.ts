@@ -281,9 +281,11 @@ async function handleDispatch(req: NextRequest) {
     for (let index = 0; index < leadsToDispatch.length; index++) {
       const { lead, nextStep } = leadsToDispatch[index];
 
-      // Delay 2 seconds between sends to avoid rate limiting
+      // Pequeño espaciado entre llamadas para respetar el rate limit de Resend (~2/seg).
+      // NO es el espaciado de entrega: eso lo hace scheduledAt (5 min). Mantener bajo
+      // para no agotar el presupuesto de 60s de la funcion (antes 2000ms => ~18s/lote).
       if (index > 0) {
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 500));
       }
 
       try {
