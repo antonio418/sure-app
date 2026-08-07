@@ -219,10 +219,9 @@ Kaunas, Lithuania`;
             ];
             const esPick = esOptions[Math.floor(Math.random() * esOptions.length)];
             const enOptions = [
-               `Who verifies your suppliers before you sign?`,
-               `Verify a supplier in 7 minutes`,
-               `When the offers pile up, who checks them?`,
-               `${cleanEmpresaName}: the blind spot in bulk trade`
+               `Due diligence in 7 minutes? Yes, really`,
+               `Due diligence in 7 minutes — see it yourself`,
+               `Due diligence in 7 minutes? Here's the catch`
             ];
             const enPick = enOptions[Math.floor(Math.random() * enOptions.length)];
             const dilSubjects: Record<string, { s1: string; s2: string; s3: string }> = {
