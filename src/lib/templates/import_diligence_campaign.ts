@@ -13,28 +13,15 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
   let signoff = "Best regards,";
   
   let emailBody = `
-    <p>Is it possible to detect an international scammer with 90% precision before signing?</p>
-    <p>I have worked for years in international trade and dealt with hundreds of fake sellers and buyers. Today, scammers are not novices. They are extremely convincing, know the technical jargon perfectly, and present masterfully forged documents: from fake SGS certificates to supposed bank guarantees.<br>
-    There are even real suppliers faking documents to meet requirements they lack.</p>
-    <p>In this industry, an authentic buyer or seller is a treasure. But a single failed operation is enough to lose it all. Reputation and trust evaporate in a second. Faced with this terror, companies have reacted by creating lists of almost abusive requirements, generating a paranoia that ends up blocking 100% legitimate operations. Distrust reigns.</p>
-    <p>The problem with traditional due diligence is human fragility. An analyst reads one line at a time and must rely on their memory to recall what they read three hours or several days ago. The human eye gets tired after 40 pages and inevitably gets distracted by what happens around them in the office.</p>
-    <p>An overlooked detail can cost millions. And what is worse: it brings the loss of reputation, the destruction of trust, and the dismissal of valuable and honest workers due to errors that, humanly, were almost impossible to detect.</p>
-    <p>Artificial Intelligence does not operate like that. AI reads multiple documents in parallel. It analyzes math, law, and chemistry simultaneously. It doesn't have Friday afternoons, it doesn't get tired, and it crosses patterns at inhuman speed without ever getting distracted.</p>
-    <p>How do we unlock this paralysis in the industry?<br>
-    Imagine this for a second:<br>
-    1. What if we had a technology that detects a Scammer in minutes at an accessible cost?<br>
-    2. What if it gave us precise instructions on what to demand from the counterparty to disarm their trap?<br>
-    3. What if it crossed data on international sanctions and geographic technical impossibilities in real-time?</p>
-    <p>We have it, that's how <strong>SURE FORENSICS</strong> (RMA Project) was born.</p>
-    <p>Hiring traditional Due Diligence can cost tens of thousands of dollars and paralyze a business for weeks. SURE does the work of a team of 20 analysts in exactly 7 minutes.<br>
-    Furthermore, for the acquisition of technological products, we complement this algorithmic shield with a deep audit of intellectual property rights, especially checking if there are valid patents and in which countries.</p>
-    <p>To prove it, I recently wanted to play around and test our new technological architecture. I started throwing old files from my own archives at it: SCO contracts, ICPO, Letters of Credit, BLs...<br>
-    What I discovered was terrifying. The rate of undetectable falsehoods that had gone unnoticed by the human eye was immense.</p>
-    <p>Is Artificial Intelligence infallible? Absolutely NOT. But by giving you 90% certainty with objectively verifiable and mathematical evidence, it collapses any narrative defense of the transgressor.</p>
-    <p>The pragmatism is simple: Suppose you receive offers from 20 different suppliers for a critical acquisition. Instead of spending weeks analyzing blindly, you run the files through SURE FORENSIC. The system detects anomalies and assigns a Critical Risk Level to 17 of them.</p>
-    <p>You just saved your capital (and your team's jobs). Now, your staff can dedicate their energy and talent exclusively to negotiating with the 3 real suppliers, leveraged on a forensic report that tells them exactly where they stand.</p>
-    <p>Trust in international trade was broken. We just repaired it.</p>
-    <p>👇 If your trading desk has an ongoing operation, send me a direct message. Let's pass those documents through the SURE vault before you sign.</p>
+    <p>A single fake counterparty — supplier or buyer — can cost up to 5% of your annual revenue, and tie up your most expensive people in weeks of manual review.</p>
+    <p>SURE verifies any counterparty in 7 minutes:</p>
+    <ul style="margin: 6pt 0; padding-left: 20px;">
+      <li style="margin-bottom: 4pt;">An exact risk score, backed by verifiable evidence.</li>
+      <li style="margin-bottom: 4pt;">A fraction of a law firm's cost.</li>
+      <li style="margin-bottom: 4pt;">Your team back to negotiating — not reading hundreds of pages.</li>
+    </ul>
+    <p>Doubting a counterparty is reasonable. See it for yourself, free, on a document of your choice.</p>
+    <p>Worth 15 minutes this week?</p>
   `;
   
   if (vars.language === 'es') {
@@ -43,28 +30,15 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
     signoff = "Cordialmente,";
     
     emailBody = `
-      <p>¿Es posible detectar a un estafador internacional con un 90% de precisión antes de firmar?</p>
-      <p>He trabajado por años en el comercio exterior y he lidiado con centenares de falsos vendedores y compradores. Hoy en día, los estafadores no son novatos. Son extremadamente convincentes, conocen la jerga técnica a la perfección y presentan documentos magistralmente falsificados: desde certificados SGS hasta supuestas garantías bancarias.<br>
-      Incluso hay proveedores reales falseando documentos para cumplir con requisitos de los cuales carecen.</p>
-      <p>En esta industria, un comprador o vendedor auténtico es un tesoro. Pero basta una sola operación fallida para perderlo todo. La reputación y la confianza se evaporan en un segundo. Ante este terror, las empresas han reaccionado creando listas de requisitos casi abusivos, lo que ha generado una paranoia que termina bloqueando operaciones 100% legítimas. La desconfianza reina.</p>
-      <p>El problema de la debida diligencia tradicional es la fragilidad humana. Un analista lee una línea a la vez y debe confiar en su memoria para recordar lo que leyó hace tres horas o varios días atrás. El ojo humano se cansa después de 40 páginas y se distrae inevitablemente con lo que ocurre a su alrededor en la oficina.</p>
-      <p>Un detalle pasado por alto puede costar millones. Y lo que es peor: acarrea la pérdida de reputación, la destrucción de la confianza y el despido de trabajadores valiosos y honestos por culpa de errores que, humanamente, eran casi imposibles de detectar.</p>
-      <p>La Inteligencia Artificial no opera así. La IA lee múltiples documentos en paralelo. Analiza matemáticas, leyes y química simultáneamente. No tiene viernes por la tarde, no se cansa, y cruza patrones a una velocidad inhumana sin distraerse jamás.</p>
-      <p>¿Cómo desbloqueamos esta parálisis en la industria?<br>
-      Imagínate esto por un segundo:<br>
-      1. ¿Y si tuviéramos una tecnología que detecte a un Scammer en minutos y a un costo accesible?<br>
-      2. ¿Y si nos diera instrucciones precisas sobre qué exigirle a la contraparte para desarmar su trampa?<br>
-      3. ¿Y si cruzara datos de sanciones internacionales e imposibilidades técnicas geográficas en tiempo real?</p>
-      <p>Lo tenemos, así nació <strong>SURE FORENSICS</strong> (Proyecto RMA).</p>
-      <p>Contratar una Due Diligence tradicional puede costar decenas de miles de dólares y paralizar un negocio durante semanas. SURE hace el trabajo de un equipo de 20 analistas en exactamente 7 minutos.<br>
-      Además, para la adquisición de productos tecnológicos, complementamos este blindaje algorítmico con una auditoría profunda de derechos de propiedad intelectual y especialmente si existen patentes vigentes y en cuales países.</p>
-      <p>Para comprobarlo, hace poco quise jugar a poner a prueba nuestra nueva arquitectura tecnológica. Empecé a lanzarle expedientes antiguos de mis propios archivos: contratos SCO, ICPO, Cartas de Crédito, BLs…<br>
-      Lo que descubrí fue aterrador. La tasa de falsedades indetectables que habían pasado desapercibidas ante el ojo humano era inmensa.</p>
-      <p>¿Es la Inteligencia Artificial infalible? Rotundamente NO. Pero al entregarte un 90% de certeza con evidencia objetivamente comprobable y matemática, derrumba cualquier defensa narrativa del transgresor.</p>
-      <p>El pragmatismo es simple: Supongamos que recibes ofertas de 20 proveedores distintos para una adquisición crítica. En lugar de gastar semanas analizando a ciegas, pasas los expedientes por SURE FORENSIC. El sistema detecta anomalías y asigna un Nivel de Riesgo Crítico a 17 de ellos.</p>
-      <p>Acabas de salvar tu capital (y los empleos de tu equipo). Ahora, tu personal puede dedicar su energía y talento exclusivamente a negociar con los 3 proveedores reales, apalancados en un reporte forense que les dice exactamente qué terreno pisan.</p>
-      <p>La confianza en el comercio internacional estaba rota. Acabamos de repararla.</p>
-      <p>👇 Si tu mesa de trading tiene una operación en curso, envíame un mensaje directo. Pasemos esos documentos por la bóveda de SURE antes de que firmes.</p>
+      <p>Una sola contraparte falsa — proveedor o comprador — puede costar hasta el 5% de sus ingresos anuales y consumir semanas de revisión manual de su gente más valiosa.</p>
+      <p>SURE verifica a cualquier contraparte en 7 minutos:</p>
+      <ul style="margin: 6pt 0; padding-left: 20px;">
+        <li style="margin-bottom: 4pt;">Un score de riesgo exacto, respaldado por evidencia verificable.</li>
+        <li style="margin-bottom: 4pt;">Una fracción del costo de un bufete de abogados.</li>
+        <li style="margin-bottom: 4pt;">Su equipo, de vuelta a negociar — no a leer cientos de páginas.</li>
+      </ul>
+      <p>Dudar de una contraparte es razonable. Compruébelo usted mismo, gratis, con un documento de su elección.</p>
+      <p>¿Vale 15 minutos esta semana?</p>
     `;
   } else if (vars.language === 'pt') {
     greeting = `Prezado(a) ${vars.nombre_contacto || 'Equipe Diretiva'},`;
@@ -72,28 +46,15 @@ export function generateImportDiligenceHtml(vars: ImportDiligenceTemplateVars): 
     signoff = "Atenciosamente,";
     
     emailBody = `
-      <p>É possível detectar um fraudador internacional com 90% de precisão antes de assinar?</p>
-      <p>Trabalho há anos no comércio exterior e lidei com centenas de falsos vendedores e compradores. Hoje em dia, os fraudadores não são novatos. São extremamente convincentes, conhecem o jargão técnico com perfeição e apresentam documentos magistralmente falsificados: de falsos certificados SGS a supostas garantias bancárias.<br>
-      Existem até fornecedores reais falsificando documentos para cumprir requisitos que não possuem.</p>
-      <p>Nesta indústria, um comprador ou vendedor autêntico é um tesouro. Mas basta uma única operação falha para perder tudo. A reputação e a confiança evaporam num segundo. Diante desse terror, as empresas reagiram criando listas de requisitos quase abusivos, gerando uma paranoia que acaba bloqueando operações 100% legítimas. A desconfiança reina.</p>
-      <p>O problema da due diligence tradicional é a fragilidade humana. Um analista lê uma linha de cada vez e deve confiar na memória para lembrar o que leu há três horas ou vários dias atrás. O olho humano se cansa após 40 páginas e inevitavelmente se distrai com o que acontece ao redor no escritório.</p>
-      <p>Um detalhe negligenciado pode custar milhões. E o que é pior: acarreta a perda de reputação, a destruição da confiança e a demissão de trabalhadores valiosos e honestos por culpa de erros que, humanamente, eram quase impossíveis de detectar.</p>
-      <p>A Inteligência Artificial não opera assim. A IA lê vários documentos em paralelo. Analisa matemática, leis e química simultaneamente. Não tem sexta-feira à tarde, não se cansa e cruza padrões a uma velocidade desumana sem nunca se distrair.</p>
-      <p>Como desbloqueamos essa paralisia na indústria?<br>
-      Imagine isso por um segundo:<br>
-      1. E se tivéssemos uma tecnologia que detecta um Scammer em minutos e a um custo acessível?<br>
-      2. E se nos desse instruções precisas sobre o que exigir da contraparte para desarmar sua armadilha?<br>
-      3. E se cruzasse dados de sanções internacionais e impossibilidades técnicas geográficas em tempo real?</p>
-      <p>Nós temos, assim nasceu <strong>SURE FORENSICS</strong> (Projeto RMA).</p>
-      <p>Contratar uma Due Diligence tradicional pode custar dezenas de milhares de dólares e paralisar um negócio por semanas. SURE faz o trabalho de uma equipe de 20 analistas em exatamente 7 minutos.<br>
-      Além disso, para a aquisição de produtos tecnológicos, complementamos esta blindagem algorítmica com uma auditoria profunda de direitos de propriedade intelectual e especialmente se existem patentes vigentes e em quais países.</p>
-      <p>Para comprovar, recentemente quis brincar de testar nossa nova arquitetura tecnológica. Comecei a enviar arquivos antigos dos meus próprios arquivos: contratos SCO, ICPO, Cartas de Crédito, BLs…<br>
-      O que descobri foi assustador. A taxa de falsidades indetectáveis que passaram despercebidas pelo olho humano era imensa.</p>
-      <p>A Inteligência Artificial é infalível? Rotundamente NÃO. Mas ao entregar 90% de certeza com evidências objetivamente comprováveis e matemáticas, derruba qualquer defesa narrativa do transgressor.</p>
-      <p>O pragmatismo é simples: Suponha que você receba ofertas de 20 fornecedores diferentes para uma aquisição crítica. Em vez de passar semanas analisando às cegas, você passa os arquivos pelo SURE FORENSIC. O sistema detecta anomalias e atribui um Nível de Risco Crítico a 17 deles.</p>
-      <p>Você acabou de salvar seu capital (e os empregos de sua equipe). Agora, sua equipe pode dedicar energia e talento exclusivamente a negociar com os 3 fornecedores reais, alavancados em um relatório forense que diz exatamente onde estão pisando.</p>
-      <p>A confiança no comércio internacional estava quebrada. Acabamos de consertá-la.</p>
-      <p>👇 Se sua mesa de trading tem uma operação em andamento, envie-me uma mensagem direta. Vamos passar esses documentos pelo cofre do SURE antes que você assine.</p>
+      <p>Uma única contraparte falsa — fornecedor ou comprador — pode custar até 5% da sua receita anual e consumir semanas de revisão manual do seu pessoal mais valioso.</p>
+      <p>A SURE verifica qualquer contraparte em 7 minutos:</p>
+      <ul style="margin: 6pt 0; padding-left: 20px;">
+        <li style="margin-bottom: 4pt;">Um score de risco exato, respaldado por evidências verificáveis.</li>
+        <li style="margin-bottom: 4pt;">Uma fração do custo de um escritório de advocacia.</li>
+        <li style="margin-bottom: 4pt;">Sua equipe de volta a negociar — não a ler centenas de páginas.</li>
+      </ul>
+      <p>Duvidar de uma contraparte é razoável. Comprove você mesmo, grátis, com um documento à sua escolha.</p>
+      <p>Vale 15 minutos esta semana?</p>
     `;
   }
 
