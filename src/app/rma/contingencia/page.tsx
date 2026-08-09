@@ -109,7 +109,7 @@ export default function ContingenciaPage() {
         <div className="flex items-center gap-6">
           <LanguageSelector />
           <Link href="/rma" className="text-sm font-bold text-slate-300 hover:text-white transition-colors bg-white/5 border border-white/5 px-4 py-2 rounded-xl">
-            Volver al Hub
+            {language === 'es' ? 'Volver al Hub' : 'Back to Hub'}
           </Link>
         </div>
       </nav>
@@ -139,7 +139,7 @@ export default function ContingenciaPage() {
               className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#00e5ff] to-cyan-500 text-black font-black uppercase tracking-widest text-sm rounded-2xl transition-all hover:scale-105 shadow-[0_0_25px_rgba(0,229,255,0.25)]"
             >
               <ShieldCheck className="w-5 h-5" />
-              <span>Crear Plan de Contingencia (PDC)</span>
+              <span>{language === 'es' ? 'Crear Plan de Contingencia (PDC)' : 'Create a Contingency Plan (PDC)'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
