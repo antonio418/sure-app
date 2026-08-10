@@ -399,6 +399,24 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateCargo = async (leadId: string, current: string) => {
+    const input = window.prompt('Cargo / rol del contacto (ej. "Purchasing Manager", "Director de Compras"). Vacío para borrar:', current === '—' ? '' : (current || ''));
+    if (input === null) return; // cancelado
+    const cargo = input.trim();
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, cargo })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el cargo");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, cargo: cargo || null } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
     const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
@@ -1002,7 +1020,7 @@ export default function AlfredoAdminPage() {
                            )}
                          </div>
                        </td>
-                       <td className="px-3 py-2.5 text-slate-300 text-xs max-w-[150px] truncate" title={lead.cargo || ''}>{lead.cargo || '—'}</td>
+                       <td onClick={() => handleUpdateCargo(lead.id, lead.cargo || '')} className="px-3 py-2.5 text-slate-300 text-xs max-w-[150px] truncate cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title={lead.cargo || 'Clic para añadir el cargo'}>{lead.cargo ? lead.cargo : <span className="text-slate-500 italic">+ cargo</span>}</td>
                        <td className="px-3 py-2.5 max-w-[180px] truncate" title={lead.email}>
                          {lead.email?.startsWith('no-email-') ? (
                            <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title={t.no_verified_email_tip}>{t.no_verified_email}</span>

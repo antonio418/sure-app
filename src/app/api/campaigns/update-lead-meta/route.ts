@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
     }
     if (comentario !== undefined) {
       updates.comentario = (comentario || '').toString().trim().slice(0, 500) || null;
+    }
+    if (cargo !== undefined) {
+      updates.cargo = (cargo || '').toString().trim().slice(0, 150) || null;
     }
 
     if (Object.keys(updates).length === 0) {
