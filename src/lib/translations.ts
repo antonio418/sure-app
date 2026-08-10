@@ -1220,6 +1220,7 @@ export const alfredoTranslations: Record<Language, Record<string, string>> = {
     pdoc_note: "Paste the Google Drive or OneDrive link. The AI will insert it into the email. Spam-safe.",
     plang_label: "Campaign Language",
     cancel: "Cancel",
+    save: "Save",
     saving: "Saving...",
     save_project: "Save Project"
   },
@@ -1324,6 +1325,7 @@ export const alfredoTranslations: Record<Language, Record<string, string>> = {
     pdoc_note: "Pega el link de Google Drive o OneDrive. La IA lo insertará en el correo. Seguro contra Spam.",
     plang_label: "Idioma de la Campaña",
     cancel: "Cancelar",
+    save: "Guardar",
     saving: "Guardando...",
     save_project: "Guardar Proyecto"
   },

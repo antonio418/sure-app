@@ -98,6 +98,10 @@ export default function AlfredoAdminPage() {
   };
   const t: Record<string, string> = { ...alfredoTranslations.en, ...(alfredoTranslations[uiLang] || {}) };
 
+  // Editor de comentario (modal con área de texto, precargado con el valor actual)
+  const [editingComment, setEditingComment] = useState<{ id: string; text: string } | null>(null);
+  const [savingComment, setSavingComment] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -381,21 +385,29 @@ export default function AlfredoAdminPage() {
     }
   };
 
-  const handleUpdateComment = async (leadId: string, current: string) => {
-    const input = window.prompt('Comentario breve (ej. "Proveedor de 100 TM de oro/día"). Vacío para borrar:', current || '');
-    if (input === null) return; // cancelado
-    const comentario = input.trim();
+  const handleUpdateComment = (leadId: string, current: string) => {
+    // Abre el editor modal (área de texto) precargado con el comentario actual.
+    setEditingComment({ id: leadId, text: current || '' });
+  };
+
+  const saveEditingComment = async () => {
+    if (!editingComment) return;
+    setSavingComment(true);
+    const comentario = editingComment.text.trim();
     try {
       const res = await authedFetch('/api/campaigns/update-lead-meta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead_id: leadId, comentario })
+        body: JSON.stringify({ lead_id: editingComment.id, comentario })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error guardando el comentario");
-      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, comentario: comentario || null } : l));
+      setLeads(prev => prev.map(l => l.id === editingComment.id ? { ...l, comentario: comentario || null } : l));
+      setEditingComment(null);
     } catch (err: any) {
       alert("Error: " + err.message);
+    } finally {
+      setSavingComment(false);
     }
   };
 
@@ -1102,6 +1114,29 @@ export default function AlfredoAdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Comment Editor Modal */}
+      {editingComment && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setEditingComment(null)}>
+          <div className="bg-[#0a101f] border border-[var(--color-sure-accent)]/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold mb-2 font-montserrat">Comentario del proveedor</h2>
+            <p className="text-xs text-slate-400 mb-3">Añade o actualiza la información del proveedor (qué produce, cantidades, mercados, rol del contacto...). Puedes modificarlo cuando quieras.</p>
+            <textarea
+              autoFocus
+              value={editingComment.text}
+              onChange={(e) => setEditingComment({ ...editingComment, text: e.target.value })}
+              placeholder="Ej: Distribuidor de Au/Ag, ~100 TM/mes, mercados: UE y Asia. Contacto: Director de Compras."
+              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white h-44 focus:outline-none focus:border-[var(--color-sure-accent)] text-sm resize-none"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button onClick={() => setEditingComment(null)} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">{t.cancel}</button>
+              <button onClick={saveEditingComment} disabled={savingComment} className="bg-[var(--color-sure-accent)] text-black font-bold px-6 py-2 rounded-lg hover:bg-white transition-colors disabled:opacity-50">
+                {savingComment ? t.saving : t.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* New Project Modal */}
       {showNewProjectModal && (
