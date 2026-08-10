@@ -899,7 +899,7 @@ export default function AlfredoAdminPage() {
           </div>
 
           <div className="overflow-x-auto">
-             <table className="min-w-[1000px] w-full text-left text-sm text-gray-400">
+             <table className="min-w-[1150px] w-full text-left text-sm text-gray-400">
                <thead className="bg-white/5 text-xs uppercase font-mono">
                  <tr>
                    <th className="px-3 py-3 w-12 text-center">
@@ -924,6 +924,9 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-40 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('nombre_contacto')}>
                      <div className="flex items-center gap-1">{t.th_contact} {sortConfig?.key === 'nombre_contacto' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
+                   <th className="px-3 py-3 w-36 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('cargo')}>
+                     <div className="flex items-center gap-1">{t.th_cargo} {sortConfig?.key === 'cargo' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
                    <th className="px-3 py-3 w-48 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
                      <div className="flex items-center gap-1">{t.th_email} {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
@@ -945,7 +948,7 @@ export default function AlfredoAdminPage() {
                </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
-                   <tr><td colSpan={12} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
+                   <tr><td colSpan={13} className="px-6 py-10 text-center font-mono font-bold text-slate-500">{t.no_contacts} {statusFilter !== 'ALL' ? t.with_this_status : ''} {t.in_this_project}</td></tr>
                 ) : (
                    filteredLeads.map(lead => (
                      <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
@@ -999,6 +1002,7 @@ export default function AlfredoAdminPage() {
                            )}
                          </div>
                        </td>
+                       <td className="px-3 py-2.5 text-slate-300 text-xs max-w-[150px] truncate" title={lead.cargo || ''}>{lead.cargo || '—'}</td>
                        <td className="px-3 py-2.5 max-w-[180px] truncate" title={lead.email}>
                          {lead.email?.startsWith('no-email-') ? (
                            <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title={t.no_verified_email_tip}>{t.no_verified_email}</span>

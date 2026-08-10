@@ -63,6 +63,7 @@ El formato exacto por cada objeto del array debe ser:
     "direccion": "Sede principal o dirección corporativa de la empresa",
     "nota_empresa": "Nota breve sobre la empresa: novedades, puntos resaltantes, tamaño o logros recientes",
     "nombre_contacto": "Nombre y apellido real de un contacto C-Level (Ej. Director de Compras, Supply Chain Manager, CFO, Director de Cumplimiento, o CEO). ES OBLIGATORIO DAR NOMBRE Y APELLIDO.",
+    "cargo": "Cargo o rol del contacto, tal como aparece en su perfil (ej. 'Director de Compras', 'Purchasing Manager', 'International Sales Manager', 'CEO'). ES OBLIGATORIO cuando conozcas al contacto. Si no tienes certeza del cargo exacto, deja el campo vacío ''.",
     "nota_contacto": "Nota breve sobre la persona a contactar, tal como puede aparecer en su perfil de LinkedIn (ej. trayectoria, responsabilidad clave)",
     "email": "Email DIRECTO del tomador de decisiones (C-Level). Busca si hay correos electrónicos reales expuestos públicamente en los resultados de búsqueda. Si no encuentras uno real, puedes proponer el patrón de correo corporativo más probable basado en el nombre del contacto y el dominio web oficial de la empresa, pero solo si es un dominio real y activo. Si no tienes bases sólidas, deja el campo vacío ''.",
     "telefono": "Teléfono corporativo REAL. Si no tienes certeza absoluta del teléfono, DEJA ESTE CAMPO VACÍO ''. ESTÁ ESTRICTAMENTE PROHIBIDO inventar números de teléfono.",

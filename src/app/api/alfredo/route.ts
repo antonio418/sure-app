@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     // Obtener prospectos existentes para excluirlos del prompt
     const { data: existingLeads } = await supabaseAdmin
       .from('leads_campaign')
-      .select('empresa, website')
+      .select('empresa, website, status')
       .eq('project_id', project_id);
 
     const ai = new GoogleGenAI({ apiKey });
@@ -73,11 +73,22 @@ export async function POST(req: NextRequest) {
         existingNamesSet.add(n);
       }
 
+      // Descartados (REJECTED/cold): NUNCA deben reaparecer. Los priorizamos en la exclusión
+      // enviada a Gemini para que ni siquiera gaste búsqueda en ellos (el filtro programático
+      // posterior los bloquea igual, pero así evitamos malgastar el presupuesto de búsqueda).
+      const discardedNames = existingLeads
+        .filter((l: any) => l.status === 'REJECTED' || l.status === 'cold')
+        .map((l: any) => (l.empresa || '').trim().toLowerCase())
+        .filter((n: string) => n !== '');
+      const discardedSet = new Set(discardedNames);
+
       if (existingWebsites.length > 0 || existingNames.length > 0) {
         searchPrompt += `\n\nESTRICTO: EVITA las siguientes empresas y sitios web que ya tenemos registrados (no los repitas):`;
         if (existingNames.length > 0) {
-          // Pasamos máximo 15 nombres para no sobrecargar el grounding
-          searchPrompt += `\n- Nombres de empresa a evitar: ${Array.from(new Set(existingNames)).slice(-15).join(', ')}`;
+          // Siempre incluimos TODOS los descartados primero; luego rellenamos con los más recientes.
+          const otherNames = Array.from(new Set(existingNames)).filter((n: string) => !discardedSet.has(n));
+          const avoidNames = Array.from(new Set([...discardedNames, ...otherNames.slice(-15)])).slice(0, 40);
+          searchPrompt += `\n- Nombres de empresa a evitar (los ya DESCARTADOS jamás deben proponerse de nuevo): ${avoidNames.join(', ')}`;
         }
         if (existingWebsites.length > 0) {
           // Pasamos máximo 15 sitios web/dominios para no sobrecargar el grounding
