@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireUser } from '@/lib/authGuard';
 
-// Actualiza campos manuales del lead: form_enviado (checkbox) y/o comentario (texto libre).
+// Actualiza campos manuales del lead: form_enviado (checkbox), comentario, cargo,
+// email (con validación de formato) y/o website. Todos editables a mano desde la tabla.
 export async function POST(req: NextRequest) {
   try {
     const authError = await requireUser(req);
