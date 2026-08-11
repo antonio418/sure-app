@@ -1083,14 +1083,19 @@ export default function AlfredoAdminPage() {
                          )}
                        </td>
                        <td onClick={() => handleUpdateCountry(lead.id, lead.pais || getCountryCode(lead.email))} className="px-3 py-2.5 text-center font-mono text-xs text-slate-300 cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Clic para editar el país">{lead.pais || getCountryCode(lead.email)}</td>
-                       <td onClick={() => handleUpdateWebsite(lead.id, lead.website || '')} className="px-3 py-2.5 max-w-[150px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.website || 'Clic para añadir/editar la web'}>
-                         {lead.website ? (
-                           <a onClick={(e) => e.stopPropagation()} href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline" title={lead.website}>
-                             {lead.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-                           </a>
-                         ) : (
-                           <span className="text-slate-500 italic text-xs">+ web</span>
-                         )}
+                       <td className="px-3 py-2.5 max-w-[150px]">
+                         <div className="flex items-center gap-1.5">
+                           {lead.website ? (
+                             <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline truncate" title={lead.website}>
+                               {lead.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                             </a>
+                           ) : (
+                             <span className="text-slate-500 text-xs">—</span>
+                           )}
+                           <button onClick={() => handleUpdateWebsite(lead.id, lead.website || '')} className="text-slate-500 hover:text-[var(--color-sure-accent)] flex-shrink-0 transition-colors" title="Editar web">
+                             <Pencil className="w-3 h-3" />
+                           </button>
+                         </div>
                        </td>
                        <td className="px-3 py-2.5 text-center">
                          <input
