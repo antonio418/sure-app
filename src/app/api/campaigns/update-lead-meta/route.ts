@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario, cargo, email } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo, email, website } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -31,6 +31,9 @@ export async function POST(req: NextRequest) {
       } else if (cleanEmail) {
         throw new Error("El correo no tiene un formato válido");
       }
+    }
+    if (website !== undefined) {
+      updates.website = (website || '').toString().trim().slice(0, 300) || null;
     }
 
     if (Object.keys(updates).length === 0) {

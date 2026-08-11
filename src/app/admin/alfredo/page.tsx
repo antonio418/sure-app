@@ -453,6 +453,24 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateWebsite = async (leadId: string, current: string) => {
+    const input = window.prompt('Sitio web de la empresa (ej. empresa.com). Vacío para borrar:', current || '');
+    if (input === null) return; // cancelado
+    const website = input.trim();
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, website })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando la web");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, website: website || null } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
     const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
@@ -1065,13 +1083,13 @@ export default function AlfredoAdminPage() {
                          )}
                        </td>
                        <td onClick={() => handleUpdateCountry(lead.id, lead.pais || getCountryCode(lead.email))} className="px-3 py-2.5 text-center font-mono text-xs text-slate-300 cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Clic para editar el país">{lead.pais || getCountryCode(lead.email)}</td>
-                       <td className="px-3 py-2.5 max-w-[150px] truncate">
+                       <td onClick={() => handleUpdateWebsite(lead.id, lead.website || '')} className="px-3 py-2.5 max-w-[150px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.website || 'Clic para añadir/editar la web'}>
                          {lead.website ? (
-                           <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline" title={lead.website}>
+                           <a onClick={(e) => e.stopPropagation()} href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline" title={lead.website}>
                              {lead.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
                            </a>
                          ) : (
-                           <span className="text-slate-500">—</span>
+                           <span className="text-slate-500 italic text-xs">+ web</span>
                          )}
                        </td>
                        <td className="px-3 py-2.5 text-center">
