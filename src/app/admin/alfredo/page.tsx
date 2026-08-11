@@ -429,6 +429,30 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateEmail = async (leadId: string, current: string) => {
+    const isPlaceholder = (current || '').startsWith('no-email-');
+    const input = window.prompt('Correo del contacto:', isPlaceholder ? '' : (current || ''));
+    if (input === null) return; // cancelado
+    const email = input.trim();
+    if (email === '') return; // vacío: sin cambios (el correo es campo clave)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('El correo no tiene un formato válido.');
+      return;
+    }
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el correo");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, email } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
     const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
@@ -1033,9 +1057,9 @@ export default function AlfredoAdminPage() {
                          </div>
                        </td>
                        <td onClick={() => handleUpdateCargo(lead.id, lead.cargo || '')} className="px-3 py-2.5 text-slate-300 text-xs max-w-[150px] truncate cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title={lead.cargo || 'Clic para añadir el cargo'}>{lead.cargo ? lead.cargo : <span className="text-slate-500 italic">+ cargo</span>}</td>
-                       <td className="px-3 py-2.5 max-w-[180px] truncate" title={lead.email}>
+                       <td onClick={() => handleUpdateEmail(lead.id, lead.email || '')} className="px-3 py-2.5 max-w-[180px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.email?.startsWith('no-email-') ? 'Clic para añadir el correo' : (lead.email || 'Clic para añadir el correo')}>
                          {lead.email?.startsWith('no-email-') ? (
-                           <span className="text-slate-500 italic text-xs hover:text-slate-400 cursor-help" title={t.no_verified_email_tip}>{t.no_verified_email}</span>
+                           <span className="text-slate-500 italic text-xs">{t.no_verified_email}</span>
                          ) : (
                            lead.email
                          )}

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario, cargo } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo, email } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -22,6 +22,15 @@ export async function POST(req: NextRequest) {
     }
     if (cargo !== undefined) {
       updates.cargo = (cargo || '').toString().trim().slice(0, 150) || null;
+    }
+    if (email !== undefined) {
+      const cleanEmail = (email || '').toString().trim();
+      // El correo es campo clave (se usa como conflicto en upsert): solo se actualiza si no está vacío.
+      if (cleanEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        updates.email = cleanEmail;
+      } else if (cleanEmail) {
+        throw new Error("El correo no tiene un formato válido");
+      }
     }
 
     if (Object.keys(updates).length === 0) {
