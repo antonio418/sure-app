@@ -302,7 +302,10 @@ async function handleDispatch(req: NextRequest) {
           try {
             const vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
             const vdata = await vres.json();
-            isValid = !!(vdata && vdata.data && vdata.data.status === 'valid');
+            const vstatus = (vdata && vdata.data) ? vdata.data.status : null;
+            // Aceptamos 'valid' y 'accept_all' (catch-all, muy común en B2B legítimo).
+            // Solo se aparcan los claramente inválidos/desechables o cuando Hunter no responde.
+            isValid = (vstatus === 'valid' || vstatus === 'accept_all');
           } catch (e) {
             isValid = false; // fallo seguro: si Hunter falla, no enviamos
           }
