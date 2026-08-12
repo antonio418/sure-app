@@ -324,9 +324,21 @@ async function handleDispatch(req: NextRequest) {
             return 'park' as const;
           };
 
+          // Timeout corto: si Hunter tarda (típico con la cuota agotada), abortamos
+          // rápido y pasamos al fallback por MX. Evita que el lote se pase de los 60s
+          // de la función (que provocaba "Failed to fetch" en el navegador).
+          const HUNTER_TIMEOUT_MS = 5000;
           try {
-            const vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
-            const vdata = await vres.json();
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), HUNTER_TIMEOUT_MS);
+            let vres: Response;
+            let vdata: any;
+            try {
+              vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`, { signal: controller.signal });
+              vdata = await vres.json();
+            } finally {
+              clearTimeout(timer);
+            }
 
             if (vres.ok && vdata && vdata.data && vdata.data.status) {
               // Hunter respondió con un veredicto real.
@@ -343,9 +355,10 @@ async function handleDispatch(req: NextRequest) {
               const hErr = (vdata && vdata.errors && vdata.errors[0]) ? (vdata.errors[0].details || vdata.errors[0].id) : `HTTP ${vres.status}`;
               decision = await mxFallback(hErr);
             }
-          } catch (e) {
-            // Error de red al llamar a Hunter -> red de seguridad propia (MX).
-            decision = await mxFallback('error de red');
+          } catch (e: any) {
+            // Timeout o error de red al llamar a Hunter -> red de seguridad propia (MX).
+            const why = (e && e.name === 'AbortError') ? `timeout ${HUNTER_TIMEOUT_MS}ms` : 'error de red';
+            decision = await mxFallback(why);
           }
 
           if (decision === 'park') {
