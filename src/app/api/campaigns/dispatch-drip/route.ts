@@ -497,7 +497,10 @@ async function handleDispatch(req: NextRequest) {
            bcc: bccEmail,
            // Espaciado anti-spam: cada correo del lote se entrega 5 min despues del anterior
            // (Resend scheduledAt). Protege la reputacion del dominio sin bloquear la funcion.
-           scheduledAt: new Date(Date.now() + index * 5 * 60 * 1000).toISOString()
+           // IMPORTANTE: Resend exige que scheduled_at sea SIEMPRE futuro. Antes el primer
+           // correo (index 0) salia con la hora actual y Resend lo rechazaba con
+           // "must be a future date". Anadimos un colchon de 60s a la base.
+           scheduledAt: new Date(Date.now() + 60 * 1000 + index * 5 * 60 * 1000).toISOString()
         };
         
         if (isHtml) {
