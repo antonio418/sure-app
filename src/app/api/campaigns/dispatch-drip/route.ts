@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { Resend } from 'resend';
 import { requireCronOrUser } from '@/lib/authGuard';
+import { promises as dnsPromises } from 'dns';
 
+export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
@@ -290,34 +292,71 @@ async function handleDispatch(req: NextRequest) {
 
       try {
         // ============================================================
-        // VERIFICACIÓN PRE-ENVÍO (Hunter.io) — FALLO SEGURO
-        // Solo se envía a correos confirmados como 'valid'. Si Hunter
-        // no lo confirma (inválido, catch-all, error o cuota agotada),
-        // se aparca el lead (PARKED) y se salta el envío. Bajo volumen
-        // (lote diario), encaja en la cuota de verificación.
+        // VERIFICACIÓN PRE-ENVÍO (Hunter.io) — con fallback por MX
+        // - Hunter con veredicto: 'valid'/'accept_all' -> envía; resto -> aparca.
+        // - Hunter sin veredicto (cuota agotada / error / caído): el lead ya
+        //   está APPROVED (verificado a mano), así que comprobamos el MX del
+        //   dominio y enviamos solo si existe; si no hay MX, se aparca.
+        // Así una cuota agotada de Hunter ya NO aparca leads legítimos.
         // ============================================================
         const hunterKey = process.env.HUNTER_API_KEY;
         if (hunterKey && lead.email && !lead.email.startsWith('no-email-')) {
-          let isValid = false;
+          // Decisión de envío: 'send' o 'park'.
+          // - Si Hunter da un VEREDICTO real -> se respeta (valid/accept_all envía; el resto aparca).
+          // - Si Hunter NO puede verificar (cuota agotada / error HTTP / caído) -> el lead ya está
+          //   APPROVED (verificado a mano), así que usamos una red de seguridad propia: comprobar el
+          //   MX del dominio. Con MX válido enviamos; sin MX (dominio muerto) aparcamos.
+          let decision: 'send' | 'park' = 'park';
+          let parkReason = 'correo no verificado';
+
+          const mxFallback = async (why: string) => {
+            const domain = (lead.email.split('@')[1] || '').trim();
+            try {
+              const mx = await dnsPromises.resolveMx(domain);
+              if (mx && mx.length > 0) {
+                console.log(`[Drip Engine] Hunter no disponible (${why}); MX OK para ${domain}. Envío por aprobación manual: ${lead.email}`);
+                return 'send' as const;
+              }
+            } catch (mxErr) {
+              // sin registros MX -> cae a park
+            }
+            parkReason = `Hunter no disponible (${why}) y dominio sin MX`;
+            return 'park' as const;
+          };
+
           try {
             const vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`);
             const vdata = await vres.json();
-            const vstatus = (vdata && vdata.data) ? vdata.data.status : null;
-            // Aceptamos 'valid' y 'accept_all' (catch-all, muy común en B2B legítimo).
-            // Solo se aparcan los claramente inválidos/desechables o cuando Hunter no responde.
-            isValid = (vstatus === 'valid' || vstatus === 'accept_all');
+
+            if (vres.ok && vdata && vdata.data && vdata.data.status) {
+              // Hunter respondió con un veredicto real.
+              const vstatus = vdata.data.status;
+              // Aceptamos 'valid' y 'accept_all' (catch-all, muy común en B2B legítimo).
+              if (vstatus === 'valid' || vstatus === 'accept_all') {
+                decision = 'send';
+              } else {
+                decision = 'park';
+                parkReason = `Hunter marcó el correo como '${vstatus}'`;
+              }
+            } else {
+              // Hunter no pudo verificar (p. ej. cuota agotada -> 429 sin 'data').
+              const hErr = (vdata && vdata.errors && vdata.errors[0]) ? (vdata.errors[0].details || vdata.errors[0].id) : `HTTP ${vres.status}`;
+              decision = await mxFallback(hErr);
+            }
           } catch (e) {
-            isValid = false; // fallo seguro: si Hunter falla, no enviamos
+            // Error de red al llamar a Hunter -> red de seguridad propia (MX).
+            decision = await mxFallback('error de red');
           }
-          if (!isValid) {
+
+          if (decision === 'park') {
             await supabaseAdmin
               .from('leads_campaign')
               .update({
                 status: 'PARKED',
-                nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Aparcado en el envío: correo no verificado por Hunter (${lead.email})`
+                nota_contacto: `${lead.nota_contacto ? lead.nota_contacto + ' | ' : ''}Aparcado en el envío: ${parkReason} (${lead.email})`
               })
               .eq('id', lead.id);
-            console.log(`[Drip Engine] Aparcado por verificación pre-envío (no válido/no confirmado): ${lead.email}`);
+            console.log(`[Drip Engine] Aparcado en verificación pre-envío (${parkReason}): ${lead.email}`);
             continue;
           }
         }
