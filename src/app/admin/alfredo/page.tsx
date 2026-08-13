@@ -904,6 +904,7 @@ export default function AlfredoAdminPage() {
                        onChange={(e) => setTargetLeadsCount(Number(e.target.value))}
                        className="bg-black/50 border border-white/10 rounded-lg py-1.5 px-3 text-white focus:outline-none focus:border-[var(--color-sure-accent)] text-sm font-bold"
                      >
+                        <option value={10}>{t.leads_min}</option>
                         <option value={20}>{t.leads_fast}</option>
                         <option value={50}>{t.leads_standard}</option>
                         <option value={100}>{t.leads_deep}</option>
