@@ -104,7 +104,13 @@ export async function POST(req: NextRequest) {
     let response;
     let leads: any[] = [];
     let retries = 2;
-    
+    // Presupuesto de tiempo: si ya vamos tarde, NO lanzamos otra llamada a Gemini y
+    // devolvemos un error JSON limpio ANTES de que Vercel corte la función a los 60s
+    // con su página de error en texto plano ("An error o..."), que es la que rompe el
+    // parseo en el navegador ("Unexpected token 'A'... is not valid JSON").
+    const startedAt = Date.now();
+    const TIME_BUDGET_MS = 42000;
+
     while (retries > 0) {
         console.log("Alfredo sending prompt to Gemini:", searchPrompt);
         try {
@@ -116,7 +122,7 @@ export async function POST(req: NextRequest) {
               temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
               tools: [{ googleSearch: {} }],
               responseMimeType: 'text/plain',
-              maxOutputTokens: 8192
+              maxOutputTokens: 4096
             }
           });
 
@@ -164,8 +170,10 @@ export async function POST(req: NextRequest) {
         } catch (e: any) {
           retries--;
           console.warn(`Error en llamada o parseo de Alfredo. Intentos restantes: ${retries}`, e.message);
-          if (retries === 0) {
-             return NextResponse.json({ error: e.message || 'Google Gemini servers are overloaded. Please try again later.' }, { status: 500 });
+          // Si no quedan reintentos O ya no hay tiempo para otra llamada, cortamos aquí
+          // con un error JSON válido (evita el timeout de Vercel que rompe el parseo).
+          if (retries === 0 || (Date.now() - startedAt) > TIME_BUDGET_MS) {
+             return NextResponse.json({ error: e.message || 'La búsqueda tardó demasiado. Reinténtalo en unos segundos.' }, { status: 500 });
           }
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
