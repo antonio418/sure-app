@@ -169,7 +169,23 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          leads = JSON.parse(rawText.trim());
+          const toParse = rawText.trim();
+          try {
+            leads = JSON.parse(toParse);
+          } catch (parseErr) {
+            // Rescate de JSON truncado (respuesta cortada por límite de tokens):
+            // tomamos desde el primer '[' hasta el último objeto completo '}' y cerramos
+            // el array. Así conservamos los prospectos completos y descartamos el cortado.
+            const start = toParse.indexOf('[');
+            const lastObj = toParse.lastIndexOf('}');
+            if (start !== -1 && lastObj > start) {
+              const salvaged = toParse.substring(start, lastObj + 1).replace(/,\s*$/, '') + ']';
+              leads = JSON.parse(salvaged); // si aún falla, lo captura el catch externo
+              console.warn('[Alfredo] JSON truncado rescatado: conservados los prospectos completos.');
+            } else {
+              throw parseErr;
+            }
+          }
           if (!Array.isArray(leads)) {
              throw new Error("El formato devuelto no es un array de prospectos válido.");
           }
