@@ -121,10 +121,18 @@ export async function POST(req: NextRequest) {
       const langInfo = languageMap[languageCode] || languageMap.en;
       const languageName = langInfo.name;
 
-      const isMetersProject = 
+      const isMetersProject =
         /medidor|meter|cnel|ecuador|ansi/i.test(projectName || '') ||
         /medidor|meter|cnel|ecuador|ansi/i.test(campaignGoal || '');
-      
+
+      // Alianza de suministro de minerales (p. ej. estaño). Se activa por el NOMBRE del
+      // proyecto (tokens específicos) para NO colisionar con el proyecto "Due Diligence
+      // Commodities". Genera un drip corto y personal en inglés (ángulo: yo traigo compradores,
+      // ellos suministran). Nombra el proyecto p. ej. "Estaño — Alianza de suministro".
+      const isMineralSourcing =
+        !isMetersProject &&
+        /esta[ñn]o|\btin\b|alianza|abastecimiento|supply[\s-]?alliance|sourcing[\s-]?alliance|mineral supply/i.test(projectName || '');
+
       const isLithuanian = languageCode === 'lt';
       const isImportDiligence = !isLithuanian && !isMetersProject && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
       const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
@@ -207,6 +215,45 @@ Kaunas, Lithuania`;
                "email_2_content": "[Cuerpo del correo 2 en inglés, preguntando brevemente si pudieron revisar la propuesta de los 12,000 medidores ANSI]",
                "email_3_subject": "Closing project sourcing: Sourcing of ANSI Smart Meters",
                "email_3_content": "[Cuerpo del correo 3 en inglés de despedida, indicando amablemente que cerramos el expediente por falta de contacto]"
+            }
+            `;
+         } else if (isMineralSourcing) {
+            // Ángulo ALIANZA DE SUMINISTRO (minerales/estaño). Correos cortos, personales,
+            // en inglés, sin adjuntos ni comisiones/NDA en el primer toque (lecciones de entregabilidad).
+            const tinSubjects = [
+               `Tin supply partnership — ${cleanEmpresaName}`,
+               `Buyers sourcing tin — open to a partnership?`,
+               `Exploring a supply alliance — ${cleanEmpresaName}`
+            ];
+            const tinPick = tinSubjects[Math.floor(Math.random() * tinSubjects.length)];
+            const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
+            promptText = `
+            Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Haces sourcing de commodities: aportas COMPRADORES y buscas PRODUCTORES/REFINADORES para suministrarles. Escribes a un productor para proponer una ALIANZA DE SUMINISTRO (tú traes la demanda; ellos, el material).
+
+            Redacta una SECUENCIA DE 3 CORREOS EN INGLÉS (cold outreach), breve y personal. REGLAS OBLIGATORIAS:
+            - CORTO. Primer correo: máximo 5-6 líneas. Sin párrafos largos. Sin logos ni adjuntos.
+            - NADA de marcadores tipo [ ]. Texto 100% limpio y humano.
+            - Saludo: si el contacto NO es 'VACÍO', usa 'Hello ${contactForGreeting},'. Si es 'VACÍO', usa 'Hello ${cleanEmpresaName} team,'.
+            - El primer correo SOLO busca un "sí, cuéntame más": quién eres (1 línea), el gancho (trabajas con compradores que buscan activamente su producto y quieres explorar una alianza de suministro), y UNA pregunta simple (¿están abiertos y pueden suministrar?).
+            - PROHIBIDO en el primer correo: comisiones, NDA/NCND, o pedir datasheets/certificados/pagos. Di que compartirás detalles (volúmenes y especificaciones) SI hay interés.
+            - Firma de solo texto, sin logo: "Antonio Baronas — MB PROCDI · Kaunas, Lithuania · +37068941110 · antonio@procdi.com".
+            - Doble salto de línea ('\\n\\n') entre párrafos. PROHIBIDO poner extensiones de dominio (.com, .cn, etc.) al nombrar la empresa.
+
+            Información del Prospecto:
+            - Empresa: ${cleanEmpresaName}
+            - Contacto: ${contactForGreeting}
+            - Producto/Sector: ${lead.sector || lead.nota_empresa || 'metals / minerals'}
+
+            Devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin texto adicional.
+
+            Estructura JSON estricta requerida:
+            {
+               "email_1_subject": "${tinPick}",
+               "email_1_content": "[Correo 1 en inglés, breve y personal, según las reglas.]",
+               "email_2_subject": "Re: ${tinPick}",
+               "email_2_content": "[Seguimiento corto de 2-3 líneas en inglés, preguntando amablemente si pudieron verlo.]",
+               "email_3_subject": "Closing the loop — ${cleanEmpresaName}",
+               "email_3_content": "[Cierre respetuoso de 2-3 líneas en inglés; asumes que quizá no es el momento y quedas disponible.]"
             }
             `;
          } else if (isImportDiligence) {

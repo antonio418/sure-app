@@ -18,16 +18,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No CSV data provided' }, { status: 400 });
     }
 
-    // Basic CSV Parser (assuming format: Empresa,Contacto,Email,Sector)
-    // In a real production app, use a library like 'papaparse'
-    const lines = csvData.split('\n').filter((l: string) => l.trim() !== '');
-    const headers = lines[0].split(',').map((h: string) => h.trim().toLowerCase());
-    
+    // Parser CSV robusto: respeta las comillas y las comas dentro de campos
+    // entrecomillados, y desescapa comillas dobles ("" -> "). El export de la app
+    // entrecomilla los campos, así que el split ingenuo por comas corrompía los datos
+    // (emails con comillas, columnas desalineadas). Esto lo arregla.
+    const parseCsvLine = (line: string): string[] => {
+      const out: string[] = [];
+      let cur = '';
+      let inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (inQ) {
+          if (c === '"') {
+            if (line[i + 1] === '"') { cur += '"'; i++; }
+            else inQ = false;
+          } else { cur += c; }
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ',') { out.push(cur); cur = ''; }
+          else cur += c;
+        }
+      }
+      out.push(cur);
+      return out.map((v) => v.trim());
+    };
+
+    const lines = csvData.split(/\r?\n/).filter((l: string) => l.trim() !== '');
+    const headers = parseCsvLine(lines[0].replace(/^﻿/, '')).map((h: string) => h.toLowerCase());
+
     const leads = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
-      // Handle commas inside quotes properly if needed, but for simple MVP this works
-      const values = lines[i].split(',').map((v: string) => v.trim());
+      const values = parseCsvLine(lines[i]);
       if (values.length < 3) continue;
 
       // Map to columns (assuming basic order if headers don't match exactly)
