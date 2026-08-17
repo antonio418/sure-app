@@ -532,11 +532,19 @@ export default function AlfredoAdminPage() {
              limit: 20
           })
         });
-        const data = await res.json();
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          // La respuesta no es JSON (p. ej. página de timeout de Vercel). Mensaje claro
+          // en vez del críptico "Unexpected token 'A'... is not valid JSON".
+          if (i === 1) throw new Error('El servidor tardó demasiado (timeout). Reinténtalo en unos segundos.');
+          break;
+        }
         if (!res.ok) {
            console.error(`Error en iteración ${i}: ${data.error}`);
            if (i === 1) throw new Error(data.error);
-           break; 
+           break;
         }
         totalFound += (data.count || 0);
         

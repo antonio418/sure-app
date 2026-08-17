@@ -114,17 +114,24 @@ export async function POST(req: NextRequest) {
     while (retries > 0) {
         console.log("Alfredo sending prompt to Gemini:", searchPrompt);
         try {
-          response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
-            contents: searchPrompt,
-            config: {
-              systemInstruction: ALFREDO_PROMPT,
-              temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
-              tools: [{ googleSearch: {} }],
-              responseMimeType: 'text/plain',
-              maxOutputTokens: 4096
-            }
-          });
+          // Timeout duro interno: si Gemini (con búsqueda web) se pasa de ~50s, lanzamos
+          // nosotros el error para devolver JSON limpio ANTES de que Vercel mate la función
+          // a los 60s con su página de texto plano (causa del "Unexpected token 'A'").
+          const GEMINI_HARD_MS = 50000;
+          response = await Promise.race([
+            ai.models.generateContent({
+              model: 'gemini-3.5-flash',
+              contents: searchPrompt,
+              config: {
+                systemInstruction: ALFREDO_PROMPT,
+                temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
+                tools: [{ googleSearch: {} }],
+                responseMimeType: 'text/plain',
+                maxOutputTokens: 4096
+              }
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('La búsqueda tardó demasiado (timeout interno de Gemini).')), GEMINI_HARD_MS))
+          ]) as any;
 
           if (!response) {
             throw new Error("No se pudo obtener respuesta de la Inteligencia Artificial.");
