@@ -490,11 +490,19 @@ async function handleDispatch(req: NextRequest) {
         
         const isHtml = body.includes('<!DOCTYPE html>') || body.includes('<html');
 
+        // Cabecera List-Unsubscribe: señal de remitente legítimo que mejora la entrega en
+        // Gmail/Outlook. Las bajas llegan como correo a antonio@procdi.com (honrar a mano:
+        // añadir el dominio a blacklist_domains o marcar el lead como REJECTED).
+        const unsubscribeMailto = `<mailto:${bccEmail}?subject=unsubscribe>`;
+
         const sendPayload: any = {
            from: fromEmail,
            to: lead.email,
            subject: subject,
            bcc: bccEmail,
+           headers: {
+             'List-Unsubscribe': unsubscribeMailto
+           },
            // Espaciado anti-spam: cada correo del lote se entrega 5 min despues del anterior
            // (Resend scheduledAt). Protege la reputacion del dominio sin bloquear la funcion.
            // IMPORTANTE: Resend exige que scheduled_at sea SIEMPRE futuro. Antes el primer
@@ -502,9 +510,23 @@ async function handleDispatch(req: NextRequest) {
            // "must be a future date". Anadimos un colchon de 60s a la base.
            scheduledAt: new Date(Date.now() + 60 * 1000 + index * 5 * 60 * 1000).toISOString()
         };
-        
+
         if (isHtml) {
             sendPayload.html = body;
+            // Versión de texto plano junto al HTML (multipart). Mejora la confianza del
+            // filtro anti-spam y garantiza legibilidad donde el HTML se recorta.
+            sendPayload.text = body
+              .replace(/<style[\s\S]*?<\/style>/gi, '')
+              .replace(/<script[\s\S]*?<\/script>/gi, '')
+              .replace(/<br\s*\/?>/gi, '\n')
+              .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n')
+              .replace(/<[^>]+>/g, '')
+              .replace(/&nbsp;/gi, ' ')
+              .replace(/&amp;/gi, '&')
+              .replace(/&lt;/gi, '<')
+              .replace(/&gt;/gi, '>')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim();
         } else {
             sendPayload.text = body;
         }
