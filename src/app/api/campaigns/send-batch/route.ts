@@ -220,10 +220,13 @@ Kaunas, Lithuania`;
          } else if (isMineralSourcing) {
             // Ángulo ALIANZA DE SUMINISTRO (minerales/estaño). Correos cortos, personales,
             // en inglés, sin adjuntos ni comisiones/NDA en el primer toque (lecciones de entregabilidad).
+            // Nombre en formato NORMAL (no MAYÚSCULAS) para los asuntos: se ve más humano y
+            // evita el efecto "grito" que penalizan algunos filtros. Quita solo el dominio.
+            const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim() || 'your company';
             const tinSubjects = [
-               `Tin supply partnership — ${cleanEmpresaName}`,
+               `Tin supply partnership — ${empresaNice}`,
                `Buyers sourcing tin — open to a partnership?`,
-               `Exploring a supply alliance — ${cleanEmpresaName}`
+               `Exploring a supply alliance — ${empresaNice}`
             ];
             const tinPick = tinSubjects[Math.floor(Math.random() * tinSubjects.length)];
             const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
@@ -233,14 +236,14 @@ Kaunas, Lithuania`;
             Redacta una SECUENCIA DE 3 CORREOS EN INGLÉS (cold outreach), breve y personal. REGLAS OBLIGATORIAS:
             - CORTO. Primer correo: máximo 5-6 líneas. Sin párrafos largos. Sin logos ni adjuntos.
             - NADA de marcadores tipo [ ]. Texto 100% limpio y humano.
-            - Saludo: si el contacto NO es 'VACÍO', usa 'Hello ${contactForGreeting},'. Si es 'VACÍO', usa 'Hello ${cleanEmpresaName} team,'.
+            - Saludo: si el contacto NO es 'VACÍO', usa 'Hello ${contactForGreeting},'. Si es 'VACÍO', usa 'Hello ${empresaNice} team,'.
             - El primer correo SOLO busca un "sí, cuéntame más": quién eres (1 línea), el gancho (trabajas con compradores que buscan activamente su producto y quieres explorar una alianza de suministro), y UNA pregunta simple (¿están abiertos y pueden suministrar?).
             - PROHIBIDO en el primer correo: comisiones, NDA/NCND, o pedir datasheets/certificados/pagos. Di que compartirás detalles (volúmenes y especificaciones) SI hay interés.
             - Firma de solo texto, sin logo: "Antonio Baronas — MB PROCDI · Kaunas, Lithuania · +37068941110 · antonio@procdi.com".
             - Doble salto de línea ('\\n\\n') entre párrafos. PROHIBIDO poner extensiones de dominio (.com, .cn, etc.) al nombrar la empresa.
 
             Información del Prospecto:
-            - Empresa: ${cleanEmpresaName}
+            - Empresa: ${empresaNice}
             - Contacto: ${contactForGreeting}
             - Producto/Sector: ${lead.sector || lead.nota_empresa || 'metals / minerals'}
 
@@ -252,7 +255,7 @@ Kaunas, Lithuania`;
                "email_1_content": "[Correo 1 en inglés, breve y personal, según las reglas.]",
                "email_2_subject": "Re: ${tinPick}",
                "email_2_content": "[Seguimiento corto de 2-3 líneas en inglés, preguntando amablemente si pudieron verlo.]",
-               "email_3_subject": "Closing the loop — ${cleanEmpresaName}",
+               "email_3_subject": "Closing the loop — ${empresaNice}",
                "email_3_content": "[Cierre respetuoso de 2-3 líneas en inglés; asumes que quizá no es el momento y quedas disponible.]"
             }
             `;
