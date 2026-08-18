@@ -578,15 +578,26 @@ export default function AlfredoAdminPage() {
       return;
     }
 
-    // Columnas clave a exportar
-    const columns = ['empresa', 'nombre_contacto', 'cargo', 'email', 'telefono', 'pais', 'sector', 'status', 'resend_status', 'created_at'];
-    
+    // Si hay leads SELECCIONADOS (checkboxes), exportamos SOLO esos; si no, todos los del
+    // proyecto. Útil para mover un subconjunto de proveedores a otro proyecto sin arrastrar todo.
+    const rowsToExport = selectedLeads.length > 0
+      ? leads.filter(l => selectedLeads.includes(l.id))
+      : sortedLeads;
+
+    if (rowsToExport.length === 0) {
+      alert("No hay contactos para exportar.");
+      return;
+    }
+
+    // Columnas clave a exportar (incluye 'comentario' con la info de productos)
+    const columns = ['empresa', 'nombre_contacto', 'cargo', 'email', 'telefono', 'pais', 'sector', 'comentario', 'status', 'resend_status', 'created_at'];
+
     const csvRows = [];
     // Header
     csvRows.push(columns.join(','));
 
     // Filas
-    for (const lead of sortedLeads) { // Exportamos los leads ordenados actuales
+    for (const lead of rowsToExport) {
       const values = columns.map(col => {
         let val = lead[col];
         if (val === null || val === undefined) val = '';
