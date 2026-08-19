@@ -1022,10 +1022,14 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-48 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('email')}>
                      <div className="flex items-center gap-1">{t.th_email} {sortConfig?.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
-                   <th className="px-3 py-3 w-16 text-center">País</th>
+                   <th className="px-3 py-3 w-16 text-center cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('pais')}>
+                     <div className="flex items-center justify-center gap-1">País {sortConfig?.key === 'pais' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
                    <th className="px-3 py-3 w-40">Web</th>
                    <th className="px-3 py-3 w-16 text-center">Form ✓</th>
-                   <th className="px-3 py-3 w-52">Comentario</th>
+                   <th className="px-3 py-3 w-52 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('comentario')}>
+                     <div className="flex items-center gap-1">Comentario {sortConfig?.key === 'comentario' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sector')}>
                      <div className="flex items-center gap-1">{t.th_sector} {sortConfig?.key === 'sector' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
@@ -1035,7 +1039,9 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-32 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('created_at')}>
                      <div className="flex items-center gap-1">{t.th_date} {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
-                   <th className="px-3 py-3 w-28">{t.th_last_action}</th>
+                   <th className="px-3 py-3 w-28 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('last_event_at')}>
+                     <div className="flex items-center gap-1">{t.th_last_action} {sortConfig?.key === 'last_event_at' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
                  </tr>
                </thead>
               <tbody>
