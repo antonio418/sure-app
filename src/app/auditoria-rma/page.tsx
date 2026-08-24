@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation';
 import { 
   ShieldCheck, ArrowLeft, Upload, FileText, CheckCircle2, 
   AlertTriangle, Trash2, ArrowRight, Loader2, HelpCircle,
-  Eye, Copy, Check, X, Cpu, CreditCard
+  Eye, Copy, Check, X, Cpu, CreditCard, Pencil, MoreVertical
 } from 'lucide-react';
 
 // Local translations mapping for self-contained language adaptability
@@ -53,6 +53,9 @@ const localTranslations: Record<string, Record<string, string>> = {
     copied: '¡Copiado!',
     btnBack: 'Cerrar',
     statusError: 'Error al convertir',
+    menuEdit: 'Editar nombre',
+    menuDelete: 'Eliminar',
+    btnSave: 'Guardar',
     clear: 'limpiar',
     choiceTitle: 'SURE RMA — PLATAFORMA DE AUDITORÍA',
     choiceSubtitle: 'Seleccione el modo de auditoría de documentos que mejor se adapte a su volumen operativo.',
@@ -174,6 +177,9 @@ const localTranslations: Record<string, Record<string, string>> = {
     copied: 'Copied!',
     btnBack: 'Close',
     statusError: 'Failed to parse',
+    menuEdit: 'Edit name',
+    menuDelete: 'Delete',
+    btnSave: 'Save',
     clear: 'clear',
     choiceTitle: 'SURE RMA — AUDITING PLATFORM',
     choiceSubtitle: 'Select the document auditing mode that best fits your operational volume.',
@@ -707,7 +713,39 @@ export default function DocumentProcessorPage() {
   const [filesSingle, setFilesSingle] = useState<UploadedFile[]>([]);
   const [filesRef, setFilesRef] = useState<UploadedFile[]>([]);
   const [filesEval, setFilesEval] = useState<UploadedFile[]>([]);
-  
+
+  // Per-file edit menu (rename / delete) for the upload lists
+  const [openFileMenuId, setOpenFileMenuId] = useState<string | null>(null);
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
+  const [editingFileName, setEditingFileName] = useState<string>('');
+
+  const startFileRename = (file: UploadedFile) => {
+    setEditingFileId(file.id);
+    setEditingFileName(file.name);
+    setOpenFileMenuId(null);
+  };
+  const cancelFileRename = () => {
+    setEditingFileId(null);
+    setEditingFileName('');
+  };
+  const commitFileRename = (
+    setFiles: React.Dispatch<React.SetStateAction<UploadedFile[]>>
+  ) => {
+    const newName = editingFileName.trim();
+    if (newName) {
+      setFiles(prev => prev.map(f => (f.id === editingFileId ? { ...f, name: newName } : f)));
+    }
+    setEditingFileId(null);
+    setEditingFileName('');
+  };
+  const removeFileFrom = (
+    setFiles: React.Dispatch<React.SetStateAction<UploadedFile[]>>,
+    id: string
+  ) => {
+    setFiles(prev => prev.filter(f => f.id !== id));
+    setOpenFileMenuId(null);
+  };
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingSuccess, setProcessingSuccess] = useState(false);
 
@@ -2295,7 +2333,28 @@ DETALLES ADICIONALES: ${instructions || ''}
                       <div className="flex items-center gap-3 min-w-0">
                         <FileText className="w-6 h-6 text-emerald-400 flex-shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-base font-extrabold text-white max-w-xs md:max-w-md truncate">{file.name}</p>
+                          {editingFileId === file.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                autoFocus
+                                value={editingFileName}
+                                onChange={(e) => setEditingFileName(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') commitFileRename(setFilesSingle);
+                                  if (e.key === 'Escape') cancelFileRename();
+                                }}
+                                className="bg-slate-800 border border-white/20 rounded-lg px-2 py-1 text-base font-extrabold text-white max-w-xs md:max-w-md focus:outline-none focus:border-emerald-500/60"
+                              />
+                              <button onClick={() => commitFileRename(setFilesSingle)} title={lt.btnSave} className="p-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300">
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button onClick={cancelFileRename} title={lt.btnBack} className="p-1.5 rounded-lg bg-slate-700/40 border border-white/10 text-slate-300 hover:text-white">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="text-base font-extrabold text-white max-w-xs md:max-w-md truncate">{file.name}</p>
+                          )}
                           <p className="text-sm font-bold text-slate-400">{file.size}</p>
                           {file.status === 'error' && file.error && (
                             <p className="text-sm font-semibold text-rose-400 mt-1 max-w-xs md:max-w-md truncate">{file.error}</p>
@@ -2334,6 +2393,34 @@ DETALLES ADICIONALES: ${instructions || ''}
                             <AlertTriangle className="w-4 h-4" /> {lt.statusError}
                           </span>
                         )}
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenFileMenuId(openFileMenuId === file.id ? null : file.id)}
+                            title={lt.menuEdit}
+                            className="p-2 rounded-lg bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-400 transition-all duration-300"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                          {openFileMenuId === file.id && (
+                            <>
+                              <div className="fixed inset-0 z-10" onClick={() => setOpenFileMenuId(null)} />
+                              <div className="absolute right-0 top-full mt-2 z-20 w-48 bg-[#0F1E33] border border-white/10 rounded-xl shadow-2xl py-1.5 overflow-hidden">
+                                <button
+                                  onClick={() => startFileRename(file)}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-slate-200 hover:bg-white/5 hover:text-white transition-colors"
+                                >
+                                  <Pencil className="w-4 h-4 text-emerald-400" /> {lt.menuEdit}
+                                </button>
+                                <button
+                                  onClick={() => removeFileFrom(setFilesSingle, file.id)}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" /> {lt.menuDelete}
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -2416,7 +2503,28 @@ DETALLES ADICIONALES: ${instructions || ''}
                           <div className="flex items-center gap-2 min-w-0">
                             <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                             <div className="min-w-0">
-                              <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              {editingFileId === file.id ? (
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    autoFocus
+                                    value={editingFileName}
+                                    onChange={(e) => setEditingFileName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') commitFileRename(setFilesRef);
+                                      if (e.key === 'Escape') cancelFileRename();
+                                    }}
+                                    className="bg-slate-800 border border-white/20 rounded-lg px-2 py-1 text-sm font-extrabold text-white max-w-[140px] md:max-w-[180px] focus:outline-none focus:border-emerald-500/60"
+                                  />
+                                  <button onClick={() => commitFileRename(setFilesRef)} title={lt.btnSave} className="p-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300">
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={cancelFileRename} title={lt.btnBack} className="p-1 rounded-lg bg-slate-700/40 border border-white/10 text-slate-300 hover:text-white">
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              )}
                               <p className="text-xs font-bold text-slate-400">{file.size}</p>
                               {file.status === 'error' && file.error && (
                                 <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
@@ -2451,6 +2559,34 @@ DETALLES ADICIONALES: ${instructions || ''}
                                 <AlertTriangle className="w-3 h-3" /> {lt.statusError}
                               </span>
                             )}
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenFileMenuId(openFileMenuId === file.id ? null : file.id)}
+                                title={lt.menuEdit}
+                                className="p-1.5 rounded-lg bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-400 transition-all duration-300"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                              {openFileMenuId === file.id && (
+                                <>
+                                  <div className="fixed inset-0 z-10" onClick={() => setOpenFileMenuId(null)} />
+                                  <div className="absolute right-0 top-full mt-2 z-20 w-44 bg-[#0F1E33] border border-white/10 rounded-xl shadow-2xl py-1.5 overflow-hidden">
+                                    <button
+                                      onClick={() => startFileRename(file)}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-slate-200 hover:bg-white/5 hover:text-white transition-colors"
+                                    >
+                                      <Pencil className="w-4 h-4 text-emerald-400" /> {lt.menuEdit}
+                                    </button>
+                                    <button
+                                      onClick={() => removeFileFrom(setFilesRef, file.id)}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" /> {lt.menuDelete}
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -2511,7 +2647,28 @@ DETALLES ADICIONALES: ${instructions || ''}
                           <div className="flex items-center gap-2 min-w-0">
                             <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                             <div className="min-w-0">
-                              <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              {editingFileId === file.id ? (
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    autoFocus
+                                    value={editingFileName}
+                                    onChange={(e) => setEditingFileName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') commitFileRename(setFilesEval);
+                                      if (e.key === 'Escape') cancelFileRename();
+                                    }}
+                                    className="bg-slate-800 border border-white/20 rounded-lg px-2 py-1 text-sm font-extrabold text-white max-w-[140px] md:max-w-[180px] focus:outline-none focus:border-emerald-500/60"
+                                  />
+                                  <button onClick={() => commitFileRename(setFilesEval)} title={lt.btnSave} className="p-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300">
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={cancelFileRename} title={lt.btnBack} className="p-1 rounded-lg bg-slate-700/40 border border-white/10 text-slate-300 hover:text-white">
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <p className="text-sm md:text-base font-extrabold text-white truncate max-w-[120px] md:max-w-[160px]">{file.name}</p>
+                              )}
                               <p className="text-xs font-bold text-slate-400">{file.size}</p>
                               {file.status === 'error' && file.error && (
                                 <p className="text-xs font-semibold text-rose-400 truncate max-w-[120px]" title={file.error}>{file.error}</p>
@@ -2546,6 +2703,34 @@ DETALLES ADICIONALES: ${instructions || ''}
                                 <AlertTriangle className="w-3 h-3" /> {lt.statusError}
                               </span>
                             )}
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenFileMenuId(openFileMenuId === file.id ? null : file.id)}
+                                title={lt.menuEdit}
+                                className="p-1.5 rounded-lg bg-[#1A2C46] border border-white/10 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-400 transition-all duration-300"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                              {openFileMenuId === file.id && (
+                                <>
+                                  <div className="fixed inset-0 z-10" onClick={() => setOpenFileMenuId(null)} />
+                                  <div className="absolute right-0 top-full mt-2 z-20 w-44 bg-[#0F1E33] border border-white/10 rounded-xl shadow-2xl py-1.5 overflow-hidden">
+                                    <button
+                                      onClick={() => startFileRename(file)}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-slate-200 hover:bg-white/5 hover:text-white transition-colors"
+                                    >
+                                      <Pencil className="w-4 h-4 text-emerald-400" /> {lt.menuEdit}
+                                    </button>
+                                    <button
+                                      onClick={() => removeFileFrom(setFilesEval, file.id)}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" /> {lt.menuDelete}
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
