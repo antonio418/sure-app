@@ -429,6 +429,52 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateEmpresa = async (leadId: string, current: string) => {
+    const input = window.prompt('Nombre de la empresa:', current || '');
+    if (input === null) return;
+    const empresa = input.trim();
+    if (empresa === '') { alert('El nombre de empresa no puede quedar vacío.'); return; }
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, empresa })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando la empresa");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, empresa } : l));
+    } catch (err: any) { alert("Error: " + err.message); }
+  };
+
+  const handleUpdateContacto = async (leadId: string, current: string) => {
+    const input = window.prompt('Nombre del contacto (vacío para borrar):', current || '');
+    if (input === null) return;
+    const nombre_contacto = input.trim();
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, nombre_contacto })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el contacto");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, nombre_contacto: nombre_contacto || null } : l));
+    } catch (err: any) { alert("Error: " + err.message); }
+  };
+
+  const handleUpdateSector = async (leadId: string, current: string) => {
+    const input = window.prompt('Sector / descripción:', current || '');
+    if (input === null) return;
+    const sector = input.trim();
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, sector })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el sector");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, sector: sector || null } : l));
+    } catch (err: any) { alert("Error: " + err.message); }
+  };
+
   const handleUpdateEmail = async (leadId: string, current: string) => {
     const isPlaceholder = (current || '').startsWith('no-email-');
     const input = window.prompt('Correo del contacto:', isPlaceholder ? '' : (current || ''));
@@ -1067,6 +1113,7 @@ export default function AlfredoAdminPage() {
                        <td className="px-3 py-2.5 font-bold text-white max-w-[160px] truncate" title={lead.empresa}>
                          <div className="flex items-center gap-2 truncate">
                            <span className="truncate">{lead.empresa}</span>
+                           <button onClick={() => handleUpdateEmpresa(lead.id, lead.empresa || '')} className="text-slate-500 hover:text-[var(--color-sure-accent)] flex-shrink-0 transition-colors" title="Editar nombre de empresa"><Pencil className="w-3 h-3" /></button>
                            {lead.website && (
                              <a 
                                href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`}
@@ -1085,6 +1132,7 @@ export default function AlfredoAdminPage() {
                        <td className="px-3 py-2.5 text-slate-200 max-w-[160px] truncate" title={lead.nombre_contacto || t.default_contact}>
                          <div className="flex items-center gap-2 truncate">
                            <span className="truncate">{lead.nombre_contacto || t.default_contact}</span>
+                           <button onClick={() => handleUpdateContacto(lead.id, lead.nombre_contacto || '')} className="text-slate-500 hover:text-[var(--color-sure-accent)] flex-shrink-0 transition-colors" title="Editar contacto"><Pencil className="w-3 h-3" /></button>
                            {lead.nombre_contacto && (
                              <a 
                                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((lead.nombre_contacto || '') + " " + (lead.empresa || ''))}`}
@@ -1135,7 +1183,7 @@ export default function AlfredoAdminPage() {
                        <td onClick={() => handleUpdateComment(lead.id, lead.comentario || '')} className="px-3 py-2.5 max-w-[200px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.comentario || 'Clic para añadir un comentario'}>
                          {lead.comentario ? <span className="text-xs text-slate-200">{lead.comentario}</span> : <span className="text-slate-500 text-xs italic">+ comentario</span>}
                        </td>
-                       <td className="px-3 py-2.5 max-w-[120px] truncate" title={lead.sector}>{lead.sector}</td>
+                       <td onClick={() => handleUpdateSector(lead.id, lead.sector || '')} className="px-3 py-2.5 max-w-[120px] truncate cursor-pointer hover:bg-white/10 transition-colors" title={lead.sector || 'Clic para editar el sector'}>{lead.sector}</td>
                        <td className="px-3 py-2.5">
                          <div className="flex flex-col gap-1.5 items-start">
                            {lead.status === 'DRAFT' ? (

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario, cargo, email, website } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo, email, website, empresa, nombre_contacto, pais, sector } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -35,6 +35,20 @@ export async function POST(req: NextRequest) {
     }
     if (website !== undefined) {
       updates.website = (website || '').toString().trim().slice(0, 300) || null;
+    }
+    if (empresa !== undefined) {
+      const v = (empresa || '').toString().trim().slice(0, 200);
+      if (!v) throw new Error("El nombre de empresa no puede quedar vacío");
+      updates.empresa = v;
+    }
+    if (nombre_contacto !== undefined) {
+      updates.nombre_contacto = (nombre_contacto || '').toString().trim().slice(0, 150) || null;
+    }
+    if (pais !== undefined) {
+      updates.pais = (pais || '').toString().trim().slice(0, 60) || null;
+    }
+    if (sector !== undefined) {
+      updates.sector = (sector || '').toString().trim().slice(0, 250) || null;
     }
 
     if (Object.keys(updates).length === 0) {
