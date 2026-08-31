@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario, cargo, email, website, empresa, nombre_contacto, pais, sector } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo, email, website, empresa, nombre_contacto, pais, sector, has_replied } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -17,6 +17,11 @@ export async function POST(req: NextRequest) {
     const updates: Record<string, any> = {};
     if (typeof form_enviado === 'boolean') {
       updates.form_enviado = form_enviado;
+    }
+    if (typeof has_replied === 'boolean') {
+      // Marcar/desmarcar que el lead respondió. has_replied=true DETIENE el drip
+      // (el despacho filtra has_replied=false), y muestra el badge de "respondió".
+      updates.has_replied = has_replied;
     }
     if (comentario !== undefined) {
       updates.comentario = (comentario || '').toString().trim().slice(0, 500) || null;

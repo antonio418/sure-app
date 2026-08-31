@@ -429,6 +429,19 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleToggleReplied = async (leadId: string, current: boolean) => {
+    const next = !current;
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, has_replied: next })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error");
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, has_replied: next } : l));
+    } catch (err: any) { alert("Error: " + err.message); }
+  };
+
   const handleUpdateEmpresa = async (leadId: string, current: string) => {
     const input = window.prompt('Nombre de la empresa:', current || '');
     if (input === null) return;
@@ -1201,7 +1214,17 @@ export default function AlfredoAdminPage() {
                                 </span>
                               );
                             })()}
-                            
+
+                            {lead.has_replied ? (
+                              <button onClick={() => handleToggleReplied(lead.id, true)} title="Respondió — clic para desmarcar" className="px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition-colors cursor-pointer">
+                                {t.s_received}
+                              </button>
+                            ) : (
+                              <button onClick={() => handleToggleReplied(lead.id, false)} title="Marcar que este lead respondió (detiene el drip)" className="px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider bg-white/5 text-slate-400 border border-white/10 hover:bg-emerald-500/20 hover:text-emerald-400 transition-colors cursor-pointer">
+                                ¿Respondió?
+                              </button>
+                            )}
+
                             {lead.resend_status && lead.resend_status !== 'pending' && (
                                <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider border ${
                                   lead.resend_status === 'delivered' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
