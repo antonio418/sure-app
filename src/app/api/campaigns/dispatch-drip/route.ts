@@ -292,73 +292,78 @@ async function handleDispatch(req: NextRequest) {
 
       try {
         // ============================================================
-        // VERIFICACIÓN PRE-ENVÍO (Hunter.io) — con fallback por MX
-        // - Hunter con veredicto: 'valid'/'accept_all' -> envía; resto -> aparca.
-        // - Hunter sin veredicto (cuota agotada / error / caído): el lead ya
-        //   está APPROVED (verificado a mano), así que comprobamos el MX del
-        //   dominio y enviamos solo si existe; si no hay MX, se aparca.
-        // Así una cuota agotada de Hunter ya NO aparca leads legítimos.
+        // VERIFICACIÓN PRE-ENVÍO — MX PRIMARIO (gratis, ilimitado).
+        // Por defecto solo comprobamos el MX del dominio (¿acepta correo?):
+        //   con MX -> envía; sin MX (dominio muerto) -> aparca.
+        // Hunter queda OPCIONAL detrás de USE_HUNTER=true (para no gastar su
+        // cuota mensual). Si se activa, se usa Hunter con fallback a MX.
         // ============================================================
-        const hunterKey = process.env.HUNTER_API_KEY;
-        if (hunterKey && lead.email && !lead.email.startsWith('no-email-')) {
-          // Decisión de envío: 'send' o 'park'.
-          // - Si Hunter da un VEREDICTO real -> se respeta (valid/accept_all envía; el resto aparca).
-          // - Si Hunter NO puede verificar (cuota agotada / error HTTP / caído) -> el lead ya está
-          //   APPROVED (verificado a mano), así que usamos una red de seguridad propia: comprobar el
-          //   MX del dominio. Con MX válido enviamos; sin MX (dominio muerto) aparcamos.
+        if (lead.email && !lead.email.startsWith('no-email-')) {
+          const domain = (lead.email.split('@')[1] || '').trim();
+          const hunterKey = process.env.HUNTER_API_KEY;
+          const useHunter = process.env.USE_HUNTER === 'true' && !!hunterKey;
+
           let decision: 'send' | 'park' = 'park';
           let parkReason = 'correo no verificado';
 
-          const mxFallback = async (why: string) => {
-            const domain = (lead.email.split('@')[1] || '').trim();
+          // ¿El dominio tiene servidor de correo? (gratis, ilimitado)
+          const mxOk = async (): Promise<boolean> => {
             try {
               const mx = await dnsPromises.resolveMx(domain);
-              if (mx && mx.length > 0) {
-                console.log(`[Drip Engine] Hunter no disponible (${why}); MX OK para ${domain}. Envío por aprobación manual: ${lead.email}`);
-                return 'send' as const;
-              }
-            } catch (mxErr) {
-              // sin registros MX -> cae a park
+              return !!(mx && mx.length > 0);
+            } catch {
+              return false;
             }
-            parkReason = `Hunter no disponible (${why}) y dominio sin MX`;
-            return 'park' as const;
           };
 
-          // Timeout corto: si Hunter tarda (típico con la cuota agotada), abortamos
-          // rápido y pasamos al fallback por MX. Evita que el lote se pase de los 60s
-          // de la función (que provocaba "Failed to fetch" en el navegador).
-          const HUNTER_TIMEOUT_MS = 5000;
-          try {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), HUNTER_TIMEOUT_MS);
-            let vres: Response;
-            let vdata: any;
-            try {
-              vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`, { signal: controller.signal });
-              vdata = await vres.json();
-            } finally {
-              clearTimeout(timer);
-            }
-
-            if (vres.ok && vdata && vdata.data && vdata.data.status) {
-              // Hunter respondió con un veredicto real.
-              const vstatus = vdata.data.status;
-              // Aceptamos 'valid' y 'accept_all' (catch-all, muy común en B2B legítimo).
-              if (vstatus === 'valid' || vstatus === 'accept_all') {
-                decision = 'send';
-              } else {
-                decision = 'park';
-                parkReason = `Hunter marcó el correo como '${vstatus}'`;
-              }
+          if (!useHunter) {
+            // --- MX primario (por defecto): sin consumir Hunter ---
+            if (await mxOk()) {
+              decision = 'send';
             } else {
-              // Hunter no pudo verificar (p. ej. cuota agotada -> 429 sin 'data').
-              const hErr = (vdata && vdata.errors && vdata.errors[0]) ? (vdata.errors[0].details || vdata.errors[0].id) : `HTTP ${vres.status}`;
-              decision = await mxFallback(hErr);
+              decision = 'park';
+              parkReason = 'dominio sin MX (rebotaría)';
             }
-          } catch (e: any) {
-            // Timeout o error de red al llamar a Hunter -> red de seguridad propia (MX).
-            const why = (e && e.name === 'AbortError') ? `timeout ${HUNTER_TIMEOUT_MS}ms` : 'error de red';
-            decision = await mxFallback(why);
+          } else {
+            // --- Ruta OPCIONAL con Hunter (USE_HUNTER=true) ---
+            // Hunter con veredicto: 'valid'/'accept_all' -> envía; resto -> aparca.
+            // Sin veredicto (cuota agotada / error / timeout) -> fallback a MX.
+            const mxFallback = async (why: string) => {
+              if (await mxOk()) {
+                console.log(`[Drip Engine] Hunter no disponible (${why}); MX OK para ${domain}. Envío: ${lead.email}`);
+                return 'send' as const;
+              }
+              parkReason = `Hunter no disponible (${why}) y dominio sin MX`;
+              return 'park' as const;
+            };
+            const HUNTER_TIMEOUT_MS = 5000;
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), HUNTER_TIMEOUT_MS);
+              let vres: Response;
+              let vdata: any;
+              try {
+                vres = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(lead.email)}&api_key=${hunterKey}`, { signal: controller.signal });
+                vdata = await vres.json();
+              } finally {
+                clearTimeout(timer);
+              }
+              if (vres.ok && vdata && vdata.data && vdata.data.status) {
+                const vstatus = vdata.data.status;
+                if (vstatus === 'valid' || vstatus === 'accept_all') {
+                  decision = 'send';
+                } else {
+                  decision = 'park';
+                  parkReason = `Hunter marcó el correo como '${vstatus}'`;
+                }
+              } else {
+                const hErr = (vdata && vdata.errors && vdata.errors[0]) ? (vdata.errors[0].details || vdata.errors[0].id) : `HTTP ${vres.status}`;
+                decision = await mxFallback(hErr);
+              }
+            } catch (e: any) {
+              const why = (e && e.name === 'AbortError') ? `timeout ${HUNTER_TIMEOUT_MS}ms` : 'error de red';
+              decision = await mxFallback(why);
+            }
           }
 
           if (decision === 'park') {
