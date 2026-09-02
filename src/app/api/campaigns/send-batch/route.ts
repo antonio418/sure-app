@@ -139,8 +139,16 @@ export async function POST(req: NextRequest) {
         !isMetersProject &&
         /esta[ñn]o|\btin\b|alianza|abastecimiento|supply[\s-]?alliance|sourcing[\s-]?alliance|mineral supply/i.test(projectName || '');
 
+      // RFQ de SCRAP: MB PROCDI compra por encargo de compradores y pide cotización a
+      // vendedores de scrap. Se activa por el NOMBRE del proyecto ("scrap"/"chatarra").
+      // Correo corto/personal, respeta el idioma por-lead (S/E). Nombra el proyecto p. ej.
+      // "Scrap metálico — proveedores".
+      const isScrapSourcing =
+        !isMetersProject && !isMineralSourcing &&
+        /scrap|chatarra/i.test(projectName || '');
+
       const isLithuanian = languageCode === 'lt';
-      const isImportDiligence = !isLithuanian && !isMetersProject && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
+      const isImportDiligence = !isLithuanian && !isMetersProject && !isScrapSourcing && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
       const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
       const isProcdiProject = 
         isMetersProject ||
@@ -299,6 +307,92 @@ Kaunas, Lithuania`;
                "email_2_content": "[Seguimiento corto de 2-3 líneas en inglés, preguntando amablemente si pudieron verlo.]",
                "email_3_subject": "${tinClose}",
                "email_3_content": "[Cierre respetuoso de 2-3 líneas en inglés; asumes que quizá no es el momento y quedas disponible.]"
+            }
+            `;
+         } else if (isScrapSourcing) {
+            // RFQ de SCRAP: compra por encargo de compradores; pide cotización a vendedores.
+            // Correo corto/personal, sin NDA/comisión/adjuntos en el primer toque. Respeta S/E.
+            const isEs = languageCode === 'es';
+            const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim() || (isEs ? 'su empresa' : 'your company');
+            const scrapSubjects = isEs ? [
+               `Compra de scrap — ${empresaNice}`,
+               `Buscamos proveedores de scrap — ¿cotizan?`,
+               `Solicitud de cotización — scrap de metales`
+            ] : [
+               `Scrap purchasing — ${empresaNice}`,
+               `Buyers sourcing metal scrap — are you supplying?`,
+               `Quotation request — metal scrap`
+            ];
+            const scrapPick = scrapSubjects[Math.floor(Math.random() * scrapSubjects.length)];
+            const scrapClose = isEs ? `Cerrando el tema — ${empresaNice}` : `Closing the loop — ${empresaNice}`;
+            const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
+            promptText = isEs ? `
+            Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajas por encargo de COMPRADORES activos y buscas PROVEEDORES/VENDEDORES de scrap para pedirles cotización.
+
+            Redacta una SECUENCIA DE 3 CORREOS EN ESPAÑOL (cold outreach), breve y personal, adaptando y personalizando esta CARTA MODELO al prospecto:
+            """
+            Hola [saludo],
+            Soy Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajo por encargo de compradores activos y, en este momento, buscamos proveedores fiables de scrap de los siguientes materiales:
+            Aluminio · Cobalto · Cobre · Molibdeno · Níquel · Estaño · Vanadio · Zinc
+            Si su empresa dispone de alguno de ellos, me gustaría explorar una relación de suministro y solicitarles una cotización. ¿Podrían indicarme qué variantes tienen disponibles actualmente, qué volumen pueden comercializar de cada una y si estarían abiertos a cotizar? Con esa información, coordinaré con los compradores y les haré llegar los detalles concretos de cada caso.
+            """
+            REGLAS OBLIGATORIAS:
+            - Mantén los 8 materiales y las 3 preguntas (qué variantes disponibles, en qué volumen por material, y si están abiertos a cotizar). NO inventes precios, NDA, comisiones ni adjuntos.
+            - Saludo: si el contacto NO es 'VACÍO', usa 'Hola ${contactForGreeting},'. Si es 'VACÍO', usa 'Hola equipo de ${empresaNice},'.
+            - NADA de marcadores tipo [ ]. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos.
+            - Los 8 materiales en UNA sola línea separados por ' · '. PROHIBIDO poner extensiones de dominio (.com, etc.) al nombrar la empresa.
+            - Firma de solo texto, sin logo: "Antonio Baronas — MB PROCDI · Kaunas, Lithuania · +37068941110 · antonio@procdi.com".
+            - Correo 2: seguimiento corto (2-3 líneas). Correo 3: cierre respetuoso (2-3 líneas).
+
+            Información del Prospecto:
+            - Empresa: ${empresaNice}
+            - Contacto: ${contactForGreeting}
+            - Producto/Sector: ${lead.sector || lead.nota_empresa || 'scrap de metales'}
+
+            Devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin texto adicional.
+
+            Estructura JSON estricta requerida:
+            {
+               "email_1_subject": "${scrapPick}",
+               "email_1_content": "[Correo 1 en español: la carta modelo adaptada y personalizada, con la firma al final, según las reglas.]",
+               "email_2_subject": "Re: ${scrapPick}",
+               "email_2_content": "[Seguimiento corto de 2-3 líneas en español, preguntando amablemente si pudieron verlo.]",
+               "email_3_subject": "${scrapClose}",
+               "email_3_content": "[Cierre respetuoso de 2-3 líneas en español; asumes que quizá no es el momento y quedas disponible.]"
+            }
+            ` : `
+            Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajas por encargo de COMPRADORES activos y buscas PROVEEDORES/VENDEDORES de scrap para pedirles cotización. El correo va en INGLÉS; estas instrucciones son para ti.
+
+            Redacta una SECUENCIA DE 3 CORREOS EN INGLÉS (cold outreach), breve y personal, adaptando y personalizando esta CARTA MODELO al prospecto:
+            """
+            Hello [greeting],
+            I'm Antonio Baronas, from MB PROCDI (Kaunas, Lithuania). I work on behalf of active buyers, and we're currently looking for reliable scrap suppliers of the following materials:
+            Aluminum · Cobalt · Copper · Molybdenum · Nickel · Tin · Vanadium · Zinc
+            If your company handles any of these, I'd like to explore a supply relationship and request a quotation. Could you let me know which variants you currently have available, what volume you can trade for each, and whether you'd be open to quoting? With that information, I'll coordinate with the buyers and send you the specific details for each case.
+            """
+            REGLAS OBLIGATORIAS:
+            - Mantén los 8 materiales y las 3 preguntas (which variants available, what volume per material, whether open to quoting). NO inventes precios, NDA, comisiones ni adjuntos.
+            - Saludo: si el contacto NO es 'VACÍO', usa 'Hello ${contactForGreeting},'. Si es 'VACÍO', usa 'Hello ${empresaNice} team,'.
+            - NADA de marcadores tipo [ ]. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos.
+            - Los 8 materiales en UNA sola línea separados por ' · '. PROHIBIDO poner extensiones de dominio al nombrar la empresa.
+            - Firma de solo texto, sin logo: "Antonio Baronas — MB PROCDI · Kaunas, Lithuania · +37068941110 · antonio@procdi.com".
+            - Correo 2: seguimiento corto (2-3 líneas). Correo 3: cierre respetuoso (2-3 líneas).
+
+            Información del Prospecto:
+            - Empresa: ${empresaNice}
+            - Contacto: ${contactForGreeting}
+            - Producto/Sector: ${lead.sector || lead.nota_empresa || 'metal scrap'}
+
+            Devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin texto adicional.
+
+            Estructura JSON estricta requerida:
+            {
+               "email_1_subject": "${scrapPick}",
+               "email_1_content": "[Email 1 in English: the model letter adapted and personalized, with the signature at the end, per the rules.]",
+               "email_2_subject": "Re: ${scrapPick}",
+               "email_2_content": "[Short 2-3 line follow-up in English, politely asking if they saw it.]",
+               "email_3_subject": "${scrapClose}",
+               "email_3_content": "[Respectful 2-3 line close in English; you assume the timing may be off and remain available.]"
             }
             `;
          } else if (isImportDiligence) {
