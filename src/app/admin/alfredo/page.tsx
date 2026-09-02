@@ -530,6 +530,26 @@ export default function AlfredoAdminPage() {
     }
   };
 
+  const handleUpdateLanguage = async (leadId: string, current: string) => {
+    const input = window.prompt('Idioma del correo para este lead: escribe S (español) o E (inglés). Vacío para borrar:', current || '');
+    if (input === null) return; // cancelado
+    const v = input.trim().toUpperCase();
+    const language = v === 'S' ? 'es' : (v === 'E' ? 'en' : v.toLowerCase());
+    try {
+      const res = await authedFetch('/api/campaigns/update-lead-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: leadId, language })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error guardando el idioma");
+      const shown = v === 'S' ? 'es' : (v === 'E' ? 'en' : (['es','en','fr','de','pt','zh','ru','ar','hi','lt'].includes(language) ? language : null));
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, language: shown } : l));
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleUpdateCountry = async (leadId: string, currentVal: string) => {
     const input = window.prompt('País (en inglés, ej. Germany, Spain, United States). Deja vacío para borrar:', currentVal === '—' ? '' : currentVal);
     if (input === null) return; // cancelado
@@ -1085,6 +1105,9 @@ export default function AlfredoAdminPage() {
                    <th className="px-3 py-3 w-16 text-center cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('pais')}>
                      <div className="flex items-center justify-center gap-1">País {sortConfig?.key === 'pais' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
                    </th>
+                   <th className="px-3 py-3 w-16 text-center cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('language')}>
+                     <div className="flex items-center justify-center gap-1">Idioma {sortConfig?.key === 'language' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>)}</div>
+                   </th>
                    <th className="px-3 py-3 w-40">Web</th>
                    <th className="px-3 py-3 w-16 text-center">Form ✓</th>
                    <th className="px-3 py-3 w-52 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('comentario')}>
@@ -1171,6 +1194,9 @@ export default function AlfredoAdminPage() {
                          )}
                        </td>
                        <td onClick={() => handleUpdateCountry(lead.id, lead.pais || getCountryCode(lead.email))} className="px-3 py-2.5 text-center font-mono text-xs text-slate-300 cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Clic para editar el país">{lead.pais || getCountryCode(lead.email)}</td>
+                       <td onClick={() => handleUpdateLanguage(lead.id, lead.language || '')} className="px-3 py-2.5 text-center font-mono text-xs cursor-pointer hover:bg-white/10 hover:text-white transition-colors" title="Idioma del correo (S=español, E=inglés). Clic para editar.">
+                         {lead.language === 'es' ? <span className="text-amber-400">ES</span> : lead.language === 'en' ? <span className="text-sky-400">EN</span> : <span className="text-slate-500 italic">—</span>}
+                       </td>
                        <td className="px-3 py-2.5 max-w-[150px]">
                          <div className="flex items-center gap-1.5">
                            {lead.website ? (

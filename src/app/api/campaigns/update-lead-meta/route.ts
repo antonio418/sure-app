@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireUser } from '@/lib/authGuard';
+import { normalizeLeadLang } from '@/lib/langUtils';
 
 // Actualiza campos manuales del lead: form_enviado (checkbox), comentario, cargo,
-// email (con validación de formato) y/o website. Todos editables a mano desde la tabla.
+// email (con validación de formato), website y/o language (S/E->es/en). Todos editables a mano desde la tabla.
 export async function POST(req: NextRequest) {
   try {
     const authError = await requireUser(req);
     if (authError) return authError;
 
-    const { lead_id, form_enviado, comentario, cargo, email, website, empresa, nombre_contacto, pais, sector, has_replied } = await req.json();
+    const { lead_id, form_enviado, comentario, cargo, email, website, empresa, nombre_contacto, pais, sector, has_replied, language } = await req.json();
     if (!lead_id) {
       throw new Error("Falta lead_id");
     }
@@ -54,6 +55,10 @@ export async function POST(req: NextRequest) {
     }
     if (sector !== undefined) {
       updates.sector = (sector || '').toString().trim().slice(0, 250) || null;
+    }
+    if (language !== undefined) {
+      // Acepta S/E, es/en o nombres; guarda el código normalizado ('es'|'en'|...) o null.
+      updates.language = normalizeLeadLang(language);
     }
 
     if (Object.keys(updates).length === 0) {
