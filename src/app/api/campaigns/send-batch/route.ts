@@ -143,9 +143,12 @@ export async function POST(req: NextRequest) {
       // vendedores de scrap. Se activa por el NOMBRE del proyecto ("scrap"/"chatarra").
       // Correo corto/personal, respeta el idioma por-lead (S/E). Nombra el proyecto p. ej.
       // "Scrap metálico — proveedores".
+      // Rama de RFQ de commodities (originalmente "scrap"): lee la carta del campo Objetivo
+      // del proyecto, respeta el idioma por-lead (S/E) y usa asuntos neutros de metales.
+      // Se activa por palabras del NOMBRE del proyecto. Va después de minerales/medidores.
       const isScrapSourcing =
         !isMetersProject && !isMineralSourcing &&
-        /scrap|chatarra/i.test(projectName || '');
+        /scrap|chatarra|\brfq\b|proveedor|sourcing|cotiza/i.test(projectName || '');
 
       const isLithuanian = languageCode === 'lt';
       const isImportDiligence = !isLithuanian && !isMetersProject && !isScrapSourcing && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
@@ -315,13 +318,13 @@ Kaunas, Lithuania`;
             const isEs = languageCode === 'es';
             const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim() || (isEs ? 'su empresa' : 'your company');
             const scrapSubjects = isEs ? [
-               `Compra de scrap — ${empresaNice}`,
-               `Buscamos proveedores de scrap — ¿cotizan?`,
-               `Solicitud de cotización — scrap de metales`
+               `Suministro de metales — ${empresaNice}`,
+               `Buscamos proveedores de metales — ¿cotizan?`,
+               `Solicitud de cotización — metales`
             ] : [
-               `Scrap purchasing — ${empresaNice}`,
-               `Buyers sourcing metal scrap — are you supplying?`,
-               `Quotation request — metal scrap`
+               `Metal supply — ${empresaNice}`,
+               `Sourcing metals — are you supplying?`,
+               `Quotation request — metals`
             ];
             const scrapPick = scrapSubjects[Math.floor(Math.random() * scrapSubjects.length)];
             const scrapClose = isEs ? `Cerrando el tema — ${empresaNice}` : `Closing the loop — ${empresaNice}`;
@@ -331,9 +334,9 @@ Kaunas, Lithuania`;
             const scrapModel = (campaignGoal && campaignGoal.trim().length > 20)
                ? campaignGoal.trim()
                : `Hola [saludo],
-Soy Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajamos por encargo de compradores activos y, en este momento, buscamos proveedores fiables de scrap de los siguientes materiales:
+Soy Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajamos por encargo de compradores activos y, en este momento, buscamos proveedores fiables de los siguientes metales, en cualquiera de sus formas — chatarra/scrap, mineral (ore) o concentrado:
 Aluminio · Cobalto · Cobre · Molibdeno · Níquel · Estaño · Vanadio · Zinc
-Si su empresa dispone de alguno de ellos, nos gustaría explorar una relación de suministro y solicitarles una cotización. ¿Podrían indicarnos qué variantes tienen disponibles actualmente, qué volumen pueden comercializar de cada una y si estarían abiertos a cotizar? Con esa información, coordinaremos con los compradores y les haremos llegar los detalles concretos de cada caso.`;
+Si su empresa dispone de alguno de ellos, nos gustaría explorar una relación de suministro y solicitarles una cotización. ¿Podrían indicarnos qué metales pueden suministrar y en qué forma (scrap, ore o concentrado), en qué volumen por cada uno, y si estarían abiertos a cotizar? Con esa información, coordinaremos con los compradores y les haremos llegar los detalles concretos de cada caso.`;
             promptText = isEs ? `
             Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajas por encargo de COMPRADORES activos y buscas PROVEEDORES/VENDEDORES de scrap para pedirles cotización.
 
