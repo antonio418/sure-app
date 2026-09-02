@@ -59,6 +59,11 @@ export async function POST(req: NextRequest) {
       const emailIndex = headers.findIndex((h: string) => h.includes('email') || h.includes('correo'));
       const sectorIndex = headers.findIndex((h: string) => h.includes('sector') || h.includes('industry'));
       const languageIndex = headers.findIndex((h: string) => h === 'language' || h === 'idioma' || h === 'lang' || h.includes('idioma') || h.includes('language'));
+      const cargoIndex = headers.findIndex((h: string) => h.includes('cargo') || h.includes('title') || h.includes('role'));
+      const telefonoIndex = headers.findIndex((h: string) => h.includes('telefono') || h.includes('teléfono') || h.includes('phone') || h === 'tel');
+      const paisIndex = headers.findIndex((h: string) => h === 'pais' || h === 'país' || h.includes('pais') || h.includes('país') || h.includes('country'));
+      const comentarioIndex = headers.findIndex((h: string) => h.includes('comentario') || h.includes('coment') || h.includes('notes'));
+      const websiteIndex = headers.findIndex((h: string) => h.includes('website') || h.includes('web') || h.includes('sitio') || h === 'url');
 
       const email = emailIndex >= 0 ? values[emailIndex] : values[2]; // fallback to 3rd col
       const cleanEmail = email ? email.toLowerCase().trim() : '';
@@ -79,6 +84,13 @@ export async function POST(req: NextRequest) {
         // Idioma por lead (columna Language S/E -> es/en). Solo se incluye si la columna
         // existe y el valor se reconoce, para no sobrescribir con null al re-subir sin ella.
         ...(languageIndex >= 0 && normalizeLeadLang(values[languageIndex]) ? { language: normalizeLeadLang(values[languageIndex]) } : {}),
+        // Preservar el resto de columnas del CSV si vienen (cargo, teléfono, país, comentario).
+        // Solo se incluyen si la columna existe y trae valor, para no borrar datos al re-subir.
+        ...(cargoIndex >= 0 && cargoIndex < values.length && values[cargoIndex] ? { cargo: values[cargoIndex] } : {}),
+        ...(telefonoIndex >= 0 && telefonoIndex < values.length && values[telefonoIndex] ? { telefono: values[telefonoIndex] } : {}),
+        ...(paisIndex >= 0 && paisIndex < values.length && values[paisIndex] ? { pais: values[paisIndex] } : {}),
+        ...(comentarioIndex >= 0 && comentarioIndex < values.length && values[comentarioIndex] ? { comentario: values[comentarioIndex] } : {}),
+        ...(websiteIndex >= 0 && websiteIndex < values.length && values[websiteIndex] ? { website: values[websiteIndex] } : {}),
         status: 'lead_nuevo',
         project_id: reqJson.project_id || null
       });

@@ -648,8 +648,9 @@ export default function AlfredoAdminPage() {
       return;
     }
 
-    // Columnas clave a exportar (incluye 'comentario' con la info de productos)
-    const columns = ['empresa', 'nombre_contacto', 'cargo', 'email', 'telefono', 'pais', 'sector', 'comentario', 'status', 'resend_status', 'created_at'];
+    // Columnas clave a exportar (incluye 'language', 'website' y 'comentario' para que al
+    // mover leads entre proyectos no se pierda ningún dato: el importador ya lee estas columnas).
+    const columns = ['empresa', 'nombre_contacto', 'cargo', 'email', 'telefono', 'pais', 'language', 'sector', 'comentario', 'website', 'status', 'resend_status', 'created_at'];
 
     const csvRows = [];
     // Header

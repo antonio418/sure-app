@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       // Se activa por palabras del NOMBRE del proyecto. Va después de minerales/medidores.
       const isScrapSourcing =
         !isMetersProject && !isMineralSourcing &&
-        /scrap|chatarra|\brfq\b|proveedor|sourcing|cotiza/i.test(projectName || '');
+        /scrap|chatarra|\brfq\b|proveedor|sourcing|cotiza|material|varios/i.test(projectName || '');
 
       const isLithuanian = languageCode === 'lt';
       const isImportDiligence = !isLithuanian && !isMetersProject && !isScrapSourcing && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
