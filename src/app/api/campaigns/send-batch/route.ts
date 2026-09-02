@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
       // Idioma POR LEAD: si el lead trae idioma propio (columna Language S/E -> es/en),
       // manda ese; si no, cae al idioma del proyecto (comportamiento anterior).
       const languageCode = normalizeLeadLang(lead.language) || projectLanguage;
-      
+      // ¿El lead trae idioma propio explícito? Si es así, ese idioma MANDA en cualquier
+      // proyecto (incluida la plantilla genérica), por encima de heurísticas de dominio/país.
+      const hasLeadLang = !!normalizeLeadLang(lead.language);
+
       const languageMap: Record<string, { name: string; subject: string; body: string }> = {
         es: {
           name: 'ESPAÑOL',
@@ -367,12 +370,12 @@ Kaunas, Lithuania`;
             - Sector: ${lead.sector}
             - Email/Dominio: ${lead.email}
 
-            REGLAS ESTRICTAS DE IDIOMA:
+            ${hasLeadLang ? `REGLA MAESTRA DE IDIOMA (OBLIGATORIA — ANULA CUALQUIER OTRA): El idioma de este prospecto ya está definido por el sistema. DEBES redactar TODA la secuencia de 3 correos (Asuntos y Cuerpos de Email 1, 2 y 3) EXCLUSIVAMENTE en ${languageName}. NO analices el dominio ni el país, y NO cambies de idioma bajo ninguna circunstancia. Excepción única: si el "MODELO EXACTO Y CONDICIONES" está redactado en LITUANO, respeta el lituano.` : `REGLAS ESTRICTAS DE IDIOMA:
             1. Analiza el idioma del "MODELO EXACTO Y CONDICIONES" proporcionado arriba por el usuario. Si el modelo/plantilla del usuario está escrito en LITUANO (LIETUVIŲ), se establece el lituano como idioma maestro absoluto. DEBES escribir toda la secuencia de 3 correos (Asuntos y Cuerpos de Email 1, 2 y 3) OBLIGATORIAMENTE en LITUANO formal, adaptándolo de manera natural para la clínica lituana.
             2. De lo contrario (si el modelo original está en inglés o español), analiza el dominio del correo y procedencia:
             3. Si el dominio termina en .br o la empresa es de Brasil -> Escribe obligatoria o alternativamente en PORTUGUÉS (traduce el modelo al portugués corporativo).
             4. Si la empresa es de España o Latinoamérica -> Escribe en ESPAÑOL.
-            5. CRÍTICO: Para cualquier otro país (China, India, USA, Europa), o si NO TIENES 100% DE CERTEZA absoluta, usa el MODELO EN INGLÉS. No uses español si tienes dudas.
+            5. CRÍTICO: Para cualquier otro país (China, India, USA, Europa), o si NO TIENES 100% DE CERTEZA absoluta, usa el MODELO EN INGLÉS. No uses español si tienes dudas.`}
 
              Genera una SECUENCIA DE 3 CORREOS (Drip Campaign). Adapta y traduce el contenido al idioma seleccionado según las reglas anteriores.
              Devuelve ÚNICAMENTE un objeto JSON válido, sin formato markdown (\`\`\`), sin texto adicional.
