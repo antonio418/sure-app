@@ -326,18 +326,23 @@ Kaunas, Lithuania`;
             const scrapPick = scrapSubjects[Math.floor(Math.random() * scrapSubjects.length)];
             const scrapClose = isEs ? `Cerrando el tema — ${empresaNice}` : `Closing the loop — ${empresaNice}`;
             const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
+            // La CARTA MODELO sale del proyecto (campo "Modelo / Condiciones Estrictas del Correo").
+            // Si el proyecto no trae texto, usa una carta base en español (se traduce si el lead es E).
+            const scrapModel = (campaignGoal && campaignGoal.trim().length > 20)
+               ? campaignGoal.trim()
+               : `Hola [saludo],
+Soy Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajamos por encargo de compradores activos y, en este momento, buscamos proveedores fiables de scrap de los siguientes materiales:
+Aluminio · Cobalto · Cobre · Molibdeno · Níquel · Estaño · Vanadio · Zinc
+Si su empresa dispone de alguno de ellos, nos gustaría explorar una relación de suministro y solicitarles una cotización. ¿Podrían indicarnos qué variantes tienen disponibles actualmente, qué volumen pueden comercializar de cada una y si estarían abiertos a cotizar? Con esa información, coordinaremos con los compradores y les haremos llegar los detalles concretos de cada caso.`;
             promptText = isEs ? `
             Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajas por encargo de COMPRADORES activos y buscas PROVEEDORES/VENDEDORES de scrap para pedirles cotización.
 
             Redacta una SECUENCIA DE 3 CORREOS EN ESPAÑOL (cold outreach), breve y personal, adaptando y personalizando esta CARTA MODELO al prospecto:
             """
-            Hola [saludo],
-            Soy Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Trabajo por encargo de compradores activos y, en este momento, buscamos proveedores fiables de scrap de los siguientes materiales:
-            Aluminio · Cobalto · Cobre · Molibdeno · Níquel · Estaño · Vanadio · Zinc
-            Si su empresa dispone de alguno de ellos, me gustaría explorar una relación de suministro y solicitarles una cotización. ¿Podrían indicarme qué variantes tienen disponibles actualmente, qué volumen pueden comercializar de cada una y si estarían abiertos a cotizar? Con esa información, coordinaré con los compradores y les haré llegar los detalles concretos de cada caso.
+            ${scrapModel}
             """
             REGLAS OBLIGATORIAS:
-            - Mantén los 8 materiales y las 3 preguntas (qué variantes disponibles, en qué volumen por material, y si están abiertos a cotizar). NO inventes precios, NDA, comisiones ni adjuntos.
+            - Respeta EXACTAMENTE los materiales y las preguntas de la CARTA MODELO (no añadas ni quites ninguno). NO inventes precios, NDA, comisiones ni adjuntos.
             - Saludo: si el contacto NO es 'VACÍO', usa 'Hola ${contactForGreeting},'. Si es 'VACÍO', usa 'Hola equipo de ${empresaNice},'.
             - NADA de marcadores tipo [ ]. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos.
             - Los 8 materiales en UNA sola línea separados por ' · '. PROHIBIDO poner extensiones de dominio (.com, etc.) al nombrar la empresa.
@@ -365,13 +370,10 @@ Kaunas, Lithuania`;
 
             Redacta una SECUENCIA DE 3 CORREOS EN INGLÉS (cold outreach), breve y personal, adaptando y personalizando esta CARTA MODELO al prospecto:
             """
-            Hello [greeting],
-            I'm Antonio Baronas, from MB PROCDI (Kaunas, Lithuania). I work on behalf of active buyers, and we're currently looking for reliable scrap suppliers of the following materials:
-            Aluminum · Cobalt · Copper · Molybdenum · Nickel · Tin · Vanadium · Zinc
-            If your company handles any of these, I'd like to explore a supply relationship and request a quotation. Could you let me know which variants you currently have available, what volume you can trade for each, and whether you'd be open to quoting? With that information, I'll coordinate with the buyers and send you the specific details for each case.
+            ${scrapModel}
             """
             REGLAS OBLIGATORIAS:
-            - Mantén los 8 materiales y las 3 preguntas (which variants available, what volume per material, whether open to quoting). NO inventes precios, NDA, comisiones ni adjuntos.
+            - Respeta EXACTAMENTE los materiales y las preguntas de la CARTA MODELO (no añadas ni quites ninguno). NO inventes precios, NDA, comisiones ni adjuntos.
             - Saludo: si el contacto NO es 'VACÍO', usa 'Hello ${contactForGreeting},'. Si es 'VACÍO', usa 'Hello ${empresaNice} team,'.
             - NADA de marcadores tipo [ ]. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos.
             - Los 8 materiales en UNA sola línea separados por ' · '. PROHIBIDO poner extensiones de dominio al nombrar la empresa.
