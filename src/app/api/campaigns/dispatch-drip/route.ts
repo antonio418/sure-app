@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { Resend } from 'resend';
 import { requireCronOrUser } from '@/lib/authGuard';
 import { promises as dnsPromises } from 'dns';
+import { normalizeLeadLang } from '@/lib/langUtils';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -488,7 +489,9 @@ async function handleDispatch(req: NextRequest) {
                 }
            };
 
-           const info = fallbackMap[projectLanguage] || fallbackMap.en;
+           // El fallback (solo si el contenido está vacío) respeta el idioma del lead si lo tiene.
+           const fallbackLang = normalizeLeadLang(lead.language) || projectLanguage;
+           const info = fallbackMap[fallbackLang] || fallbackMap.en;
            subject = subject || info.subject;
            body = body || info.body;
         }

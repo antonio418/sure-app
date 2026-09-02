@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireUser } from '@/lib/authGuard';
+import { normalizeLeadLang } from '@/lib/langUtils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
       const contactoIndex = headers.findIndex((h: string) => h.includes('contacto') || h.includes('name'));
       const emailIndex = headers.findIndex((h: string) => h.includes('email') || h.includes('correo'));
       const sectorIndex = headers.findIndex((h: string) => h.includes('sector') || h.includes('industry'));
+      const languageIndex = headers.findIndex((h: string) => h === 'language' || h === 'idioma' || h === 'lang' || h.includes('idioma') || h.includes('language'));
 
       const email = emailIndex >= 0 ? values[emailIndex] : values[2]; // fallback to 3rd col
       const cleanEmail = email ? email.toLowerCase().trim() : '';
@@ -74,6 +76,9 @@ export async function POST(req: NextRequest) {
         nombre_contacto: contactoIndex >= 0 ? values[contactoIndex] : values[1],
         email: email,
         sector: sectorIndex >= 0 && sectorIndex < values.length ? values[sectorIndex] : 'General',
+        // Idioma por lead (columna Language S/E -> es/en). Solo se incluye si la columna
+        // existe y el valor se reconoce, para no sobrescribir con null al re-subir sin ella.
+        ...(languageIndex >= 0 && normalizeLeadLang(values[languageIndex]) ? { language: normalizeLeadLang(values[languageIndex]) } : {}),
         status: 'lead_nuevo',
         project_id: reqJson.project_id || null
       });

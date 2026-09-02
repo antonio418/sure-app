@@ -4,6 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 import { Resend } from 'resend';
 import { generateImportDiligenceHtml } from '@/lib/templates/import_diligence_campaign';
 import { requireUser } from '@/lib/authGuard';
+import { normalizeLeadLang } from '@/lib/langUtils';
 
 // Configure this to true if deploying to Vercel and you want this to run longer
 export const maxDuration = 60;
@@ -63,7 +64,9 @@ export async function POST(req: NextRequest) {
 
     // Process in parallel to save time
     await Promise.all(leads.map(async (lead) => {
-      const languageCode = projectLanguage;
+      // Idioma POR LEAD: si el lead trae idioma propio (columna Language S/E -> es/en),
+      // manda ese; si no, cae al idioma del proyecto (comportamiento anterior).
+      const languageCode = normalizeLeadLang(lead.language) || projectLanguage;
       
       const languageMap: Record<string, { name: string; subject: string; body: string }> = {
         es: {
@@ -223,14 +226,50 @@ Kaunas, Lithuania`;
             // Nombre en formato NORMAL (no MAYÚSCULAS) para los asuntos: se ve más humano y
             // evita el efecto "grito" que penalizan algunos filtros. Quita solo el dominio.
             const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au)(\.[a-z]{2})?$/i, '').trim() || 'your company';
-            const tinSubjects = [
+            // Idioma por lead: 'es' -> secuencia en español; cualquier otro -> inglés (por
+            // defecto/entregabilidad). El idioma sale de languageCode (lead.language o proyecto).
+            const isEs = languageCode === 'es';
+            const tinSubjects = isEs ? [
+               `Alianza de suministro de estaño — ${empresaNice}`,
+               `Compradores buscando estaño — ¿abiertos a una alianza?`,
+               `Explorando una alianza de suministro — ${empresaNice}`
+            ] : [
                `Tin supply partnership — ${empresaNice}`,
                `Buyers sourcing tin — open to a partnership?`,
                `Exploring a supply alliance — ${empresaNice}`
             ];
             const tinPick = tinSubjects[Math.floor(Math.random() * tinSubjects.length)];
+            const tinClose = isEs ? `Cerrando el tema — ${empresaNice}` : `Closing the loop — ${empresaNice}`;
             const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
-            promptText = `
+            promptText = isEs ? `
+            Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Haces sourcing de commodities: aportas COMPRADORES y buscas PRODUCTORES/REFINADORES para suministrarles. Escribes a un productor para proponer una ALIANZA DE SUMINISTRO (tú traes la demanda; ellos, el material).
+
+            Redacta una SECUENCIA DE 3 CORREOS EN ESPAÑOL (cold outreach), breve y personal. REGLAS OBLIGATORIAS:
+            - CORTO. Primer correo: máximo 5-6 líneas. Sin párrafos largos. Sin logos ni adjuntos.
+            - NADA de marcadores tipo [ ]. Texto 100% limpio y humano.
+            - Saludo: si el contacto NO es 'VACÍO', usa 'Hola ${contactForGreeting},'. Si es 'VACÍO', usa 'Hola equipo de ${empresaNice},'.
+            - El primer correo SOLO busca un "sí, cuéntame más": quién eres (1 línea), el gancho (trabajas con compradores que buscan activamente su producto y quieres explorar una alianza de suministro), y UNA pregunta simple (¿están abiertos y pueden suministrar?).
+            - PROHIBIDO en el primer correo: comisiones, NDA/NCND, o pedir fichas técnicas/certificados/pagos. Di que compartirás detalles (volúmenes y especificaciones) SI hay interés.
+            - Firma de solo texto, sin logo: "Antonio Baronas — MB PROCDI · Kaunas, Lithuania · +37068941110 · antonio@procdi.com".
+            - Doble salto de línea ('\\n\\n') entre párrafos. PROHIBIDO poner extensiones de dominio (.com, .cn, etc.) al nombrar la empresa.
+
+            Información del Prospecto:
+            - Empresa: ${empresaNice}
+            - Contacto: ${contactForGreeting}
+            - Producto/Sector: ${lead.sector || lead.nota_empresa || 'metales / minerales'}
+
+            Devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin texto adicional.
+
+            Estructura JSON estricta requerida:
+            {
+               "email_1_subject": "${tinPick}",
+               "email_1_content": "[Correo 1 en español, breve y personal, según las reglas.]",
+               "email_2_subject": "Re: ${tinPick}",
+               "email_2_content": "[Seguimiento corto de 2-3 líneas en español, preguntando amablemente si pudieron verlo.]",
+               "email_3_subject": "${tinClose}",
+               "email_3_content": "[Cierre respetuoso de 2-3 líneas en español; asumes que quizá no es el momento y quedas disponible.]"
+            }
+            ` : `
             Eres Antonio Baronas, de MB PROCDI (Kaunas, Lituania). Haces sourcing de commodities: aportas COMPRADORES y buscas PRODUCTORES/REFINADORES para suministrarles. Escribes a un productor para proponer una ALIANZA DE SUMINISTRO (tú traes la demanda; ellos, el material).
 
             Redacta una SECUENCIA DE 3 CORREOS EN INGLÉS (cold outreach), breve y personal. REGLAS OBLIGATORIAS:
@@ -255,7 +294,7 @@ Kaunas, Lithuania`;
                "email_1_content": "[Correo 1 en inglés, breve y personal, según las reglas.]",
                "email_2_subject": "Re: ${tinPick}",
                "email_2_content": "[Seguimiento corto de 2-3 líneas en inglés, preguntando amablemente si pudieron verlo.]",
-               "email_3_subject": "Closing the loop — ${empresaNice}",
+               "email_3_subject": "${tinClose}",
                "email_3_content": "[Cierre respetuoso de 2-3 líneas en inglés; asumes que quizá no es el momento y quedas disponible.]"
             }
             `;
