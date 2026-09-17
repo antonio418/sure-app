@@ -1,16 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import officeparser from 'officeparser';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const maxDuration = 60; // Max duration for Vercel/serverless execution
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    const contentType = req.headers.get('content-type') || '';
 
-    if (!file) {
-      return NextResponse.json({ error: 'No se ha proporcionado ningún archivo.' }, { status: 400 });
+    let buffer: Buffer;
+    let fileName: string;
+    let fileSize: number;
+
+    if (contentType.includes('application/json')) {
+      // NUEVO FLUJO: el archivo ya fue subido directo a Supabase Storage.
+      // Aquí solo recibimos la referencia (filePath), sin límite de 4.5MB.
+      const { filePath, fileName: originalName } = await req.json();
+
+      if (!filePath || !originalName) {
+        return NextResponse.json({ error: 'Falta filePath o fileName.' }, { status: 400 });
+      }
+
+      const { data, error } = await supabaseAdmin.storage
+        .from('temp_dossiers')
+        .download(filePath);
+
+      if (error || !data) {
+        return NextResponse.json(
+          { error: `No se pudo descargar el archivo: ${error?.message}` },
+          { status: 500 }
+        );
+      }
+
+      const arrayBuffer = await data.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      fileName = originalName;
+      fileSize = buffer.length;
+
+      // Limpieza del temporal (no bloqueante si falla)
+      supabaseAdmin.storage.from('temp_dossiers').remove([filePath]).catch(() => {});
+    } else {
+      // FLUJO ANTIGUO (compatibilidad hacia atrás): archivo pequeño enviado
+      // directo en el body del request. Sigue sujeto al límite de Vercel (~4.5MB).
+      const formData = await req.formData();
+      const file = formData.get('file') as File | null;
+
+      if (!file) {
+        return NextResponse.json({ error: 'No se ha proporcionado ningún archivo.' }, { status: 400 });
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      fileName = file.name;
+      fileSize = file.size;
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -19,20 +62,15 @@ export async function POST(req: NextRequest) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-
-    const fileName = file.name;
     const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
     let markdown = '';
 
-    console.log(`[DocuProcessor] Processing file: ${fileName} (${file.size} bytes) with extension ${fileExtension}`);
+    console.log(`[DocuProcessor] Processing file: ${fileName} (${fileSize} bytes) with extension ${fileExtension}`);
 
     if (fileExtension === '.pdf') {
-      // PDF: Send base64 directly to Gemini (highly optimized for tables, hierarchy, etc.)
       const base64Data = buffer.toString('base64');
-      
+
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [
@@ -59,7 +97,6 @@ export async function POST(req: NextRequest) {
 
       markdown = response.text || '';
     } else if (['.txt', '.md', '.csv'].includes(fileExtension)) {
-      // Plain text formats: Parse as UTF-8 string and ask Gemini to clean it into Markdown
       const rawText = buffer.toString('utf-8');
 
       const response = await ai.models.generateContent({
@@ -85,7 +122,6 @@ ${rawText}`
 
       markdown = response.text || '';
     } else if (['.docx', '.xlsx', '.pptx', '.rtf'].includes(fileExtension)) {
-      // Office and RTF formats: Parse text locally via officeparser and then use Gemini to format it to Markdown
       console.log(`[DocuProcessor] Extracting text from ${fileExtension} file locally using officeparser...`);
       const ast = await officeparser.parseOffice(buffer);
       const extractedText = typeof ast.toText === 'function' ? ast.toText() : '';
@@ -128,15 +164,15 @@ ${extractedText}`
     return NextResponse.json({
       success: true,
       name: fileName,
-      size: file.size,
+      size: fileSize,
       extension: fileExtension,
       markdown: markdown
     });
 
   } catch (error: any) {
     console.error('[DocuProcessor] Error processing file:', error);
-    return NextResponse.json({ 
-      error: error.message || 'Error interno al procesar el archivo.' 
+    return NextResponse.json({
+      error: error.message || 'Error interno al procesar el archivo.'
     }, { status: 500 });
   }
 }
