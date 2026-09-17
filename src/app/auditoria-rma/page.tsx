@@ -947,14 +947,36 @@ export default function DocumentProcessorPage() {
       setFiles(prev => [...prev, initialFile]);
 
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-
         setFiles(prev => prev.map(item => item.id === fileId ? { ...item, status: 'parsing' } : item));
 
+        // 1. Pedir URL firmada de subida a Supabase
+        const urlResp = await fetch('/api/documents/get-upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name })
+        });
+
+        if (!urlResp.ok) {
+          const errData = await urlResp.json();
+          throw new Error(errData.error || `Error HTTP ${urlResp.status}`);
+        }
+
+        const { token, path } = await urlResp.json();
+
+        // 2. Subir el archivo DIRECTO a Supabase Storage (sin límite de 4.5MB)
+        const { error: uploadError } = await supabase.storage
+          .from('temp_dossiers')
+          .uploadToSignedUrl(path, token, file);
+
+        if (uploadError) {
+          throw new Error(uploadError.message || 'Error al subir el archivo a Supabase.');
+        }
+
+        // 3. Pedir la conversión, pasando solo la referencia (no el archivo)
         const response = await fetch('/api/documents/convert', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: path, fileName: file.name })
         });
 
         if (!response.ok) {
@@ -2977,3 +2999,4 @@ DETALLES ADICIONALES: ${instructions || ''}
     </main>
   );
 }
+get-upload-url
