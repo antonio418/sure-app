@@ -2999,4 +2999,3 @@ DETALLES ADICIONALES: ${instructions || ''}
     </main>
   );
 }
-get-upload-url
