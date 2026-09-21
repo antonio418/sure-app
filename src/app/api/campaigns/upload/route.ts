@@ -19,38 +19,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No CSV data provided' }, { status: 400 });
     }
 
-    // Parser CSV robusto: respeta las comillas y las comas dentro de campos
-    // entrecomillados, y desescapa comillas dobles ("" -> "). El export de la app
-    // entrecomilla los campos, así que el split ingenuo por comas corrompía los datos
-    // (emails con comillas, columnas desalineadas). Esto lo arregla.
-    const parseCsvLine = (line: string): string[] => {
-      const out: string[] = [];
+    // Parser CSV robusto de ARCHIVO COMPLETO (estilo RFC 4180): respeta comillas, comas
+    // y SALTOS DE LÍNEA dentro de campos entrecomillados, y desescapa comillas dobles
+    // ("" -> "). Devuelve registros ya troceados en campos. Necesario para columnas
+    // multilínea como 'comentario' (listas de productos), que con el parser por líneas
+    // anterior se cortaban al primer salto de línea.
+    const parseCsv = (text: string): string[][] => {
+      const rows: string[][] = [];
+      let row: string[] = [];
       let cur = '';
       let inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
+      const s = String(text).replace(/\r\n?/g, '\n');
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i];
         if (inQ) {
           if (c === '"') {
-            if (line[i + 1] === '"') { cur += '"'; i++; }
+            if (s[i + 1] === '"') { cur += '"'; i++; }
             else inQ = false;
           } else { cur += c; }
         } else {
           if (c === '"') inQ = true;
-          else if (c === ',') { out.push(cur); cur = ''; }
+          else if (c === ',') { row.push(cur.trim()); cur = ''; }
+          else if (c === '\n') { row.push(cur.trim()); rows.push(row); row = []; cur = ''; }
           else cur += c;
         }
       }
-      out.push(cur);
-      return out.map((v) => v.trim());
+      if (cur !== '' || row.length > 0) { row.push(cur.trim()); rows.push(row); }
+      return rows.filter((r) => r.some((v) => v !== ''));
     };
 
-    const lines = csvData.split(/\r?\n/).filter((l: string) => l.trim() !== '');
-    const headers = parseCsvLine(lines[0].replace(/^﻿/, '')).map((h: string) => h.toLowerCase());
+    const records = parseCsv(csvData);
+    const headers = (records[0] || []).map((h: string) => h.replace(/^﻿/, '').toLowerCase());
 
     const leads = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseCsvLine(lines[i]);
+    for (let i = 1; i < records.length; i++) {
+      const values = records[i];
       if (values.length < 3) continue;
 
       // Map to columns (assuming basic order if headers don't match exactly)
