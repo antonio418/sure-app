@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Salidas de trabajo de Claude (CSV de leads con contactos reales, exportaciones, etc.).
+# No versionar: evita borrados accidentales y que datos personales queden en el historial.
+# Si algún día quieres versionar un archivo puntual de aquí, fuérzalo con: git add -f <ruta>
+Claude outputs/
