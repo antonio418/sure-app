@@ -1011,16 +1011,61 @@ export default function DocumentProcessorPage() {
 
   const [finalReport, setFinalReport] = useState<any>(null);
 
+  // --- FIX (sept 2026): helper para invocar a un agente especialista individual
+  // (Roberto / Alcides / Moisés) ANTES del Consolidador. Antes, el modo "comparative"
+  // (Projects — Advanced Assistant) llamaba al Consolidador directamente con el texto
+  // de los documentos metido en el campo previousReports, saltándose por completo a
+  // Roberto y Alcides. El Consolidador espera recibir hallazgos YA PROCESADOS por los
+  // subagentes (así lo dice su propio prompt: "you do not analyze raw documents
+  // directly"), así que ejecutarlo solo era, en la práctica, un análisis genérico sin
+  // el checklist especializado (OFAC/UBO/vigencia de licencia de Roberto, consistencia
+  // termodinámica/origen de Alcides).
+  //
+  // NOTA: el endpoint /api/analyze no tiene hoy un campo dedicado para "aquí está el
+  // texto del documento a analizar" cuando no se sube un PDF/imagen real — reutilizamos
+  // userContext como vehículo (el backend lo inyecta íntegro en el system prompt del
+  // agente). Es funcional, pero si en algún momento quieres algo más limpio, se puede
+  // añadir un campo `documentText` propio en route.ts.
+  const callAgent = async (
+    agentName: 'roberto' | 'moises' | 'alcides',
+    opts: { documentText: string; analysisMode?: string; targetLanguage: string; projectId?: string }
+  ): Promise<string> => {
+    const fd = new FormData();
+    fd.append('agent', agentName);
+    fd.append('targetLanguage', opts.targetLanguage);
+    if (opts.analysisMode) fd.append('analysisMode', opts.analysisMode);
+    // projectId habilita, del lado del backend, la memoria/base de conocimiento
+    // acotada a ESTE proyecto (para comparar contra documentos futuros del mismo
+    // caso). Si va vacío, el backend simplemente no la usa — no rompe nada.
+    if (opts.projectId) fd.append('projectId', opts.projectId);
+    fd.append(
+      'userContext',
+      `DOCUMENTOS A ANALIZAR (texto pre-extraído, este es tu material de trabajo principal):\n\n${opts.documentText}`
+    );
+
+    const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || `Fallo en el agente ${agentName}`);
+    }
+    return data.report || '';
+  };
+
   // Start the final audit process (real API call)
   const runFullAudit = async () => {
     setIsProcessing(true);
     try {
       // Compile documents markdown
       let compiledMarkdown = '';
+      let previousReportsPayload = '';
+
       if (selectedMode === 'single') {
         compiledMarkdown = filesSingle
           .map((f, i) => `--- DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
           .join('\n\n');
+        // Due Diligence (single) sigue llamando directo al Consolidador, sin cambios:
+        // el linecard solo promete "un reporte único" para este modo, no 4 agentes.
+        previousReportsPayload = compiledMarkdown;
       } else {
         const refDocs = filesRef
           .map((f, i) => `--- REFERENCE DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
@@ -1029,6 +1074,28 @@ export default function DocumentProcessorPage() {
           .map((f, i) => `--- EVALUATION DOCUMENT ${i + 1}: ${f.name} ---\n\n${f.markdown || ''}`)
           .join('\n\n');
         compiledMarkdown = `[REFERENCE BASELINE DOCUMENTS]\n${refDocs}\n\n[EVALUATION PROPOSALS / SCHEMES TO COMPARE]\n${evalDocs}`;
+
+        // --- FIX: ejecutar los 3 agentes especialistas EN PARALELO antes del
+        // Consolidador. Los tres reciben el paquete COMPLETO (referencia + evaluación)
+        // — así Roberto y Alcides también pueden señalar una falla flagrante entre el
+        // contrato/oferta y los documentos de licitación/iniciales, no solo auditar al
+        // licitante en aislado. Moisés sigue en modo 'comparison' para el contraste
+        // línea por línea ref vs eval.
+        const [robertoReport, alcidesReport, moisesReport] = await Promise.all([
+          callAgent('roberto', { documentText: compiledMarkdown, targetLanguage: reportLanguage, projectId: projectNumber }),
+          callAgent('alcides', { documentText: compiledMarkdown, targetLanguage: reportLanguage, projectId: projectNumber }),
+          callAgent('moises', {
+            documentText: compiledMarkdown,
+            analysisMode: 'comparison',
+            targetLanguage: reportLanguage,
+            projectId: projectNumber,
+          }),
+        ]);
+
+        previousReportsPayload =
+          `=== ROBERTO REPORT (Due Diligence & Compliance) ===\n${robertoReport}\n\n` +
+          `=== ALCIDES REPORT (Technical Specifications) ===\n${alcidesReport}\n\n` +
+          `=== MOISÉS REPORT (Contractual Coherence / A vs B) ===\n${moisesReport}`;
       }
 
       // Contexto para la IA. En Due Diligence (single) NO se envían datos personales
@@ -1054,9 +1121,15 @@ DETALLES ADICIONALES: ${instructions || ''}
       const formData = new FormData();
       formData.append('agent', 'consolidator');
       formData.append('targetLanguage', reportLanguage);
-      formData.append('previousReports', compiledMarkdown);
+      formData.append('previousReports', previousReportsPayload);
       formData.append('userContext', userContextStr);
       formData.append('analysisMode', selectedMode);
+      // projectId: etiqueta los hallazgos guardados en la base de conocimiento con
+      // este proyecto, para que documentos futuros del MISMO caso se comparen contra
+      // su propia base, no contra la de toda la organización. Vacío en modo "single".
+      if (selectedMode === 'comparative' && projectNumber) {
+        formData.append('projectId', projectNumber);
+      }
       if (email) formData.append('email', email);
 
       const response = await fetch('/api/analyze', {

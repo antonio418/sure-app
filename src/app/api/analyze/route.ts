@@ -26,6 +26,11 @@ export async function POST(req: NextRequest) {
     const previousReports = formData.get('previousReports') as string | null;
     const userContext = formData.get('userContext') as string | null;
     const analysisMode = formData.get('analysisMode') as string | null;
+    // projectId (opcional): acota la memoria RAG (base de conocimiento) a UN proyecto
+    // específico, para que documentos futuros del mismo caso se comparen contra su
+    // propia base en vez de contra la de toda la organización. Si viene vacío, el
+    // comportamiento es exactamente el de antes (memoria a nivel de organización).
+    const projectId = formData.get('projectId') as string | null;
 
     if (!agent) {
        return NextResponse.json({ error: 'Missing agent parameter' }, { status: 400 });
@@ -100,12 +105,39 @@ export async function POST(req: NextRequest) {
        try {
          const { generateEmbedding } = await import('@/lib/embeddings');
          const queryEmbedding = await generateEmbedding(userContext);
-         const { data: matches } = await supabaseAdmin.rpc('match_knowledge', {
-           query_embedding: queryEmbedding,
-           match_threshold: 0.65,
-           match_count: 3,
-           org_filter: null 
-         });
+
+         let matches: any[] | null = null;
+
+         // Si hay projectId, intentamos PRIMERO la memoria acotada a este proyecto
+         // (requiere la función SQL match_knowledge_by_project + la columna
+         // project_id — ver migración adjunta). Si esa función todavía no existe
+         // en Supabase, esto falla silenciosamente y caemos al comportamiento
+         // anterior (memoria de toda la organización) sin romper nada.
+         if (projectId) {
+           try {
+             const { data: projectMatches } = await supabaseAdmin.rpc('match_knowledge_by_project', {
+               query_embedding: queryEmbedding,
+               match_threshold: 0.65,
+               match_count: 5,
+               org_filter: null,
+               project_filter: projectId
+             });
+             if (projectMatches && projectMatches.length > 0) matches = projectMatches;
+           } catch (projectRagError) {
+             console.error('RAG Retrieval Error (project-scoped, falling back to org-level):', projectRagError);
+           }
+         }
+
+         // Comportamiento original, intacto: memoria a nivel de organización.
+         if (!matches) {
+           const { data: orgMatches } = await supabaseAdmin.rpc('match_knowledge', {
+             query_embedding: queryEmbedding,
+             match_threshold: 0.65,
+             match_count: 3,
+             org_filter: null 
+           });
+           matches = orgMatches || null;
+         }
          
          if (matches && matches.length > 0) {
            systemInstruction += `\n\n**HISTORICAL INTELLIGENCE (SELF-LEARNING MEMORY):**\nThe SURE Vector Database found historical anomalies that semantically match the user's context. Cross-reference these past findings with the current document:\n`;
@@ -182,13 +214,22 @@ export async function POST(req: NextRequest) {
           for (const anomaly of parsedJson.anomalies) {
              const anomalyText = `${parsedJson.companyName || 'Unknown Entity'} - ${anomaly.title}: ${anomaly.description}`;
              const embedding = await generateEmbedding(anomalyText);
-             await supabaseAdmin.from('knowledge_base').insert({
+             const insertPayload: Record<string, any> = {
                 entity_name: parsedJson.companyName || 'Unknown',
                 anomaly_title: anomaly.title,
                 anomaly_description: anomaly.description,
                 context_vector: embedding,
                 organization_id: orgId
-             });
+             };
+             // project_id solo se envía si projectId vino en la petición. Si la
+             // columna aún no existe en Supabase (falta correr la migración),
+             // esta inserción concreta fallará y quedará registrada en el catch
+             // de abajo — sin afectar al resto del flujo ni a las inserciones
+             // sin projectId (Due Diligence single-mode sigue funcionando igual).
+             if (projectId) insertPayload.project_id = projectId;
+
+             const { error: insertErr } = await supabaseAdmin.from('knowledge_base').insert(insertPayload);
+             if (insertErr) console.error('Knowledge base insert error (anomaly skipped):', insertErr.message);
           }
         } catch (insertError) {
           console.error("Failed to insert into Vector DB:", insertError);
