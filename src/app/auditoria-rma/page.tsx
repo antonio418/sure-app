@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { PDFDocument } from 'pdf-lib';
 import { 
   ShieldCheck, ArrowLeft, Upload, FileText, CheckCircle2, 
   AlertTriangle, Trash2, ArrowRight, Loader2, HelpCircle,
@@ -275,6 +276,9 @@ interface UploadedFile {
   status: 'uploading' | 'parsing' | 'success' | 'error';
   markdown?: string;
   error?: string;
+  // Solo se usa mientras un PDF grande se está trocenado y procesando por partes
+  // (ver splitPdfIntoChunks / MAX_PAGES_PER_CHUNK). Ej: "Bloque 3 de 8".
+  progressLabel?: string;
 }
 
 const RMAPdfGenerator = dynamic(
@@ -850,6 +854,63 @@ export default function DocumentProcessorPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
+  // --- FIX (sept 2026): troceo automático de PDFs grandes por PÁGINAS ---
+  // Diagnóstico confirmado con Antonio: el límite real no es el tamaño en MB
+  // sino cuántas páginas tiene que convertir Gemini en una sola llamada —
+  // Vercel Hobby corta cualquier función a los 60s, y un PDF con muchas
+  // páginas (aunque pese poco) puede tardar más que eso. Un bloque de ~20-26
+  // páginas sí procesó bien; bloques de 35-150 páginas fallaron, sin importar
+  // el tamaño en MB. Así que troceamos por CANTIDAD DE PÁGINAS, no por MB.
+  const MAX_PAGES_PER_CHUNK = 20;
+
+  // Divide un PDF grande en varios PDFs más chicos (≤ MAX_PAGES_PER_CHUNK
+  // páginas cada uno), conservando el orden. Si el archivo no es PDF, o tiene
+  // pocas páginas, o no se puede leer con pdf-lib (PDF corrupto/protegido),
+  // devuelve el archivo original sin tocar — nunca bloquea la subida por esto.
+  const splitPdfIntoChunks = async (file: File): Promise<File[]> => {
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) return [file];
+
+    try {
+      const sourceBytes = await file.arrayBuffer();
+      const sourceDoc = await PDFDocument.load(sourceBytes, { ignoreEncryption: true });
+      const totalPages = sourceDoc.getPageCount();
+
+      if (totalPages <= MAX_PAGES_PER_CHUNK) return [file];
+
+      const totalChunks = Math.ceil(totalPages / MAX_PAGES_PER_CHUNK);
+      const baseName = file.name.replace(/\.pdf$/i, '');
+      const chunks: File[] = [];
+
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const startPage = chunkIndex * MAX_PAGES_PER_CHUNK;
+        const endPage = Math.min(startPage + MAX_PAGES_PER_CHUNK, totalPages);
+        const pageIndices = Array.from({ length: endPage - startPage }, (_, i) => startPage + i);
+
+        const chunkDoc = await PDFDocument.create();
+        const copiedPages = await chunkDoc.copyPages(sourceDoc, pageIndices);
+        copiedPages.forEach(p => chunkDoc.addPage(p));
+        const chunkBytes = await chunkDoc.save();
+
+        chunks.push(
+          new File(
+            [chunkBytes],
+            `${baseName}_parte${chunkIndex + 1}de${totalChunks}.pdf`,
+            { type: 'application/pdf' }
+          )
+        );
+      }
+
+      return chunks;
+    } catch (splitError) {
+      // No pudimos leer el PDF con pdf-lib (protegido, corrupto, etc.) — seguimos
+      // con el archivo original tal cual; si es realmente muy grande, fallará
+      // como antes y el usuario verá el error normal, no uno nuevo y confuso.
+      console.error('No se pudo trocear el PDF, se sube completo:', splitError);
+      return [file];
+    }
+  };
+
   // Check if any files are currently loaded in any section
   const hasUploadedFiles = (): boolean => {
     return filesSingle.length > 0 || filesRef.length > 0 || filesEval.length > 0;
@@ -936,7 +997,7 @@ export default function DocumentProcessorPage() {
     
     for (const file of arr) {
       const fileId = Math.random().toString(36).substring(2, 9);
-      
+
       const initialFile: UploadedFile = {
         id: fileId,
         name: file.name,
@@ -947,55 +1008,80 @@ export default function DocumentProcessorPage() {
       setFiles(prev => [...prev, initialFile]);
 
       try {
-        setFiles(prev => prev.map(item => item.id === fileId ? { ...item, status: 'parsing' } : item));
+        // Si el PDF tiene muchas páginas, esto lo devuelve trocenado en varios
+        // PDFs más chicos (≤ MAX_PAGES_PER_CHUNK páginas c/u). Para cualquier
+        // otro archivo, o un PDF chico, devuelve [file] sin tocar — mismo
+        // comportamiento de siempre.
+        const chunks = await splitPdfIntoChunks(file);
+        const totalChunks = chunks.length;
+        const markdownParts: string[] = [];
 
-        // 1. Pedir URL firmada de subida a Supabase
-        const urlResp = await fetch('/api/documents/get-upload-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: file.name })
-        });
+        for (let chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++) {
+          const chunkFile = chunks[chunkIdx];
+          const progressLabel = totalChunks > 1
+            ? `${lt.parsingLabel} (${chunkIdx + 1}/${totalChunks})`
+            : undefined;
 
-        if (!urlResp.ok) {
-          const errData = await urlResp.json();
-          throw new Error(errData.error || `Error HTTP ${urlResp.status}`);
+          setFiles(prev => prev.map(item =>
+            item.id === fileId ? { ...item, status: 'parsing', progressLabel } : item
+          ));
+
+          // 1. Pedir URL firmada de subida a Supabase
+          const urlResp = await fetch('/api/documents/get-upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName: chunkFile.name })
+          });
+
+          if (!urlResp.ok) {
+            const errData = await urlResp.json();
+            throw new Error(errData.error || `Error HTTP ${urlResp.status}`);
+          }
+
+          const { token, path } = await urlResp.json();
+
+          // 2. Subir el archivo (o el bloque) DIRECTO a Supabase Storage (sin límite de 4.5MB)
+          const { error: uploadError } = await supabase.storage
+            .from('temp_dossiers')
+            .uploadToSignedUrl(path, token, chunkFile);
+
+          if (uploadError) {
+            throw new Error(uploadError.message || 'Error al subir el archivo a Supabase.');
+          }
+
+          // 3. Pedir la conversión, pasando solo la referencia (no el archivo)
+          const response = await fetch('/api/documents/convert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filePath: path, fileName: chunkFile.name })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            const chunkNote = totalChunks > 1 ? ` (bloque ${chunkIdx + 1} de ${totalChunks})` : '';
+            throw new Error((errData.error || `Error HTTP ${response.status}`) + chunkNote);
+          }
+
+          const data = await response.json();
+          markdownParts.push(data.markdown || '');
         }
 
-        const { token, path } = await urlResp.json();
+        const combinedMarkdown = totalChunks > 1
+          ? markdownParts
+              .map((part, idx) => `<!-- Parte ${idx + 1} de ${totalChunks} -->\n\n${part}`)
+              .join('\n\n---\n\n')
+          : markdownParts[0];
 
-        // 2. Subir el archivo DIRECTO a Supabase Storage (sin límite de 4.5MB)
-        const { error: uploadError } = await supabase.storage
-          .from('temp_dossiers')
-          .uploadToSignedUrl(path, token, file);
-
-        if (uploadError) {
-          throw new Error(uploadError.message || 'Error al subir el archivo a Supabase.');
-        }
-
-        // 3. Pedir la conversión, pasando solo la referencia (no el archivo)
-        const response = await fetch('/api/documents/convert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filePath: path, fileName: file.name })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error || `Error HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        setFiles(prev => prev.map(item => 
-          item.id === fileId 
-            ? { ...item, status: 'success', markdown: data.markdown } 
+        setFiles(prev => prev.map(item =>
+          item.id === fileId
+            ? { ...item, status: 'success', markdown: combinedMarkdown, progressLabel: undefined }
             : item
         ));
       } catch (error: any) {
         console.error("Error al convertir documento:", error);
-        setFiles(prev => prev.map(item => 
-          item.id === fileId 
-            ? { ...item, status: 'error', error: error.message || 'Error al procesar el archivo.' } 
+        setFiles(prev => prev.map(item =>
+          item.id === fileId
+            ? { ...item, status: 'error', error: error.message || 'Error al procesar el archivo.', progressLabel: undefined }
             : item
         ));
       }
@@ -2464,7 +2550,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                         )}
                         {file.status === 'parsing' && (
                           <span className="text-sm font-extrabold text-slate-300 flex items-center gap-1.5">
-                            <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> {lt.parsingLabel}
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> {file.progressLabel || lt.parsingLabel}
                           </span>
                         )}
                         {file.status === 'success' && (
@@ -2631,7 +2717,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                               <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
                             )}
                             {file.status === 'parsing' && (
-                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {file.progressLabel || lt.parsingLabel}</span>
                             )}
                             {file.status === 'success' && (
                               <div className="flex items-center gap-1.5">
@@ -2775,7 +2861,7 @@ DETALLES ADICIONALES: ${instructions || ''}
                               <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-blue-400" /> Subiendo</span>
                             )}
                             {file.status === 'parsing' && (
-                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {lt.parsingLabel}</span>
+                              <span className="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin text-amber-400" /> {file.progressLabel || lt.parsingLabel}</span>
                             )}
                             {file.status === 'success' && (
                               <div className="flex items-center gap-1.5">
