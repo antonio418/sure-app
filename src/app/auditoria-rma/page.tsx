@@ -860,19 +860,19 @@ export default function DocumentProcessorPage() {
   // Vercel Hobby corta cualquier función a los 60s, y un PDF con muchas
   // páginas (aunque pese poco) puede tardar más que eso.
   //
-  // AJUSTE (misma sesión): un límite fijo de páginas no alcanza, porque la
-  // "pesadez" por página varía muchísimo entre tipos de documento — un
-  // contrato de texto puro procesa bien en bloques de ~20-25 páginas, pero un
-  // plano técnico/eléctrico denso (mucho contenido gráfico por página) puede
-  // seguir dando timeout incluso con solo 20 páginas en el bloque. Por eso
-  // ahora el tamaño del bloque se calcula según cuánto pesa el documento en
-  // promedio POR PÁGINA (bytes totales / cantidad de páginas), usando como
-  // referencia el bloque de ~500KB que sí procesó bien — así un documento
-  // liviano sigue yendo en bloques grandes, y uno denso se trocena solo en
-  // bloques más chicos, sin que Antonio tenga que adivinar nada.
+  // AJUSTE 2 (misma sesión): un promedio de "bytes por página" de TODO el
+  // documento no alcanza cuando la densidad es DESPAREJA — ej. un documento
+  // mayormente de texto que tiene un capítulo entero de planos técnicos muy
+  // pesados. El promedio general subestima esa sección puntual. Por eso ahora
+  // el troceo se AUTOCORRIGE: arma un bloque candidato, PESA el resultado real
+  // (no una estimación), y si sigue siendo demasiado pesado, lo parte por la
+  // mitad y vuelve a pesar — las veces que haga falta — hasta que cada bloque
+  // final sea realmente liviano, sin importar qué tan pareja o despareja sea
+  // la densidad del documento.
   const TARGET_CHUNK_BYTES = 500 * 1024; // ~500KB por bloque, el tamaño que confirmamos que funciona
-  const MAX_PAGES_PER_CHUNK = 20; // techo absoluto, incluso para documentos muy livianos por página
-  const MIN_PAGES_PER_CHUNK = 1;  // piso absoluto, para documentos extremadamente densos
+  const MAX_CHUNK_BYTES = TARGET_CHUNK_BYTES * 1.4; // margen antes de forzar una subdivisión más
+  const MAX_PAGES_PER_CHUNK = 20; // techo para el tramo inicial (documentos livianos)
+  const MIN_PAGES_PER_CHUNK = 1;  // piso: no se puede partir un bloque de 1 sola página
 
   // Divide un PDF grande en varios PDFs más chicos, conservando el orden.
   // Si el archivo no es PDF, o ya es chico/liviano, o no se puede leer con
@@ -886,39 +886,61 @@ export default function DocumentProcessorPage() {
       const sourceBytes = await file.arrayBuffer();
       const sourceDoc = await PDFDocument.load(sourceBytes, { ignoreEncryption: true });
       const totalPages = sourceDoc.getPageCount();
+      if (totalPages === 0) return [file];
 
-      const avgBytesPerPage = totalPages > 0 ? file.size / totalPages : file.size;
-      const pagesPerChunk = Math.max(
+      // Estimación de partida rápida (promedio general del documento) — solo
+      // para no arrancar trabajando página por página en documentos livianos.
+      // Lo que de verdad garantiza que cada bloque quede liviano es el paso
+      // siguiente, que mide el resultado real y corrige si hace falta.
+      const avgBytesPerPage = file.size / totalPages;
+      const initialGuess = Math.max(
         MIN_PAGES_PER_CHUNK,
         Math.min(MAX_PAGES_PER_CHUNK, Math.floor(TARGET_CHUNK_BYTES / Math.max(avgBytesPerPage, 1)))
       );
 
-      if (totalPages <= pagesPerChunk) return [file];
+      if (totalPages <= initialGuess) return [file];
 
-      const totalChunks = Math.ceil(totalPages / pagesPerChunk);
-      const baseName = file.name.replace(/\.pdf$/i, '');
-      const chunks: File[] = [];
-
-      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-        const startPage = chunkIndex * pagesPerChunk;
-        const endPage = Math.min(startPage + pagesPerChunk, totalPages);
-        const pageIndices = Array.from({ length: endPage - startPage }, (_, i) => startPage + i);
-
+      const buildChunkBytes = async (pageIndices: number[]): Promise<Uint8Array> => {
         const chunkDoc = await PDFDocument.create();
         const copiedPages = await chunkDoc.copyPages(sourceDoc, pageIndices);
         copiedPages.forEach(p => chunkDoc.addPage(p));
-        const chunkBytes = await chunkDoc.save();
+        return chunkDoc.save();
+      };
 
-        chunks.push(
-          new File(
-            [chunkBytes as BlobPart],
-            `${baseName}_parte${chunkIndex + 1}de${totalChunks}.pdf`,
-            { type: 'application/pdf' }
-          )
-        );
+      const results: { pageIndices: number[]; bytes: Uint8Array }[] = [];
+
+      // Arma un tramo, lo pesa de verdad, y si pesa más de la cuenta lo parte
+      // por la mitad y repite el proceso con cada mitad — hasta que quede
+      // liviano o hasta llegar a una sola página (ahí ya no se puede partir más).
+      const resolveRange = async (pageIndices: number[]) => {
+        const bytes = await buildChunkBytes(pageIndices);
+        if (bytes.length <= MAX_CHUNK_BYTES || pageIndices.length === 1) {
+          results.push({ pageIndices, bytes });
+          return;
+        }
+        const mid = Math.ceil(pageIndices.length / 2);
+        await resolveRange(pageIndices.slice(0, mid));
+        await resolveRange(pageIndices.slice(mid));
+      };
+
+      for (let start = 0; start < totalPages; start += initialGuess) {
+        const end = Math.min(start + initialGuess, totalPages);
+        const pageIndices = Array.from({ length: end - start }, (_, i) => start + i);
+        await resolveRange(pageIndices);
       }
 
-      return chunks;
+      if (results.length <= 1) return [file];
+
+      const baseName = file.name.replace(/\.pdf$/i, '');
+      const totalChunks = results.length;
+
+      return results.map((r, idx) =>
+        new File(
+          [r.bytes as BlobPart],
+          `${baseName}_parte${idx + 1}de${totalChunks}.pdf`,
+          { type: 'application/pdf' }
+        )
+      );
     } catch (splitError) {
       // No pudimos leer el PDF con pdf-lib (protegido, corrupto, etc.) — seguimos
       // con el archivo original tal cual; si es realmente muy grande, fallará
