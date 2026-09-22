@@ -858,15 +858,26 @@ export default function DocumentProcessorPage() {
   // Diagnóstico confirmado con Antonio: el límite real no es el tamaño en MB
   // sino cuántas páginas tiene que convertir Gemini en una sola llamada —
   // Vercel Hobby corta cualquier función a los 60s, y un PDF con muchas
-  // páginas (aunque pese poco) puede tardar más que eso. Un bloque de ~20-26
-  // páginas sí procesó bien; bloques de 35-150 páginas fallaron, sin importar
-  // el tamaño en MB. Así que troceamos por CANTIDAD DE PÁGINAS, no por MB.
-  const MAX_PAGES_PER_CHUNK = 20;
+  // páginas (aunque pese poco) puede tardar más que eso.
+  //
+  // AJUSTE (misma sesión): un límite fijo de páginas no alcanza, porque la
+  // "pesadez" por página varía muchísimo entre tipos de documento — un
+  // contrato de texto puro procesa bien en bloques de ~20-25 páginas, pero un
+  // plano técnico/eléctrico denso (mucho contenido gráfico por página) puede
+  // seguir dando timeout incluso con solo 20 páginas en el bloque. Por eso
+  // ahora el tamaño del bloque se calcula según cuánto pesa el documento en
+  // promedio POR PÁGINA (bytes totales / cantidad de páginas), usando como
+  // referencia el bloque de ~500KB que sí procesó bien — así un documento
+  // liviano sigue yendo en bloques grandes, y uno denso se trocena solo en
+  // bloques más chicos, sin que Antonio tenga que adivinar nada.
+  const TARGET_CHUNK_BYTES = 500 * 1024; // ~500KB por bloque, el tamaño que confirmamos que funciona
+  const MAX_PAGES_PER_CHUNK = 20; // techo absoluto, incluso para documentos muy livianos por página
+  const MIN_PAGES_PER_CHUNK = 1;  // piso absoluto, para documentos extremadamente densos
 
-  // Divide un PDF grande en varios PDFs más chicos (≤ MAX_PAGES_PER_CHUNK
-  // páginas cada uno), conservando el orden. Si el archivo no es PDF, o tiene
-  // pocas páginas, o no se puede leer con pdf-lib (PDF corrupto/protegido),
-  // devuelve el archivo original sin tocar — nunca bloquea la subida por esto.
+  // Divide un PDF grande en varios PDFs más chicos, conservando el orden.
+  // Si el archivo no es PDF, o ya es chico/liviano, o no se puede leer con
+  // pdf-lib (PDF corrupto/protegido), devuelve el archivo original sin tocar
+  // — nunca bloquea la subida por esto.
   const splitPdfIntoChunks = async (file: File): Promise<File[]> => {
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     if (!isPdf) return [file];
@@ -876,15 +887,21 @@ export default function DocumentProcessorPage() {
       const sourceDoc = await PDFDocument.load(sourceBytes, { ignoreEncryption: true });
       const totalPages = sourceDoc.getPageCount();
 
-      if (totalPages <= MAX_PAGES_PER_CHUNK) return [file];
+      const avgBytesPerPage = totalPages > 0 ? file.size / totalPages : file.size;
+      const pagesPerChunk = Math.max(
+        MIN_PAGES_PER_CHUNK,
+        Math.min(MAX_PAGES_PER_CHUNK, Math.floor(TARGET_CHUNK_BYTES / Math.max(avgBytesPerPage, 1)))
+      );
 
-      const totalChunks = Math.ceil(totalPages / MAX_PAGES_PER_CHUNK);
+      if (totalPages <= pagesPerChunk) return [file];
+
+      const totalChunks = Math.ceil(totalPages / pagesPerChunk);
       const baseName = file.name.replace(/\.pdf$/i, '');
       const chunks: File[] = [];
 
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-        const startPage = chunkIndex * MAX_PAGES_PER_CHUNK;
-        const endPage = Math.min(startPage + MAX_PAGES_PER_CHUNK, totalPages);
+        const startPage = chunkIndex * pagesPerChunk;
+        const endPage = Math.min(startPage + pagesPerChunk, totalPages);
         const pageIndices = Array.from({ length: endPage - startPage }, (_, i) => startPage + i);
 
         const chunkDoc = await PDFDocument.create();
