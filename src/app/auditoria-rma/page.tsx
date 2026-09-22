@@ -894,7 +894,7 @@ export default function DocumentProcessorPage() {
 
         chunks.push(
           new File(
-            [chunkBytes],
+            [chunkBytes as BlobPart],
             `${baseName}_parte${chunkIndex + 1}de${totalChunks}.pdf`,
             { type: 'application/pdf' }
           )
