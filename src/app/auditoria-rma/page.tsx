@@ -873,6 +873,12 @@ export default function DocumentProcessorPage() {
   const MAX_CHUNK_BYTES = TARGET_CHUNK_BYTES * 1.4; // margen antes de forzar una subdivisión más
   const MAX_PAGES_PER_CHUNK = 20; // techo para el tramo inicial (documentos livianos)
   const MIN_PAGES_PER_CHUNK = 1;  // piso: no se puede partir un bloque de 1 sola página
+  // AJUSTE 3 (misma sesión): confirmado con datos reales — hay documentos
+  // (planos técnicos con mucha densidad visual por página) donde el peso en
+  // bytes NO predice bien el tiempo de Gemini: un bloque de solo 307KB igual
+  // se pasó de los 60s. Por eso, además del límite de peso, forzamos también
+  // un techo absoluto de páginas por bloque, sin excepción.
+  const MAX_LEAF_PAGES = 2;
 
   // Divide un PDF grande en varios PDFs más chicos, conservando el orden.
   // Si el archivo no es PDF, o ya es chico/liviano, o no se puede leer con
@@ -914,7 +920,9 @@ export default function DocumentProcessorPage() {
       // liviano o hasta llegar a una sola página (ahí ya no se puede partir más).
       const resolveRange = async (pageIndices: number[]) => {
         const bytes = await buildChunkBytes(pageIndices);
-        if (bytes.length <= MAX_CHUNK_BYTES || pageIndices.length === 1) {
+        const isLightEnough = bytes.length <= MAX_CHUNK_BYTES;
+        const isFewEnoughPages = pageIndices.length <= MAX_LEAF_PAGES;
+        if ((isLightEnough && isFewEnoughPages) || pageIndices.length === 1) {
           results.push({ pageIndices, bytes });
           return;
         }
