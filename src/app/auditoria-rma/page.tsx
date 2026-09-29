@@ -1055,6 +1055,29 @@ export default function DocumentProcessorPage() {
       setFiles(prev => [...prev, initialFile]);
 
       try {
+// --- NUEVO (sept 2026): conversión LOCAL de PDFs con texto nativo ---
+        // Sin troceo, sin subir el PDF y sin Gemini. Si el PDF es escaneado
+        // (sin capa de texto) o algo falla, se sigue por el camino anterior.
+        const isPdfFile = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        if (isPdfFile) {
+          setFiles(prev => prev.map(item =>
+            item.id === fileId ? { ...item, status: 'parsing', progressLabel: undefined } : item
+          ));
+          try {
+            const { pdfToMarkdown } = await import('@/lib/pdfToMarkdown');
+            const local = await pdfToMarkdown(await file.arrayBuffer());
+            if (local.ok) {
+              setFiles(prev => prev.map(item =>
+                item.id === fileId
+                  ? { ...item, status: 'success', markdown: local.markdown, progressLabel: undefined }
+                  : item
+              ));
+              continue; // siguiente archivo
+            }
+          } catch (localErr) {
+            console.warn('Conversión local no disponible, se usa el camino con IA:', localErr);
+          }
+        }
         // Si el PDF tiene muchas páginas, esto lo devuelve trocenado en varios
         // PDFs más chicos (≤ MAX_PAGES_PER_CHUNK páginas c/u). Para cualquier
         // otro archivo, o un PDF chico, devuelve [file] sin tocar — mismo
