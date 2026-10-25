@@ -127,16 +127,24 @@ export async function POST(req: NextRequest) {
       const langInfo = languageMap[languageCode] || languageMap.en;
       const languageName = langInfo.name;
 
+      // BID & PROPOSALS (servicio de licitaciones IPC de MB PROCDI). Se activa SOLO por el
+      // NOMBRE del proyecto ("licitación/licitaciones" o "bid"), y tiene PRIORIDAD sobre todas
+      // las demás ramas (la carta del Objetivo menciona kV, transformadores, etc. y podría
+      // disparar otras ramas por campaignGoal). Lee la carta modelo del campo Objetivo y
+      // respeta el idioma por-lead (S/E). Nombra el proyecto p. ej. "Licitaciones IPC México".
+      const isBidProposals = /licitaci|\bbid\b/i.test(projectName || '');
+
       const isMetersProject =
+        !isBidProposals && (
         /medidor|meter|cnel|ecuador|ansi/i.test(projectName || '') ||
-        /medidor|meter|cnel|ecuador|ansi/i.test(campaignGoal || '');
+        /medidor|meter|cnel|ecuador|ansi/i.test(campaignGoal || ''));
 
       // Alianza de suministro de minerales (p. ej. estaño). Se activa por el NOMBRE del
       // proyecto (tokens específicos) para NO colisionar con el proyecto "Due Diligence
       // Commodities". Genera un drip corto y personal en inglés (ángulo: yo traigo compradores,
       // ellos suministran). Nombra el proyecto p. ej. "Estaño — Alianza de suministro".
       const isMineralSourcing =
-        !isMetersProject &&
+        !isBidProposals && !isMetersProject &&
         /esta[ñn]o|\btin\b|alianza|abastecimiento|supply[\s-]?alliance|sourcing[\s-]?alliance|mineral supply/i.test(projectName || '');
 
       // RFQ de SCRAP: MB PROCDI compra por encargo de compradores y pide cotización a
@@ -147,11 +155,11 @@ export async function POST(req: NextRequest) {
       // del proyecto, respeta el idioma por-lead (S/E) y usa asuntos neutros de metales.
       // Se activa por palabras del NOMBRE del proyecto. Va después de minerales/medidores.
       const isScrapSourcing =
-        !isMetersProject && !isMineralSourcing &&
+        !isBidProposals && !isMetersProject && !isMineralSourcing &&
         /scrap|chatarra|\brfq\b|proveedor|sourcing|cotiza|material|varios/i.test(projectName || '');
 
       const isLithuanian = languageCode === 'lt';
-      const isImportDiligence = !isLithuanian && !isMetersProject && !isScrapSourcing && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
+      const isImportDiligence = !isBidProposals && !isLithuanian && !isMetersProject && !isScrapSourcing && (/import|mid-market|\brma\b|distribuidor/i.test(campaignGoal || '') || /import|mid-market|\brma\b|distribuidor/i.test(projectName || ''));
       const isDNSProject = /dns/i.test(projectName || '') || /dns/i.test(campaignGoal || '');
       const isProcdiProject = 
         isMetersProject ||
@@ -168,7 +176,71 @@ export async function POST(req: NextRequest) {
 
       try {
          let promptText = "";
-         if (isMetersProject) {
+         if (isBidProposals) {
+            // BID & PROPOSALS: secuencia de 3 correos a empresas IPC (o fabricantes) ofreciendo
+            // la preparación de paquetes técnicos en inglés. La carta sale del Objetivo del proyecto.
+            const isEs = languageCode === 'es';
+            const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au|mx)(\.[a-z]{2})?$/i, '').trim() || (isEs ? 'su empresa' : 'your company');
+            const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
+            const cargo = (lead.cargo || lead.nota_contacto || '').toString().trim() || 'VACÍO';
+            const proyectoReciente = (lead.comentario || '').toString().trim().slice(0, 400) || 'VACÍO';
+            // País del proyecto: se toma del NOMBRE ("Licitaciones IPC Panamá" -> "Panamá"),
+            // o del país del lead. Así cada país (México, Nicaragua, Panamá...) tiene su
+            // propio proyecto y su propia carta en el Objetivo, sin interferir entre sí.
+            const paisProyecto = (projectName || '')
+               .replace(/licitaci[oó]n(es)?|\bbid\b|&|proposals?|\bipc\b|\bepc\b|fabricantes?|[—–\-:|]/gi, ' ')
+               .replace(/\s+/g, ' ').trim();
+            const pais = (lead.pais || '').toString().trim() || paisProyecto || 'VACÍO';
+            const bidSignature ="Antonio Baronas — Ingeniero Electricista · MB PROCDI · Kaunas, Lituania · +370 689 41110 (WhatsApp) · antonio@procdi.com";
+            const bidSignatureEn = "Antonio Baronas — Electrical Engineer · MB PROCDI · Kaunas, Lithuania · +370 689 41110 (WhatsApp) · antonio@procdi.com";
+            // Carta base de respaldo (si el Objetivo del proyecto viene vacío).
+            const bidModel = (campaignGoal && campaignGoal.trim().length > 20)
+               ? campaignGoal.trim()
+               : `CORREO 1 — Asunto: El tiempo mata más licitaciones que el precio
+Soy Antonio Baronas, ingeniero electricista. Llevo más de 20 años preparando licitaciones de subestaciones y líneas de transmisión para empresas IPC y fabricantes en unos 30 países. Cada día que tarda la especificación en llegar en inglés al fabricante es un día menos para que cotice. Separamos las bases de licitación por producto o servicio y entregamos cada paquete técnico en inglés (especificación, lista de materiales y formulario de experiencia del fabricante) en 1 a 3 días, no en más de una semana, con glosario IEC de más de 550 términos y revisión de un ingeniero de la especialidad (eléctrica, civil o mecánica). Les propongo una prueba sin costo con un paquete real de su próxima licitación. ¿Tienen alguna en preparación?
+CORREO 2 — Asunto: "The Wii Remote should contain circuit monitoring relays" — ejemplo real de traducción automática de "mando sincronizado" (correcto: controlled switching device); no somos traductores, somos ingenieros; la prueba sin costo sigue disponible.
+CORREO 3 — Asunto: Licitaciones con fabricantes extranjeros — último mensaje; caso Las Brechas 500/230 kV: 69 + 15 páginas en unos 15 minutos de proceso más revisión técnica; envíennos las bases y en 24 horas les devolvemos propuesta de paquetes, plazo y precio.`;
+            promptText = `
+            Eres Antonio Baronas, ingeniero electricista, de MB PROCDI (Kaunas, Lituania). Ofreces un servicio de Bid & Proposals: preparas los paquetes técnicos de licitaciones (especificación en inglés técnico, lista de materiales y formulario de experiencia del fabricante) para que los fabricantes coticen a tiempo.
+
+            Redacta una SECUENCIA DE 3 CORREOS EN ${isEs ? `ESPAÑOL formal${pais !== 'VACÍO' ? ` (con el vocabulario técnico y comercial habitual en ${pais})` : ''}` : 'INGLÉS (formal, británico)'} siguiendo esta CARTA MODELO Y CONDICIONES del usuario:
+            """
+            ${bidModel}
+            """
+
+            REGLAS OBLIGATORIAS:
+            - Sigue la CARTA MODELO lo más fielmente posible: mismos argumentos, mismas cifras, mismo orden. NO inventes cifras, clientes, proyectos, precios, descuentos ni plazos que no estén en el modelo.
+            - ${isEs
+                ? 'Escribe en español. Usa SIEMPRE "IPC" (nunca "EPC"). Trato en plural (ustedes / nosotros).'
+                : 'Traduce el modelo al inglés técnico. En inglés usa "EPC" (nunca "IPC"), "tender documents" por "bases de licitación" o "pliego" y "manufacturer experience form". El ejemplo "The Wii Remote..." se mantiene tal cual, explicando que es la traducción automática de un término en español.'}
+            - Asuntos: usa EXACTAMENTE los asuntos indicados en la carta modelo para cada correo${isEs ? '' : ' (traducidos al inglés, salvo la cita "The Wii Remote should contain circuit monitoring relays", que va igual)'}. NO uses "Re:" salvo que el modelo lo indique.
+            - Saludo: si el contacto NO es 'VACÍO', usa '${isEs ? `Hola ${contactForGreeting}:` : `Dear ${contactForGreeting},`}'. Si es 'VACÍO', usa '${isEs ? `Hola, equipo de ${empresaNice}:` : `Dear ${empresaNice} team,`}'.
+            - Personalización: si "Proyecto reciente" NO es 'VACÍO', puedes añadir en el correo 1 UNA frase breve que lo mencione (sin inventar datos que no estén ahí). Si es 'VACÍO', no personalices con proyectos.
+            - Longitud: correo 1 máximo 150 palabras; correos 2 y 3 máximo 90 palabras.
+            - NADA de marcadores tipo [ ] o { }. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos. Sin enlaces ni adjuntos.
+            - PROHIBIDO poner extensiones de dominio (.com, .mx, etc.) al nombrar la empresa.
+            - Cierra CADA uno de los 3 correos con '${isEs ? 'Saludos cordiales,' : 'Kind regards,'}' y debajo esta firma de solo texto: "${isEs ? bidSignature : bidSignatureEn}".
+
+            Información del Prospecto:
+            - Empresa: ${empresaNice}
+            - Contacto: ${contactForGreeting}
+            - Cargo: ${cargo}
+            - País: ${pais}
+            - Proyecto reciente: ${proyectoReciente}
+
+            Devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin texto adicional.
+
+            Estructura JSON estricta requerida:
+            {
+               "email_1_subject": "[Asunto del correo 1 según el modelo]",
+               "email_1_content": "[Correo 1 completo, con saludo y firma]",
+               "email_2_subject": "[Asunto del correo 2 según el modelo]",
+               "email_2_content": "[Correo 2 completo, con saludo y firma]",
+               "email_3_subject": "[Asunto del correo 3 según el modelo]",
+               "email_3_content": "[Correo 3 completo, con saludo y firma]"
+            }
+            `;
+         } else if (isMetersProject) {
             const metersTemplate = `Dear [Contact Person],
 I hope this email finds you well.
 
@@ -646,7 +718,9 @@ Si su empresa dispone de alguno de ellos, nos gustaría explorar una relación d
          } else {
             subject = parsedEmails.email_1_subject || "SURE: Oportunidad";
             let emailContentTextRaw = parsedEmails.email_1_content || "Cuerpo vacío.";
-            if (isProcdiProject) {
+            // La rama Bid & Proposals pone su propia firma (en el idioma del lead) desde el prompt;
+            // no se le añade la firma inglesa de sourcing aunque el Objetivo mencione "PROCDI".
+            if (isProcdiProject && !isBidProposals) {
                const signature = `\n\nBest regards,\n\nAntonio Baronas\nSourcing Integration Team | PROCDI\nPh: +37068941110\ne-mail: antonio@procdi.com\n\nCompany code: 307515454\nPartizanų g. 61-806, LT-49282\nKaunas, Lithuania`;
                if (!emailContentTextRaw.includes('antonio@procdi.com') && !emailContentTextRaw.includes('Antonio Baronas')) {
                   emailContentTextRaw = emailContentTextRaw + signature;

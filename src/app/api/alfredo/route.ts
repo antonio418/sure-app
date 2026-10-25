@@ -97,6 +97,40 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // LICITACIONES por país (México, Nicaragua, Panamá...): una empresa ya captada en OTRO
+    // proyecto de licitaciones no se vuelve a captar (evita que una IPC multinacional reciba
+    // la misma oferta desde dos países). Se compara por sitio web y por dominio de correo.
+    // Solo afecta a proyectos cuyo nombre contiene "licitaci" o "bid"; el resto, igual que antes.
+    const isBidProject = /licitaci|\bbid\b/i.test(project.name || '');
+    if (isBidProject) {
+      const { data: bidProjects } = await supabaseAdmin
+        .from('projects')
+        .select('id, name');
+      const otherBidIds = (bidProjects || [])
+        .filter((p: any) => p.id !== project_id && /licitaci|\bbid\b/i.test(p.name || ''))
+        .map((p: any) => p.id);
+      if (otherBidIds.length > 0) {
+        const { data: otherLeads } = await supabaseAdmin
+          .from('leads_campaign')
+          .select('website, email')
+          .in('project_id', otherBidIds);
+        const otherDomains: string[] = [];
+        for (const l of otherLeads || []) {
+          const w = (l.website || '').replace(/^https?:\/\/(www\.)?/, '').trim().toLowerCase().split('/')[0];
+          const d = ((l.email || '').split('@')[1] || '').trim().toLowerCase();
+          for (const dom of [w, d]) {
+            if (dom && !/^(gmail|hotmail|outlook|yahoo|live|icloud)\./.test(dom)) {
+              existingWebsitesSet.add(dom);
+              otherDomains.push(dom);
+            }
+          }
+        }
+        if (otherDomains.length > 0) {
+          searchPrompt += `\nESTRICTO: Estas empresas ya fueron contactadas desde otro país; NO las propongas: ${Array.from(new Set(otherDomains)).slice(-20).join(', ')}`;
+        }
+      }
+    }
+
     if (supplementary_info && supplementary_info.trim() !== '') {
       searchPrompt += `\nTen en cuenta las siguientes restricciones y contexto adicional (Geografía, perfil, etc.): "${supplementary_info.trim()}".`;
     }
@@ -248,6 +282,12 @@ export async function POST(req: NextRequest) {
       
       if (existingWebsitesSet.has(cleanWeb)) {
         console.log(`[Alfredo] Filtrando duplicado por sitio web existente: ${lead.website}`);
+        return false;
+      }
+      // En licitaciones, comparar también el dominio del correo (filiales con otra web).
+      const emailDom = ((lead.email || '').split('@')[1] || '').trim().toLowerCase();
+      if (isBidProject && emailDom && existingWebsitesSet.has(emailDom)) {
+        console.log(`[Alfredo] Filtrando empresa ya captada en otro proyecto de licitaciones: ${lead.email}`);
         return false;
       }
       if (existingNamesSet.has(cleanName)) {

@@ -104,14 +104,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No valid leads found in CSV' }, { status: 400 });
     }
 
-    // Upsert but make sure we UPDATE the project_id if the lead exists
+    // PROTECCIÓN DEL DRIP: un lead que YA fue contactado (o está cerrado) NO se mueve de
+    // proyecto ni se resetea a 'lead_nuevo' al re-subir un CSV. Antes, subir a "Licitaciones
+    // IPC Panamá" un correo que ya estaba en "Licitaciones IPC México" lo sacaba de México y
+    // le reenviaba el correo 1. Solo se pueden mover/actualizar leads aún NO contactados.
+    const MOVABLE = new Set(['lead_nuevo', 'NEW', 'DRAFT', 'APPROVED', 'PARKED']);
+    const emailsToCheck = Array.from(new Set(leads.map((l: any) => l.email)));
+    const protectedEmails = new Set<string>();
+    for (let i = 0; i < emailsToCheck.length; i += 200) {
+      const chunk = emailsToCheck.slice(i, i + 200);
+      const { data: existing, error: exErr } = await supabaseAdmin
+        .from('leads_campaign')
+        .select('email, status')
+        .in('email', chunk);
+      if (exErr) throw exErr;
+      for (const ex of existing || []) {
+        if (!MOVABLE.has(ex.status)) protectedEmails.add(ex.email);
+      }
+    }
+    const leadsToUpsert = leads.filter((l: any) => !protectedEmails.has(l.email));
+    const skipped = leads.length - leadsToUpsert.length;
+    if (skipped > 0) {
+      console.log(`[CSV Upload] ${skipped} leads ya contactados se dejan intactos (no se mueven ni se resetean).`);
+    }
+
+    if (leadsToUpsert.length === 0) {
+      return NextResponse.json({ success: true, count: 0, skipped, message: 'Todos los correos del CSV ya fueron contactados en algún proyecto; no se modificó nada.' });
+    }
+
+    // Upsert but make sure we UPDATE the project_id if the lead exists (solo no contactados)
     const { data, error } = await supabaseAdmin
       .from('leads_campaign')
-      .upsert(leads, { onConflict: 'email', ignoreDuplicates: false });
+      .upsert(leadsToUpsert, { onConflict: 'email', ignoreDuplicates: false });
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, count: leads.length });
+    return NextResponse.json({ success: true, count: leadsToUpsert.length, skipped });
   } catch (error: any) {
     console.error("CSV Upload Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
