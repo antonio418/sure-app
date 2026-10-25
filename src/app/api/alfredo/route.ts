@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 import { ALFREDO_PROMPT } from '@/lib/agents/alfredo';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireUser } from '@/lib/authGuard';
@@ -161,7 +161,12 @@ export async function POST(req: NextRequest) {
                 temperature: 0.1, // Temperatura baja para obligar a basarse en los resultados de búsqueda reales
                 tools: [{ googleSearch: {} }],
                 responseMimeType: 'text/plain',
-                maxOutputTokens: 4096
+                // 4096 se quedaba corto: los tokens de "pensamiento" del modelo cuentan
+                // dentro de maxOutputTokens y el JSON llegaba truncado (finishReason MAX_TOKENS,
+                // solo 3 de 7 empresas). Subimos el cupo y limitamos el pensamiento a LOW,
+                // que además acorta el tiempo de respuesta frente al límite de 60s de Vercel.
+                maxOutputTokens: 16384,
+                thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
               }
             }),
             new Promise((_, reject) => setTimeout(() => reject(new Error('La búsqueda tardó demasiado (timeout interno de Gemini).')), GEMINI_HARD_MS))
