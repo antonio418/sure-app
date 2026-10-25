@@ -3,6 +3,9 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 import { ALFREDO_PROMPT } from '@/lib/agents/alfredo';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireUser } from '@/lib/authGuard';
+import { normalizeLeadLang } from '@/lib/langUtils';
+
+const SPANISH_COUNTRIES = /m[eé]xico|espa[nñ]a|spain|argentina|bolivia|chile|colombia|costa rica|cuba|ecuador|el salvador|guatemala|honduras|nicaragua|panam[aá]|paraguay|per[uú]|puerto rico|rep[uú]blica dominicana|dominican|uruguay|venezuela/i;
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -273,6 +276,14 @@ export async function POST(req: NextRequest) {
         telefono: lead.telefono || lead.phone || '',
         pais: lead.pais || lead.country || '',
         sector: lead.sector || '',
+        // Alfredo no rellenaba 'comentario' ni 'language' (columnas vacías en el panel).
+        // comentario: nota sobre la empresa (proyecto/licitación reciente) para personalizar el correo.
+        comentario: lead.comentario || lead.nota_empresa || '',
+        // language: el que indique Gemini; si no, español para países hispanohablantes; si no, el del proyecto.
+        // Sin esto el drip cae al idioma del proyecto, que por defecto es 'en'.
+        language: normalizeLeadLang(lead.idioma ?? lead.language)
+          ?? (SPANISH_COUNTRIES.test(lead.pais || lead.country || '') ? 'es' : null)
+          ?? normalizeLeadLang(project.language),
         linkedin: lead.linkedin || '',
         website: lead.website || '',
         status: status,
