@@ -106,6 +106,8 @@ Provee un breve monólogo interno visible analizando las fases.
 9. CONCLUSION
 10. APPENDIX (Complete list and active links of web sources used. **Mandatory**).
 
+TERM FIDELITY: interpret every contractual or technical term in its ordinary commercial and engineering meaning, and only relate two clauses when they deal with the same subject matter. Do not stretch a term to cover a different situation (for example, a clause on partial shipments from the factory says nothing about how units are moved on site), and do not invent an ambiguity where the term has a standard meaning. If a real ambiguity exists, quote the exact wording that causes it.
+
 ### PARTE 1 (CONTINUACIÓN) - CROSS-DIMENSION HANDOFF (MANDATORY SECTION)
 After the APPENDIX and before Part 2, add a section titled "CROSS-DIMENSION HANDOFF (CORPORATE & COMMERCIAL)". List, with citations (document, page, section), the corporate and commercial facts that bear on the technical and legal terms: licences, registrations, authorisations or scope of activity of the issuer that relate to the stated supply (for example authorised-distributor or rights-holder status, export licences, ownership or sub-licensing rights over technology); commercial terms with technical or legal consequences (delivery schedule, payment structure, price inclusions and exclusions, Incoterms); and the origin of goods and component suppliers compared with any sanctions or restricted-origin list. Write "None identified" for any category without facts. Report only what the documents state.
 
