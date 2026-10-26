@@ -366,6 +366,8 @@ export interface ReportData {
   recommendations?: string;
   anomalies: { title: string; description: string }[];
   analysisMode?: string;
+  reportId?: string;
+  issueToken?: string;
 }
 
 interface SureReportTemplateProps {
@@ -869,6 +871,23 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
     }))
   };
 
+  const registryIsEs = language === 'es';
+  const registryText = registryIsEs
+    ? {
+        title: 'Registro del documento',
+        agents: 'Agentes involucrados',
+        reportId: 'Numero de informe',
+        how: 'Los informes emitidos por la plataforma SURE se registran al descargarse mediante una huella digital (SHA-256) del archivo, sin su contenido. Para comprobar que este PDF no ha sido alterado desde su emision, subalo en:',
+      }
+    : {
+        title: 'Document registry',
+        agents: 'Agents involved',
+        reportId: 'Report number',
+        how: 'Reports issued by the SURE platform are registered at download through a digital fingerprint (SHA-256) of the file, without its content. To check that this PDF has not been altered since issue, upload it at:',
+      };
+  const agentsLabel = safeData.analysisMode === 'single' ? 'SURE Consolidator' : 'Roberto, Moisés, Alcides';
+  const verifyUrl = (typeof window !== 'undefined' ? window.location.origin : 'https://sureforensic.com') + '/verify-report';
+
   let pageStyleOverrides: any = {};
   if (isArabic) {
     pageStyleOverrides = { fontFamily: 'Cairo', textAlign: 'right' };
@@ -1025,26 +1044,13 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
           )}
         </View>
 
-        {/* Signature Block */}
+        {/* Document registry (replaces the former decorative signature block) */}
         <View style={styles.signatureBlock} wrap={false}>
-          <Text style={styles.signatureTitle}>{t.signatureTitle}</Text>
-          <View style={styles.signatureGrid}>
-            <View style={styles.signatureItem}>
-              <Text style={styles.signatureAgent}>{t.agentDD}</Text>
-              <Text style={styles.signatureId}>NODE ID: ROB-9X</Text>
-              <Text style={styles.signatureHash}>HASH: a8f7b...9c2</Text>
-            </View>
-            <View style={styles.signatureItem}>
-              <Text style={styles.signatureAgent}>{t.agentLegal}</Text>
-              <Text style={styles.signatureId}>NODE ID: MOI-2B</Text>
-              <Text style={styles.signatureHash}>HASH: f4d2e...1a8</Text>
-            </View>
-            <View style={styles.signatureItem}>
-              <Text style={styles.signatureAgent}>{t.agentTech}</Text>
-              <Text style={styles.signatureId}>NODE ID: ALC-7V</Text>
-              <Text style={styles.signatureHash}>HASH: e9c4f...8b1</Text>
-            </View>
-          </View>
+          <Text style={styles.signatureTitle}>{registryText.title}</Text>
+          <Text style={{ fontSize: 9, color: slateDark, marginBottom: 5 }}>{registryText.agents}: {agentsLabel}</Text>
+          <Text style={styles.signatureId}>{registryText.reportId}: {reportId || '-'}</Text>
+          <Text style={{ fontSize: 8, color: slateText, lineHeight: 1.5 }}>{registryText.how}</Text>
+          <Text style={styles.signatureHash}>{verifyUrl}</Text>
         </View>
 
         {/* Conclusions and Recommendations Section */}

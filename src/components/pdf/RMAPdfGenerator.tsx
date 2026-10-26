@@ -6,6 +6,22 @@ import { SureReportTemplate, ReportData } from './SureReportTemplate';
 import { Download, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
+async function registerFingerprint(blob: Blob, report: ReportData, variant: 'full' | 'redacted') {
+  const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+  const sha256 = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  const body = JSON.stringify({
+    reportId: report.reportId,
+    issueToken: report.issueToken,
+    sha256,
+    mode: report.analysisMode,
+    variant,
+  });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch('/api/reports/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    if (res.ok) return;
+  }
+}
+
 export default function RMAPdfGenerator({ 
   finalReport,
   buttonColor = "bg-green-500 hover:bg-green-400",
@@ -42,10 +58,19 @@ export default function RMAPdfGenerator({
         reportToCompile.website = "[REDACTED DOMAIN]";
       }
 
-      const reportId = `SURE-RMA-${Date.now().toString().slice(-6)}`;
+      const reportId = finalReport.reportId || `SURE-RMA-${Date.now().toString().slice(-6)}`;
       const fileName = `SURE_RMA_${reportToCompile.companyName.replace(/\s+/g, '_')}.pdf`;
       
       const blob = await pdf(<SureReportTemplate data={reportToCompile} reportId={reportId} language={language} />).toBlob();
+      // Registro de huella: solo informes emitidos por el servidor (con sello de emision).
+      if (finalReport.reportId && finalReport.issueToken) {
+        try {
+          await registerFingerprint(blob, finalReport, redactOnTheFly ? 'redacted' : 'full');
+        } catch (regError) {
+          console.error('Fingerprint registration failed:', regError);
+        }
+      }
+
       const url = URL.createObjectURL(blob);
       
       // Abrir el PDF directamente en una nueva pestaña para que se muestre en pantalla y sea capturado por OBS

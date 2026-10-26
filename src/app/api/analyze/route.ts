@@ -7,6 +7,7 @@ import { ALCIDES_PROMPT } from '@/lib/agents/alcides';
 import { CONSOLIDATOR_PROMPT } from '@/lib/agents/consolidator';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { extractAndParseJSON } from '@/lib/jsonParser';
+import { newReportId, signReportId } from '@/lib/reportSeal';
 
 export const maxDuration = 300; // Max execution time for large files
 
@@ -243,6 +244,15 @@ export async function POST(req: NextRequest) {
           }
         }
         // Estandarizamos el reporte devuelto al frontend como JSON limpio
+        // Numero de informe y sello de emision creados por el servidor; permiten registrar
+        // despues la huella del PDF descargado.
+        try {
+          const issuedId = newReportId();
+          parsedJson.reportId = issuedId;
+          parsedJson.issueToken = signReportId(issuedId);
+        } catch (sealError) {
+          console.error('Report seal skipped:', sealError);
+        }
         report = JSON.stringify(parsedJson, null, 2);
       } catch (e) {
         console.error("Failed to parse Consolidator JSON output. Raw output was:", report);
