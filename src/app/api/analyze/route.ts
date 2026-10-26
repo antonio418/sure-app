@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { Resend } from 'resend';
 import { ROBERTO_PROMPT } from '@/lib/agents/roberto';
@@ -8,6 +8,7 @@ import { CONSOLIDATOR_PROMPT } from '@/lib/agents/consolidator';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { extractAndParseJSON } from '@/lib/jsonParser';
 import { newReportId, signReportId } from '@/lib/reportSeal';
+import { startRun, endRun, RunMeta } from '@/lib/runLog';
 
 export const maxDuration = 300; // Max execution time for large files
 
@@ -25,7 +26,7 @@ async function mergeDuplicateFindings(client: any, anomalies: any[]): Promise<an
     system: 'You deduplicate findings of a document-audit report. Two findings are duplicates ONLY if they describe the same underlying conflict with the same facts (for example the same clause versus the same data point), even if worded or titled differently. Findings that are merely related, or that concern different clauses or numbers, are NOT duplicates. Reply with strict JSON only: {"groups":[{"keep":<index of the most complete finding>,"drop":[<indexes of its duplicates>]}]}. Use {"groups":[]} if there are no duplicates.',
     messages: [{ role: 'user', content: list }],
   });
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('merge timeout')), 40000));
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('merge timeout')), 25000));
   const resp: any = await Promise.race([call, timeout]);
   const text = resp?.content?.[0]?.text || '';
   const parsed = extractAndParseJSON(text);
@@ -45,7 +46,21 @@ async function mergeDuplicateFindings(client: any, anomalies: any[]): Promise<an
   return anomalies.filter((_, idx) => !drop.has(idx));
 }
 
+// Envoltura: registra en Supabase la duracion y el resultado de cada llamada.
 export async function POST(req: NextRequest) {
+  const meta: RunMeta = {};
+  const t0 = Date.now();
+  try {
+    const res = await handleAnalyze(req, meta);
+    await endRun(meta.runId, { ms: Date.now() - t0, ok: res.status < 400, httpStatus: res.status, meta });
+    return res;
+  } catch (e: any) {
+    await endRun(meta.runId, { ms: Date.now() - t0, ok: false, error: e?.message || 'unhandled error', meta });
+    throw e;
+  }
+}
+
+async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextResponse> {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -70,6 +85,9 @@ export async function POST(req: NextRequest) {
     if (!agent) {
        return NextResponse.json({ error: 'Missing agent parameter' }, { status: 400 });
     }
+    meta.agent = agent;
+    meta.mode = analysisMode;
+    meta.runId = await startRun(agent, analysisMode);
 
     const hasFiles = filePaths && filePaths.length > 0;
     const hasContext = userContext && userContext.trim().length > 0;
@@ -213,6 +231,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Error Crítico de Claude: ${apiError.message || JSON.stringify(apiError)}` }, { status: 500 });
     }
 
+    meta.stopReason = response.stop_reason || null;
+    meta.inputTokens = response.usage?.input_tokens ?? null;
+    meta.outputTokens = response.usage?.output_tokens ?? null;
+
     let report = '';
     let parsedJsonData: any = null;
     if (response.content && response.content.length > 0) {
@@ -260,6 +282,10 @@ export async function POST(req: NextRequest) {
 
       // RAG Insertion (Self-Learning Memory)
       if (parsedJson && parsedJson.anomalies && parsedJson.anomalies.length > 0) {
+        const kbJson: any = parsedJson;
+        // Se ejecuta despues de responder al navegador: no alarga la espera del informe.
+        after(async () => {
+        const parsedJson: any = kbJson;
         try {
           const { generateEmbedding } = await import('@/lib/embeddings');
           const email = formData.get('email') as string | null;
@@ -293,9 +319,12 @@ export async function POST(req: NextRequest) {
         } catch (insertError) {
           console.error("Failed to insert into Vector DB:", insertError);
         }
+        });
       }
     }
 
+    // El correo se envia despues de responder al navegador: no alarga la espera del informe.
+    after(async () => {
     const email = formData.get('email') as string | null;
     if (email && process.env.RESEND_API_KEY) {
       try {
@@ -450,6 +479,7 @@ export async function POST(req: NextRequest) {
         console.error("Resend Error (non-fatal):", emailErr);
       }
     }
+    });
 
     return NextResponse.json({ report });
   } catch (error: any) {
