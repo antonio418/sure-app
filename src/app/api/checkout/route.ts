@@ -139,7 +139,7 @@ export async function POST(req: Request) {
             currency: 'usd',
             product_data: {
               name: `SURE Network - Full Due Diligence Pipeline`,
-              description: 'Sequential AI Analysis (Roberto, Moisés, Alcides) + Executive Consolidator Report.',
+              description: 'AI Due Diligence Analysis + Executive Consolidator Report.',
             },
             unit_amount: 5000,
           },

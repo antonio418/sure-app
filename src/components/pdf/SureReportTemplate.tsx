@@ -365,6 +365,7 @@ export interface ReportData {
   dateGenerated: string;
   recommendations?: string;
   anomalies: { title: string; description: string }[];
+  analysisMode?: string;
 }
 
 interface SureReportTemplateProps {
@@ -998,7 +999,7 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
           </View>
           <View style={styles.targetCell}>
             <Text style={styles.targetLabel}>{t.agentsInvolved}</Text>
-            <Text style={styles.targetValue}>Roberto, Moisés, Alcides</Text>
+            <Text style={styles.targetValue}>{safeData.analysisMode === 'single' ? 'SURE Consolidator' : 'Roberto, Moisés, Alcides'}</Text>
           </View>
         </View>
 

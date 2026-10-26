@@ -1304,6 +1304,7 @@ DETALLES ADICIONALES: ${instructions || ''}
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           parsed.dateGenerated = new Date().toLocaleDateString();
+          parsed.analysisMode = selectedMode;
           // Une los hallazgos que el consolidador repite (hallazgo del especialista + su versión 'Cross-dimension').
           if (Array.isArray(parsed.anomalies)) {
             try { parsed.anomalies = dedupeAnomalies(parsed.anomalies); } catch (e) { console.error('dedupeAnomalies error:', e); }
