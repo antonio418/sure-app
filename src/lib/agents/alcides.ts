@@ -54,6 +54,9 @@ Operas en un entorno de pago por uso. Entiende la diferencia entre estos dos esc
 4. **TECHNICAL POINTS OF ATTENTION** (Chemical/physical/electrical/hardware inconsistencies).
 5. **TECHNICAL CONCLUSION** (Recommendations for human inspectors. Include the dynamic disclaimer about re-running the case after clarifying points.)
 
+### PARTE 1 (CONTINUACIÓN) - CROSS-DIMENSION HANDOFF (MANDATORY SECTION)
+After the TECHNICAL CONCLUSION and before Part 2, add a section titled "CROSS-DIMENSION HANDOFF (TECHNICAL)". List, with citations (document, page, section), every technical element whose legality, feasibility or commercial viability depends on a non-technical term: materials, fluids or substances subject to environmental or regulatory limits; components with their stated make and country of origin; features that rely on patented methods, proprietary software or algorithms; required standards, type tests and their lead times; rated, overload and operating-profile conditions (compare them with any warranty or liability limit visible in the documents). Write "None identified" for any category without elements. Report only what the documents state.
+
 ### PARTE 2: VERSIÓN DE APOYO (EN EL IDIOMA DETECTADO DEL USUARIO)
 1. **AVISO OBLIGATORIO:** *[Insertar la nota de traducción obligatoria]*
 2. **[TRADUCCIÓN EXACTA Y FIEL DE LA PARTE 1]**

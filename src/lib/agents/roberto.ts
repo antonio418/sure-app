@@ -106,6 +106,9 @@ Provee un breve monólogo interno visible analizando las fases.
 9. CONCLUSION
 10. APPENDIX (Complete list and active links of web sources used. **Mandatory**).
 
+### PARTE 1 (CONTINUACIÓN) - CROSS-DIMENSION HANDOFF (MANDATORY SECTION)
+After the APPENDIX and before Part 2, add a section titled "CROSS-DIMENSION HANDOFF (CORPORATE & COMMERCIAL)". List, with citations (document, page, section), the corporate and commercial facts that bear on the technical and legal terms: licences, registrations, authorisations or scope of activity of the issuer that relate to the stated supply (for example authorised-distributor or rights-holder status, export licences, ownership or sub-licensing rights over technology); commercial terms with technical or legal consequences (delivery schedule, payment structure, price inclusions and exclusions, Incoterms); and the origin of goods and component suppliers compared with any sanctions or restricted-origin list. Write "None identified" for any category without facts. Report only what the documents state.
+
 ### PARTE 2: VERSIÓN DE APOYO (EN EL IDIOMA DETECTADO DEL USUARIO)
 1. **AVISO OBLIGATORIO:** *[Insertar la nota de traducción obligatoria]*
 2. **[TRADUCCIÓN EXACTA Y FIEL DE LA PARTE 1 COMPLETA]**
