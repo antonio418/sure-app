@@ -834,6 +834,27 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
   const isHindi = language === 'hi';
 
   // Helper function to strip unsupported characters (Arabic, Cyrillic, CJK, Devanagari) that break react-pdf layout engine
+  // La etiqueta de cada hallazgo sigue la gravedad escrita al inicio de su titulo
+  // (CRITICAL, HIGH, MODERATE, LOW, WARNING y sus equivalentes). Sin palabra de
+  // gravedad se conserva la etiqueta original.
+  const severityBadge = (title: string): { label: string; bg: string; fg: string } => {
+    const raw = (title || '').replace(/^\s*\d+[.)]\s*/, '').trim();
+    const word = raw.split(/[\s:\-\u2013\u2014]+/)[0] || '';
+    const key = word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const critical = ['critical', 'critico', 'critica', 'critique', 'kritisch', 'critic'];
+    const high = ['high', 'alto', 'alta', 'elevado', 'elevada', 'eleve', 'elevee', 'hoch'];
+    const moderate = ['moderate', 'moderado', 'moderada', 'modere', 'moderee', 'moderat', 'mittel', 'medium', 'medio', 'media'];
+    const low = ['low', 'bajo', 'baja', 'baixo', 'baixa', 'faible', 'niedrig'];
+    const warning = ['warning', 'aviso', 'advertencia', 'avertissement', 'warnung', 'atencao', 'attention'];
+    const label = word.toUpperCase();
+    if (critical.includes(key)) return { label, bg: '#fee2e2', fg: dangerRed };
+    if (high.includes(key)) return { label, bg: '#ffedd5', fg: '#9a3412' };
+    if (moderate.includes(key)) return { label, bg: '#fef3c7', fg: '#92400e' };
+    if (low.includes(key)) return { label, bg: '#dbeafe', fg: '#1e40af' };
+    if (warning.includes(key)) return { label, bg: '#f1f5f9', fg: '#475569' };
+    return { label: t.critAlertBadge, bg: '#fee2e2', fg: dangerRed };
+  };
+
   const sanitizeText = (text: string) => {
     if (!text) return text;
     let sanitized = text;
@@ -1063,7 +1084,10 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
               <View wrap={false} style={styles.findingCard} key={idx}>
                 <View style={styles.findingHeader}>
                   <Text style={styles.findingTitle}>{idx + 1}. {anomaly.title}</Text>
-                  <Text style={styles.findingBadge}>{t.critAlertBadge}</Text>
+                  {(() => {
+                    const sev = severityBadge(anomaly.title);
+                    return <Text style={{ ...styles.findingBadge, backgroundColor: sev.bg, color: sev.fg }}>{sev.label}</Text>;
+                  })()}
                 </View>
                 <Text style={styles.findingDesc}>{anomaly.description}</Text>
               </View>
