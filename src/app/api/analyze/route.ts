@@ -81,6 +81,8 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
     // propia base en vez de contra la de toda la organización. Si viene vacío, el
     // comportamiento es exactamente el de antes (memoria a nivel de organización).
     const projectId = formData.get('projectId') as string | null;
+    // pipeline = 'feeder': el especialista alimenta al Consolidador (no se entrega tal cual al cliente).
+    const pipelineRole = formData.get('pipeline') as string | null;
 
     if (!agent) {
        return NextResponse.json({ error: 'Missing agent parameter' }, { status: 400 });
@@ -149,6 +151,12 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
 
     if (targetLanguage && targetLanguage !== 'Auto') {
        systemInstruction += `\n\n**CRITICAL LANGUAGE OVERRIDE:** For the Support Version (Parte 2) of the report, DO NOT auto-detect the language from the document. You MUST strictly translate the full report into this exact language: **${targetLanguage}**.`;
+    }
+
+    if (pipelineRole === 'feeder' && agent !== 'consolidator') {
+       // Este informe solo lo lee el Consolidador, que redacta el informe final en el idioma del cliente.
+       // Se omite la traduccion (Parte 2), el cierre legal (Parte 3) y el monologo previo, y se pide un formato compacto.
+       systemInstruction += `\n\n**OUTPUT MODE: INPUT FOR THE EXECUTIVE CONSOLIDATOR (OVERRIDES EVERY LANGUAGE AND FORMAT INSTRUCTION ABOVE THAT CONFLICTS WITH IT).** Your report will be read only by the Executive Consolidator, never delivered to the client as is. Produce ONLY the official English Part 1, in compact form: no thinking-process monologue, no translation or support version (skip Part 2 entirely), no legal disclaimer or closing message (skip Part 3 entirely), no restating of document text beyond the short quotation needed to support a finding. Keep every finding with its figures, exact citations (document, page, section) and a severity. Keep the mandatory CROSS-DIMENSION HANDOFF section in full. Target a total length of about 4,500 tokens; never exceed 6,000.`;
     }
 
     if (userContext) {

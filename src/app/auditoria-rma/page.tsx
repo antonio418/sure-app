@@ -1190,6 +1190,7 @@ export default function DocumentProcessorPage() {
     const fd = new FormData();
     fd.append('agent', agentName);
     fd.append('targetLanguage', opts.targetLanguage);
+    fd.append('pipeline', 'feeder');
     if (opts.analysisMode) fd.append('analysisMode', opts.analysisMode);
     // projectId habilita, del lado del backend, la memoria/base de conocimiento
     // acotada a ESTE proyecto (para comparar contra documentos futuros del mismo
