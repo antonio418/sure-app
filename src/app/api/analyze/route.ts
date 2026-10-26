@@ -162,7 +162,9 @@ export async function POST(req: NextRequest) {
     try {
       response = await anthropic.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8192,
+        // El consolidador emite el informe final completo (JSON largo): con 8192 se cortaba
+        // a mitad del arreglo de hallazgos y el JSON quedaba sin cerrar.
+        max_tokens: agent === 'consolidator' ? 16000 : 8192,
         system: systemInstruction,
         messages: [
           {
@@ -181,6 +183,10 @@ export async function POST(req: NextRequest) {
     if (response.content && response.content.length > 0) {
         // @ts-ignore
         report = response.content[0].text || '';
+    }
+
+    if (agent === 'consolidator' && response.stop_reason === 'max_tokens') {
+      console.error('Consolidator output was truncated by max_tokens; the JSON report may be incomplete.');
     }
 
     if (agent === 'consolidator') {
