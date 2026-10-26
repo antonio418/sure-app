@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { dedupeAnomalies } from '@/lib/dedupeAnomalies';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
@@ -1303,6 +1304,10 @@ DETALLES ADICIONALES: ${instructions || ''}
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           parsed.dateGenerated = new Date().toLocaleDateString();
+          // Une los hallazgos que el consolidador repite (hallazgo del especialista + su versión 'Cross-dimension').
+          if (Array.isArray(parsed.anomalies)) {
+            try { parsed.anomalies = dedupeAnomalies(parsed.anomalies); } catch (e) { console.error('dedupeAnomalies error:', e); }
+          }
           setFinalReport(parsed);
           setProcessingSuccess(true);
           
