@@ -838,6 +838,31 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
     if (!text) return text;
     let sanitized = text;
 
+    // Antes de descartar lo que la fuente no soporta, se convierten a ASCII los simbolos
+    // comunes que el modelo escribe: sin esto "SF6" quedaba "SF", "22-24" quedaba "2224"
+    // y "-45" perdia el signo.
+    const subSup: Record<string, string> = {
+      '\u2080': '0', '\u2081': '1', '\u2082': '2', '\u2083': '3', '\u2084': '4',
+      '\u2085': '5', '\u2086': '6', '\u2087': '7', '\u2088': '8', '\u2089': '9',
+      '\u2070': '0', '\u2074': '4', '\u2075': '5', '\u2076': '6', '\u2077': '7',
+      '\u2078': '8', '\u2079': '9',
+    };
+    sanitized = sanitized
+      .replace(/[\u2080-\u2089\u2070\u2074-\u2079]/g, (c) => subSup[c] || '')
+      .replace(/[\u2010-\u2015\u2212]/g, '-')
+      .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+      .replace(/[\u201C\u201D\u201E]/g, '"')
+      .replace(/\u2026/g, '...')
+      .replace(/\u2192/g, '->')
+      .replace(/\u2190/g, '<-')
+      .replace(/\u2265/g, '>=')
+      .replace(/\u2264/g, '<=')
+      .replace(/\u2248/g, '~')
+      .replace(/\u2260/g, '!=')
+      .replace(/\u2022/g, '-')
+      .replace(/\u20AC/g, 'EUR')
+      .replace(/[\u2007\u2009\u202F]/g, ' ');
+
     if (isArabic) {
       // Keep Latin-1 + Arabic ranges
       sanitized = sanitized.replace(/[^\x00-\xFF\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '');
@@ -854,7 +879,9 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
       // Keep Latin-1 + Devanagari
       sanitized = sanitized.replace(/[^\x00-\xFF\u0900-\u097F]/g, '');
     } else {
-      // For English, Spanish, Portuguese, French, German: Keep only Latin-1 (code points 0-255)
+      // For English, Spanish, Portuguese, French, German: Keep only Latin-1 (code points 0-255).
+      // Letters outside Latin-1 (e.g. Lithuanian s, z, e with marks) keep their base letter.
+      sanitized = sanitized.replace(/[^\x00-\xFF]/g, (ch) => ch.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
       sanitized = sanitized.replace(/[^\x00-\xFF]/g, '');
     }
 
@@ -886,7 +913,7 @@ export const SureReportTemplate: React.FC<SureReportTemplateProps> = ({ data, re
         how: 'Reports issued by the SURE platform are registered at download through a digital fingerprint (SHA-256) of the file, without its content. To check that this PDF has not been altered since issue, upload it at:',
       };
   const agentsLabel = safeData.analysisMode === 'single' ? 'SURE Consolidator' : 'Roberto, Moisés, Alcides';
-  const verifyUrl = (typeof window !== 'undefined' ? window.location.origin : 'https://sureforensic.com') + '/verify-report';
+  const verifyUrl = 'https://sureforensic.com/verify-report';
 
   let pageStyleOverrides: any = {};
   if (isArabic) {
