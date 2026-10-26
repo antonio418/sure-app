@@ -10,6 +10,40 @@ import { extractAndParseJSON } from '@/lib/jsonParser';
 
 export const maxDuration = 300; // Max execution time for large files
 
+
+// Segunda pasada ligera: pide al modelo qué hallazgos describen EL MISMO conflicto
+// y conserva solo el más completo de cada grupo. Nunca lanza: ante cualquier duda
+// devuelve la lista original.
+async function mergeDuplicateFindings(client: any, anomalies: any[]): Promise<any[]> {
+  const list = anomalies
+    .map((a, i) => `${i}: ${String(a?.title || '').slice(0, 160)} | ${String(a?.description || '').slice(0, 380)}`)
+    .join('\n');
+  const call = client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 700,
+    system: 'You deduplicate findings of a document-audit report. Two findings are duplicates ONLY if they describe the same underlying conflict with the same facts (for example the same clause versus the same data point), even if worded or titled differently. Findings that are merely related, or that concern different clauses or numbers, are NOT duplicates. Reply with strict JSON only: {"groups":[{"keep":<index of the most complete finding>,"drop":[<indexes of its duplicates>]}]}. Use {"groups":[]} if there are no duplicates.',
+    messages: [{ role: 'user', content: list }],
+  });
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('merge timeout')), 40000));
+  const resp: any = await Promise.race([call, timeout]);
+  const text = resp?.content?.[0]?.text || '';
+  const parsed = extractAndParseJSON(text);
+  const groups = Array.isArray(parsed?.groups) ? parsed.groups : [];
+  const drop = new Set<number>();
+  const keepers = new Set<number>();
+  for (const g of groups) {
+    const keep = g?.keep;
+    if (!Number.isInteger(keep) || keep < 0 || keep >= anomalies.length || !Array.isArray(g?.drop)) continue;
+    keepers.add(keep);
+    for (const d of g.drop) {
+      if (Number.isInteger(d) && d >= 0 && d < anomalies.length && d !== keep) drop.add(d);
+    }
+  }
+  keepers.forEach((k) => drop.delete(k));
+  if (drop.size === 0 || drop.size > Math.floor(anomalies.length / 2)) return anomalies;
+  return anomalies.filter((_, idx) => !drop.has(idx));
+}
+
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -199,6 +233,15 @@ export async function POST(req: NextRequest) {
       try {
         parsedJson = extractAndParseJSON(report);
         parsedJsonData = parsedJson;
+        // Proyecto: el consolidador a veces repite un mismo hallazgo (el del especialista y su
+        // versión "Cross-dimension"). Una segunda pasada corta los une; si falla, el informe sale igual.
+        if (analysisMode === 'comparative' && Array.isArray(parsedJson?.anomalies) && parsedJson.anomalies.length >= 6) {
+          try {
+            parsedJson.anomalies = await mergeDuplicateFindings(anthropic, parsedJson.anomalies);
+          } catch (mergeError) {
+            console.error('Duplicate-merge pass skipped:', mergeError);
+          }
+        }
         // Estandarizamos el reporte devuelto al frontend como JSON limpio
         report = JSON.stringify(parsedJson, null, 2);
       } catch (e) {
