@@ -160,6 +160,10 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
        // Este informe solo lo lee el Consolidador, que redacta el informe final en el idioma del cliente.
        // Se omite la traduccion (Parte 2), el cierre legal (Parte 3) y el monologo previo, y se pide un formato compacto.
        systemInstruction += `\n\n**OUTPUT MODE: INPUT FOR THE EXECUTIVE CONSOLIDATOR (OVERRIDES EVERY LANGUAGE AND FORMAT INSTRUCTION ABOVE THAT CONFLICTS WITH IT).** Your report will be read only by the Executive Consolidator, never delivered to the client as is. Produce ONLY the official English Part 1, in compact form: no thinking-process monologue, no translation or support version (skip Part 2 entirely), no legal disclaimer or closing message (skip Part 3 entirely), no restating of document text beyond the short quotation needed to support a finding. Keep every finding with its figures, exact citations (document, page, section) and a severity. Keep the mandatory CROSS-DIMENSION HANDOFF section in full. Target a total length of about 4,500 tokens; never exceed 6,000.`;
+       if (agent === 'roberto') {
+          // Roberto era el unico que terminaba siempre por max_tokens: se le fijan limites en palabras y secciones, que el modelo si puede contar.
+          systemInstruction += `\n\n**ROBERTO COMPACT LIMITS (HARD RULES):** (1) At most 10 findings in total; each finding at most 90 words, with its citation and severity. (2) Include ONLY these sections: Final Verdict & Summary (at most 120 words), Verified Corporate Facts (a short table of at most 8 rows), Points of Attention Analysis, Recommendations (at most 150 words), Appendix with the web sources actually used, and the CROSS-DIMENSION HANDOFF. Omit the Impersonation Contrast Table, Verification Attempts, Commercial Risk Assessment, Comparison with Legitimate Suppliers and Conclusion sections. (3) No long comparison tables. (4) The whole report must stay under 2,500 words.`;
+       }
     }
 
     if (userContext) {
