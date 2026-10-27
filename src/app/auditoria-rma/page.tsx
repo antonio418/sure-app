@@ -1290,14 +1290,45 @@ DETALLES ADICIONALES: ${instructions || ''}
       }
       if (email) formData.append('email', email);
 
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        body: formData
-      });
+      // Identificador del informe: si la conexión se corta, el servidor conserva el resultado
+      // unos minutos y aquí se recupera sin perder el análisis ya realizado.
+      const jobId = (typeof crypto !== 'undefined' && (crypto as any).randomUUID) ? (crypto as any).randomUUID() : '';
+      if (jobId) formData.append('jobId', jobId);
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze documents');
+      let data: any = null;
+      let recoverable = false;
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        let body: any = null;
+        try { body = await response.json(); } catch (_) { recoverable = true; }
+        if (!recoverable) {
+          if (!response.ok) {
+            throw new Error(body?.error || 'Failed to analyze documents');
+          }
+          data = body;
+        }
+      } catch (netErr: any) {
+        if (netErr instanceof TypeError) recoverable = true;
+        else throw netErr;
+      }
+
+      if (!data && recoverable && jobId) {
+        // Hasta unos 4 minutos de consulta cada 8 segundos.
+        for (let attempt = 0; attempt < 30 && !data; attempt++) {
+          await new Promise((r) => setTimeout(r, 8000));
+          try {
+            const rec = await fetch('/api/analyze/result?jobId=' + jobId + (email ? '&email=' + encodeURIComponent(email) : ''));
+            if (rec.ok) data = await rec.json();
+          } catch (_) { /* se reintenta */ }
+        }
+      }
+      if (!data) {
+        throw new Error(language === 'es'
+          ? 'La conexión se interrumpió y el resultado no pudo recuperarse. Intenta de nuevo.'
+          : 'The connection was interrupted and the result could not be recovered. Please try again.');
       }
 
       if (data.report) {
@@ -1321,7 +1352,7 @@ DETALLES ADICIONALES: ${instructions || ''}
             await fetch('/api/credits', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email })
+              body: JSON.stringify({ email, jobId: jobId || undefined })
             }).catch(e => console.error("Credit deduction sync error:", e));
           }
         } else {

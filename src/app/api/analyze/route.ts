@@ -83,6 +83,9 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
     const projectId = formData.get('projectId') as string | null;
     // pipeline = 'feeder': el especialista alimenta al Consolidador (no se entrega tal cual al cliente).
     const pipelineRole = formData.get('pipeline') as string | null;
+    // jobId (opcional): identificador del informe; permite recuperarlo si la conexion del navegador se corta.
+    const rawJobId = formData.get('jobId') as string | null;
+    const jobId = rawJobId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawJobId) ? rawJobId : null;
 
     if (!agent) {
        return NextResponse.json({ error: 'Missing agent parameter' }, { status: 400 });
@@ -488,6 +491,27 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
       }
     }
     });
+
+    // Buzon temporal: guarda el informe terminado para poder recuperarlo si el navegador pierde la conexion.
+    if (agent === 'consolidator' && jobId && report) {
+      try {
+        const { error: saveErr } = await supabaseAdmin.from('analysis_results').upsert({
+          job_id: jobId,
+          email: (formData.get('email') as string | null) || null,
+          report,
+        });
+        if (saveErr) console.error('analysis_results save error:', saveErr.message);
+      } catch (saveEx) {
+        console.error('analysis_results save failed:', saveEx);
+      }
+      after(async () => {
+        try {
+          await supabaseAdmin.from('analysis_results').delete().lt('created_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString());
+        } catch (cleanEx) {
+          console.error('analysis_results cleanup failed:', cleanEx);
+        }
+      });
+    }
 
     return NextResponse.json({ report });
   } catch (error: any) {

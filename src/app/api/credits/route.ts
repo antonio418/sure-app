@@ -41,10 +41,30 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    const { email, jobId } = await req.json();
     
     if (!email) {
       return NextResponse.json({ error: 'Email es obligatorio para descontar créditos.' }, { status: 400 });
+    }
+
+    // Si viene el identificador del informe, el cobro es idempotente: un mismo informe se cobra una sola vez.
+    const validJob = typeof jobId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
+    let jobRowExists = false;
+    if (validJob) {
+      const { data: claimed } = await supabaseAdmin
+        .from('analysis_results')
+        .update({ credit_charged: true, report: null })
+        .eq('job_id', jobId)
+        .eq('credit_charged', false)
+        .select('job_id');
+      if (claimed && claimed.length > 0) {
+        jobRowExists = true;
+      } else {
+        const { data: existing } = await supabaseAdmin.from('analysis_results').select('job_id').eq('job_id', jobId).maybeSingle();
+        if (existing) {
+          return NextResponse.json({ success: true, alreadyCharged: true });
+        }
+      }
     }
 
     // 1. Verificar balance actual a través de la organización
