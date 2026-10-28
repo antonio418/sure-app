@@ -68,7 +68,52 @@ export async function POST(req: NextRequest) {
 
     console.log(`[DocuProcessor] Processing file: ${fileName} (${fileSize} bytes) with extension ${fileExtension}`);
 
-    if (fileExtension === '.pdf') {
+    // Imagenes (capturas de pantalla, fotos de documentos): se leen con vision de Gemini (OCR).
+    const imageMimeByExt: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.jfif': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+      '.heic': 'image/heic',
+      '.heif': 'image/heif',
+    };
+
+    if (imageMimeByExt[fileExtension]) {
+      if (buffer.length > 15 * 1024 * 1024) {
+        return NextResponse.json({ error: 'La imagen supera 15 MB. Reduce su tamano o guardala como PDF.' }, { status: 413 });
+      }
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `Esta imagen es una captura o una foto de un documento. Transcribe TODO el texto visible de forma fiel y estructurada en Markdown limpio.
+- Si hay tablas, conviertelas a tablas de Markdown (| Columna 1 | Columna 2 |).
+- Conserva titulos, listas y numeracion tal como aparecen.
+- Si hay sellos, firmas, logotipos, membretes o marcas de agua, indicalos entre corchetes, por ejemplo [Sello: ...], [Firma manuscrita], [Logotipo: ...].
+- Si una parte del texto es ilegible, escribe [ilegible]; no inventes contenido.
+- No agregues comentarios ni explicaciones fuera del contenido del documento.
+- Manten el idioma original.`
+              },
+              {
+                inlineData: {
+                  data: buffer.toString('base64'),
+                  mimeType: imageMimeByExt[fileExtension]
+                }
+              }
+            ]
+          }
+        ]
+      });
+
+      markdown = response.text || '';
+      if (!markdown.trim()) {
+        return NextResponse.json({ error: 'No se pudo leer texto en la imagen. Prueba con una imagen mas nitida o con el documento en PDF.' }, { status: 422 });
+      }
+    } else if (fileExtension === '.pdf') {
       const base64Data = buffer.toString('base64');
 
       const response = await ai.models.generateContent({
