@@ -9,6 +9,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { extractAndParseJSON } from '@/lib/jsonParser';
 import { newReportId, signReportId } from '@/lib/reportSeal';
 import { startRun, endRun, RunMeta } from '@/lib/runLog';
+import { INTEGRITY_RULES, TONE_REINFORCEMENT } from '@/lib/agents/integrity';
 
 export const maxDuration = 300; // Max execution time for large files
 
@@ -155,6 +156,10 @@ async function handleAnalyze(req: NextRequest, meta: RunMeta): Promise<NextRespo
     if (targetLanguage && targetLanguage !== 'Auto') {
        systemInstruction += `\n\n**CRITICAL LANGUAGE OVERRIDE:** For the Support Version (Parte 2) of the report, DO NOT auto-detect the language from the document. You MUST strictly translate the full report into this exact language: **${targetLanguage}**.`;
     }
+
+    // Integridad: ningun agente puede declarar "verificado" lo que no pudo consultar (no tiene internet).
+    systemInstruction += INTEGRITY_RULES;
+    if (agent === 'consolidator') systemInstruction += TONE_REINFORCEMENT;
 
     if (pipelineRole === 'feeder' && agent !== 'consolidator') {
        // Este informe solo lo lee el Consolidador, que redacta el informe final en el idioma del cliente.
