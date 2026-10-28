@@ -17,4 +17,6 @@ export const INTEGRITY_RULES = `
 export const TONE_REINFORCEMENT = `
 
 **TONE REINFORCEMENT (applies to the TITLE and the DESCRIPTION of every item in the "anomalies" array and to the recommendations):** never use the words "fraud", "fraudulent", "scam", "forgery" or their translations (including expressions such as "fraud signal", "fraud marker", "fraud vector" or "known fraud pattern"). Describe what the document shows with objective language such as "point of attention", "documentary inconsistency", "pattern that requires additional verification" or "deviation requiring clarification".
+
+**NO NON-FINDINGS:** the "anomalies" array must contain only real points of attention. Never include an item whose own text concludes that there is no inconsistency, no anomaly or no risk (for example "no anomaly, noted for transparency" or "within the expected range"). Confirmations that something is consistent are omitted, or mentioned briefly in the recommendations or in the cross-dimension coverage paragraph.
 `;
