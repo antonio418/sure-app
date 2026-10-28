@@ -168,7 +168,9 @@ ${rawText}`
       markdown = response.text || '';
     } else if (['.docx', '.xlsx', '.pptx', '.rtf'].includes(fileExtension)) {
       console.log(`[DocuProcessor] Extracting text from ${fileExtension} file locally using officeparser...`);
-      const ast = await officeparser.parseOffice(buffer);
+      // La extension del archivo es la fuente fiable del tipo: sin esta pista, la libreria intenta adivinarlo por el contenido
+      // y falla con algunos .docx (por ejemplo, los guardados por ciertos editores) con el error "Auto-detection of file type".
+      const ast = await officeparser.parseOffice(buffer, { fileType: fileExtension.replace('.', '') as any });
       const extractedText = typeof ast.toText === 'function' ? ast.toText() : '';
 
       if (!extractedText || extractedText.trim() === '') {
