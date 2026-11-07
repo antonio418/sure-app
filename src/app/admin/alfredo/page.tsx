@@ -276,10 +276,12 @@ export default function AlfredoAdminPage() {
       const res = await authedFetch('/api/campaigns/send-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project_id: activeProjectId })
+        // Si hay leads marcados, se generan SOLO esos (máx. 5 por tanda); si no, los 5 NEW más recientes del proyecto.
+        body: JSON.stringify({ project_id: activeProjectId, selectedLeads })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error en el servidor");
+      setSelectedLeads([]);
       alert(`Borradores generados. Procesados: ${data.sentCount || 0}`);
       fetchLeads(activeProjectId);
     } catch (error: any) {

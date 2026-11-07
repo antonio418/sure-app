@@ -31,6 +31,11 @@ export async function POST(req: NextRequest) {
       .select('*')
       .in('status', ['NEW', 'lead_nuevo']);
 
+    // Solo leads del proyecto activo (antes tomaba los NEW de cualquier proyecto).
+    if (project_id) {
+      query = query.eq('project_id', project_id);
+    }
+
     if (selectedLeads && selectedLeads.length > 0) {
       query = query.in('id', selectedLeads);
     }
