@@ -181,7 +181,12 @@ export async function POST(req: NextRequest) {
             // la preparación de paquetes técnicos en inglés. La carta sale del Objetivo del proyecto.
             const isEs = languageCode === 'es';
             const empresaNice = (lead.empresa || '').replace(/\.(com|co|net|org|io|ai|biz|info|us|uk|br|cn|in|de|fr|es|it|jp|ru|au|mx)(\.[a-z]{2})?$/i, '').trim() || (isEs ? 'su empresa' : 'your company');
-            const contactForGreeting = (!lead.nombre_contacto || lead.nombre_contacto.length <= 4 || /^(ltd|inc|co|llc)/i.test((lead.nombre_contacto || '').replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : lead.nombre_contacto;
+            // Si el campo de contacto trae un CARGO ("Gerente de Licitaciones", "Contacto de Ofertas"...)
+            // o repite el nombre de la empresa, no es una persona: se saluda al equipo.
+            const rawContacto = (lead.nombre_contacto || '').toString().trim();
+            const contactoEsCargo = /\b(gerente|gerencia|director|directora|direcci[oó]n|contacto|equipo|departamento|[aá]rea|jefe|jefa|coordinador|responsable|licitaciones|propuestas|ofertas|compras|procura)\b/i.test(rawContacto)
+               || rawContacto.toLowerCase() === (lead.empresa || '').toString().trim().toLowerCase();
+            const contactForGreeting = (!rawContacto || rawContacto.length <= 4 || contactoEsCargo || /^(ltd|inc|co|llc)/i.test(rawContacto.replace(/[^a-zA-Z]/g, ''))) ? 'VACÍO' : rawContacto;
             const cargo = (lead.cargo || lead.nota_contacto || '').toString().trim() || 'VACÍO';
             const proyectoReciente = (lead.comentario || '').toString().trim().slice(0, 400) || 'VACÍO';
             // País del proyecto: se toma del NOMBRE ("Licitaciones IPC Panamá" -> "Panamá"),
@@ -197,7 +202,7 @@ export async function POST(req: NextRequest) {
             const bidModel = (campaignGoal && campaignGoal.trim().length > 20)
                ? campaignGoal.trim()
                : `CORREO 1 — Asunto: El tiempo mata más licitaciones que el precio
-Soy Antonio Baronas, ingeniero electricista. Llevo más de 20 años preparando licitaciones de subestaciones y líneas de transmisión para empresas IPC y fabricantes en unos 30 países. Cada día que tarda la especificación en llegar en inglés al fabricante es un día menos para que cotice. Separamos las bases de licitación por producto o servicio y entregamos cada paquete técnico en inglés (especificación, lista de materiales y formulario de experiencia del fabricante) en 1 a 3 días, no en más de una semana, con glosario IEC de más de 550 términos y revisión de un ingeniero de la especialidad (eléctrica, civil o mecánica). Les propongo una prueba sin costo con un paquete real de su próxima licitación. ¿Tienen alguna en preparación?
+Soy Antonio Baronas, ingeniero electricista. Llevo más de 20 años preparando licitaciones de subestaciones y líneas de transmisión para empresas IPC y fabricantes en unos 30 países. Cada día que tarda la especificación en llegar en inglés al fabricante es un día menos para que cotice. Separamos las bases de licitación por producto o servicio y entregamos cada paquete técnico en inglés (especificación, lista de materiales y formulario de experiencia del fabricante) en 1 a 3 días, y nunca en más de una semana, con glosario IEC de más de 550 términos y revisión de un ingeniero de la especialidad (eléctrica, civil o mecánica). Les propongo una prueba sin costo con un paquete real de su próxima licitación. ¿Tienen alguna en preparación? Si les resulta útil, con gusto les envío una presentación breve del servicio. Si no es usted la persona indicada, le agradeceré hacer llegar este mensaje al área de Licitaciones o Comercial.
 CORREO 2 — Asunto: "The Wii Remote should contain circuit monitoring relays" — ejemplo real de traducción automática de "mando sincronizado" (correcto: controlled switching device); no somos traductores, somos ingenieros; la prueba sin costo sigue disponible.
 CORREO 3 — Asunto: Licitaciones con fabricantes extranjeros — último mensaje; caso Las Brechas 500/230 kV: 69 + 15 páginas en unos 15 minutos de proceso más revisión técnica; envíennos las bases y en 24 horas les devolvemos propuesta de paquetes, plazo y precio.`;
             promptText = `
@@ -214,7 +219,7 @@ CORREO 3 — Asunto: Licitaciones con fabricantes extranjeros — último mensaj
                 ? 'Escribe en español. Usa SIEMPRE "IPC" (nunca "EPC"). Trato en plural (ustedes / nosotros).'
                 : 'Traduce el modelo al inglés técnico. En inglés usa "EPC" (nunca "IPC"), "tender documents" por "bases de licitación" o "pliego" y "manufacturer experience form". El ejemplo "The Wii Remote..." se mantiene tal cual, explicando que es la traducción automática de un término en español.'}
             - Asuntos: usa EXACTAMENTE los asuntos indicados en la carta modelo para cada correo${isEs ? '' : ' (traducidos al inglés, salvo la cita "The Wii Remote should contain circuit monitoring relays", que va igual)'}. NO uses "Re:" salvo que el modelo lo indique.
-            - Saludo: si el contacto NO es 'VACÍO', usa '${isEs ? `Hola ${contactForGreeting}:` : `Dear ${contactForGreeting},`}'. Si es 'VACÍO', usa '${isEs ? `Hola, equipo de ${empresaNice}:` : `Dear ${empresaNice} team,`}'.
+            - Saludo: si el contacto NO es 'VACÍO', usa '${isEs ? `Estimado ${contactForGreeting}:` : `Dear ${contactForGreeting},`}'${isEs ? ' (usa "Estimada" si el nombre es de mujer; corrige tildes evidentes del nombre, p. ej. Alvaro → Álvaro, Gonzalez → González; conserva "Ing." o "Lic." si vienen en el nombre)' : ''}. Si es 'VACÍO', usa '${isEs ? `Estimado equipo de ${empresaNice}:` : `Dear ${empresaNice} team,`}'.
             - Personalización: si "Proyecto reciente" NO es 'VACÍO', puedes añadir en el correo 1 UNA frase breve que lo mencione (sin inventar datos que no estén ahí). Si es 'VACÍO', no personalices con proyectos.
             - Longitud: correo 1 máximo 150 palabras; correos 2 y 3 máximo 90 palabras.
             - NADA de marcadores tipo [ ] o { }. Texto 100% limpio y humano. Doble salto de línea ('\\n\\n') entre párrafos. Sin enlaces ni adjuntos.
