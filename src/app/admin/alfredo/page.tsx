@@ -270,19 +270,36 @@ export default function AlfredoAdminPage() {
 
   const triggerCampaign = async () => {
     if (!activeProjectId) return;
-    if (!confirm("¿Generar y enviar borradores para los leads nuevos de ESTE proyecto?")) return;
+    if (!confirm(selectedLeads.length > 0
+      ? `¿Generar borradores para los ${selectedLeads.length} lead(s) marcados?`
+      : "¿Generar borradores para TODOS los leads nuevos de ESTE proyecto? (se procesan en tandas de 5 hasta terminar)")) return;
     setSending(true);
     try {
-      const res = await authedFetch('/api/campaigns/send-batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Si hay leads marcados, se generan SOLO esos (máx. 5 por tanda); si no, los 5 NEW más recientes del proyecto.
-        body: JSON.stringify({ project_id: activeProjectId, selectedLeads })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error en el servidor");
+      // El servidor procesa máx. 5 por llamada (límite de tiempo de Vercel), así que
+      // repetimos las llamadas hasta terminar: con marcados, en trozos de 5; sin marcar,
+      // hasta que no queden NEW en el proyecto (tope de seguridad: 30 tandas).
+      const chunks: string[][] = [];
+      if (selectedLeads.length > 0) {
+        for (let i = 0; i < selectedLeads.length; i += 5) chunks.push(selectedLeads.slice(i, i + 5));
+      }
+      let total = 0;
+      for (let round = 0; round < 30; round++) {
+        const chunk = selectedLeads.length > 0 ? chunks[round] : [];
+        if (selectedLeads.length > 0 && !chunk) break;
+        const res = await authedFetch('/api/campaigns/send-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project_id: activeProjectId, selectedLeads: chunk })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error en el servidor");
+        const n = data.sentCount || 0;
+        total += n;
+        fetchLeads(activeProjectId);
+        if (selectedLeads.length === 0 && n === 0) break;
+      }
       setSelectedLeads([]);
-      alert(`Borradores generados. Procesados: ${data.sentCount || 0}`);
+      alert(`Borradores generados: ${total}`);
       fetchLeads(activeProjectId);
     } catch (error: any) {
       alert(`Error ejecutando la campaña: ${error.message}`);

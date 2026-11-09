@@ -218,6 +218,8 @@ async function handleDispatch(req: NextRequest) {
       .eq('status', 'APPROVED')
       .eq('has_replied', false)
       .in('project_id', activeProjectIds)
+      // FIFO: primero los leads más antiguos de la cola de aprobados.
+      .order('created_at', { ascending: true })
       .limit(50);
 
     if (leads1 && leads1.length > 0) {
