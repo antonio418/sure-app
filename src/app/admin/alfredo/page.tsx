@@ -1436,8 +1436,7 @@ export default function AlfredoAdminPage() {
                  </div>
 
                  {/* Pestañas (o apilado) para ver Email vs LinkedIn */}
-                 {/* Las notas de LinkedIn no aplican a Bid & Proposals: se ocultan en esos proyectos */}
-                 <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 ${/licitaci|\bbid\b/i.test(activeProject?.name || '') ? 'hidden' : ''}`}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 {(() => {
                        const contentStr = (activeDraft.email_1_content || '').toLowerCase();
                        const isPortuguese = contentStr.includes('atenciosamente') || contentStr.includes('segurança') || contentStr.includes('bom dia');
@@ -1460,7 +1459,7 @@ export default function AlfredoAdminPage() {
                          ? (isNoName 
                              ? `Estimado Proveedor, un placer. Gestiono el abastecimiento para un proyecto de 12k medidores inteligentes ANSI en Sudamérica. Vi su catálogo de medidores y me gustaría conectar.`
                              : `Estimado Sr. ${lastName}, un placer. Gestiono el abastecimiento para un proyecto de 12k medidores inteligentes ANSI en Sudamérica. Vi su catálogo de medidores y me gustaría conectar.`)
-                         : `Dear Mr. ${lastName || 'Partner'}, un honor. He desarrollado una IA que detecta estafadores de comercio exterior con 90% de precisión. Quisiera conectar.`;
+                         : `${isNoName ? 'Buen día' : `Estimado Sr. ${lastName}`}, un honor. He desarrollado una IA que detecta estafadores de comercio exterior con 90% de precisión. Quisiera conectar.`;
 
                        const lnShortEn = isMeters
                          ? (isNoName
@@ -1472,7 +1471,7 @@ export default function AlfredoAdminPage() {
                          ? (isNoName
                              ? `Prezado Fornecedor, prazer. Gerencio o fornecimento para um projeto de 12k medidores inteligentes ANSI na América do Sul. Vi seu portfólio de medidores e gostaria de conectar.`
                              : `Prezado Sr. ${lastName}, prazer. Gerencio o fornecimento para um projeto de 12k medidores inteligentes ANSI na América do Sul. Vi seu portfólio de medidores e gostaria de conectar.`)
-                         : `Dear Mr. ${lastName || 'Partner'}, uma honra. Desenvolvi uma IA que detecta fraudadores no comércio internacional com 90% de precisão. Gostaria de conectar.`;
+                         : `${isNoName ? 'Bom dia' : `Prezado Sr. ${lastName}`}, uma honra. Desenvolvi uma IA que detecta fraudadores no comércio internacional com 90% de precisão. Gostaria de conectar.`;
 
                        const lnShortLt = isMeters
                          ? (isNoName
@@ -1598,8 +1597,40 @@ Su pagarba,
 Antonio Baronas
 MB PROCDI direktorius`;
 
-                       const shortNote = isEnglish ? lnShortEn : isPortuguese ? lnShortPt : isLithuanian ? lnShortLt : lnShortEs;
-                       const longNote = isEnglish ? lnLongEn : isPortuguese ? lnLongPt : isLithuanian ? lnLongLt : lnLongEs;
+                       // Bid & Proposals (proyectos "Licitaciones ..."): notas de LinkedIn propias del servicio.
+                       const isBidLn = /licitaci|\bbid\b/i.test(activeProject?.name || '');
+                       const rawNombre = (activeDraft.nombre_contacto || '').trim();
+                       const bidNoName = isNoName || /\b(gerente|gerencia|director|directora|direcci[oó]n|contacto|equipo|departamento|[aá]rea|jefe|jefa|coordinador|responsable|licitaciones|propuestas|ofertas|compras|procura)\b/i.test(rawNombre)
+                          || rawNombre.toLowerCase() === (activeDraft.empresa || '').trim().toLowerCase();
+                       const bidShortEs = bidNoName
+                          ? `Buen día: soy ingeniero electricista y preparo licitaciones de subestaciones y líneas de transmisión para empresas IPC desde hace más de 20 años. Me gustaría conectar.`
+                          : `Estimado ${rawNombre}: soy ingeniero electricista y preparo licitaciones de subestaciones y líneas para empresas IPC desde hace más de 20 años. Me gustaría conectar.`;
+                       const bidShortEn = bidNoName
+                          ? `Hello! I'm an electrical engineer who has prepared substation and transmission-line tenders for EPC contractors for over 20 years. I'd be glad to connect.`
+                          : `Dear ${rawNombre}, I'm an electrical engineer preparing substation and transmission-line tenders for EPC contractors for 20+ years. I'd be glad to connect.`;
+                       const bidLongEs = `${bidNoName ? 'Buen día' : `Estimado ${rawNombre}`}:
+
+Gracias por aceptar la conexión. Llevo más de 20 años preparando licitaciones de subestaciones y líneas de transmisión para empresas IPC y fabricantes en unos 30 países.
+
+Cuando las bases llegan en español, cada día que tarda la especificación en llegar en inglés al fabricante es un día menos para que cotice. Separamos las bases por producto o servicio y entregamos cada paquete técnico en inglés (especificación, lista de materiales y formulario de experiencia del fabricante) en 1 a 3 días, con revisión de un ingeniero de la especialidad.
+
+Les propongo una prueba sin costo con un paquete real de su próxima licitación. ¿Tienen alguna en preparación?
+
+Saludos cordiales,
+Antonio Baronas — MB PROCDI · antonio@procdi.com · +370 689 41110 (WhatsApp)`;
+                       const bidLongEn = `${bidNoName ? 'Hello' : `Dear ${rawNombre}`},
+
+Thank you for connecting. For over 20 years I have prepared substation and transmission-line tenders for EPC contractors and manufacturers in some 30 countries.
+
+When tender documents arrive in Spanish, every day the specification takes to reach the manufacturer in English is a day less to quote. We split the tender by product or service and deliver each technical package in English (specification, bill of materials and manufacturer experience form) in 1 to 3 days, reviewed by an engineer of the discipline.
+
+We offer a free trial with a real package from your next tender. Do you have one in preparation?
+
+Kind regards,
+Antonio Baronas — MB PROCDI · antonio@procdi.com · +370 689 41110 (WhatsApp)`;
+
+                       const shortNote = isBidLn ? (isEnglish ? bidShortEn : bidShortEs) : (isEnglish ? lnShortEn : isPortuguese ? lnShortPt : isLithuanian ? lnShortLt : lnShortEs);
+                       const longNote = isBidLn ? (isEnglish ? bidLongEn : bidLongEs) : (isEnglish ? lnLongEn : isPortuguese ? lnLongPt : isLithuanian ? lnLongLt : lnLongEs);
 
                        return (
                           <>
