@@ -1366,14 +1366,16 @@ export default function AlfredoAdminPage() {
 
       {/* Draft Review Modal */}
       {activeDraft && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-           <div className="bg-[#0a101f] border border-[var(--color-sure-accent)]/30 rounded-2xl p-6 w-full max-w-2xl shadow-[0_0_50px_rgba(0,229,255,0.1)] max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4 font-montserrat flex items-center gap-2">
+        // Panel lateral a la derecha (sin oscurecer la tabla), para ver a la vez
+        // empresa, contacto, cargo y correo en la lista de la izquierda.
+        <div className="fixed top-0 right-0 h-screen w-full md:w-[46%] xl:w-[40%] z-50 flex">
+           <div className="bg-[#0a101f] border-l border-[var(--color-sure-accent)]/40 p-4 w-full h-full shadow-[-10px_0_40px_rgba(0,0,0,0.6)] overflow-y-auto flex flex-col">
+              <h2 className="text-lg font-bold mb-3 font-montserrat flex items-center gap-2">
                 <Mail className="w-5 h-5 text-yellow-400" />
                 Revisar Borrador (Draft)
               </h2>
-              <div className="space-y-4 mb-6">
-                 <div className="grid grid-cols-2 gap-4 bg-black/30 p-4 rounded-xl border border-white/5">
+              <div className="space-y-3 mb-3 flex-1">
+                 <div className="grid grid-cols-2 gap-3 bg-black/30 p-3 rounded-xl border border-white/5">
                     <div>
                        <div className="text-[10px] text-slate-500 uppercase font-bold flex justify-between items-center mb-1">
                          <span>Destinatario</span>
@@ -1391,7 +1393,10 @@ export default function AlfredoAdminPage() {
                          </a>
                        </div>
                        <div className="text-sm font-bold text-white">{activeDraft.nombre_contacto}</div>
-                       <div className="text-xs text-slate-400">{activeDraft.email}</div>
+                       {activeDraft.cargo && activeDraft.cargo !== activeDraft.nombre_contacto && (
+                         <div className="text-xs text-slate-300">{activeDraft.cargo}</div>
+                       )}
+                       <div className="text-xs text-slate-400 break-all">{activeDraft.email}</div>
                     </div>
                     <div>
                        <div className="text-[10px] text-slate-500 uppercase font-bold flex justify-between items-center mb-1">
@@ -1431,7 +1436,8 @@ export default function AlfredoAdminPage() {
                  </div>
 
                  {/* Pestañas (o apilado) para ver Email vs LinkedIn */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                 {/* Las notas de LinkedIn no aplican a Bid & Proposals: se ocultan en esos proyectos */}
+                 <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 ${/licitaci|\bbid\b/i.test(activeProject?.name || '') ? 'hidden' : ''}`}>
 {(() => {
                        const contentStr = (activeDraft.email_1_content || '').toLowerCase();
                        const isPortuguese = contentStr.includes('atenciosamente') || contentStr.includes('segurança') || contentStr.includes('bom dia');
@@ -1659,13 +1665,13 @@ MB PROCDI direktorius`;
                        <textarea
                           value={activeDraft.email_1_content || ''}
                           onChange={(e) => setActiveDraft({...activeDraft, email_1_content: e.target.value})}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg p-4 text-white text-sm h-64 font-mono whitespace-pre-wrap focus:border-[var(--color-sure-accent)] outline-none"
+                          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white text-sm h-[58vh] font-mono whitespace-pre-wrap focus:border-[var(--color-sure-accent)] outline-none"
                        />
                     )}
                  </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 border-t border-white/10 pt-4">
+              <div className="flex justify-end gap-3 border-t border-white/10 pt-3 sticky bottom-0 bg-[#0a101f]">
                  <button onClick={() => setActiveDraft(null)} className="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-colors text-sm font-bold">
                     Cerrar
                  </button>
