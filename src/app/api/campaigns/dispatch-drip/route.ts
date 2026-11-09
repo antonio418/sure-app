@@ -54,7 +54,7 @@ async function handleDispatch(req: NextRequest) {
     // =========================================================================
     // DAILY SEND LIMIT CHECK
     // =========================================================================
-    const dailyLimitStr = process.env.DAILY_EMAIL_LIMIT || '50';
+    const dailyLimitStr = process.env.DAILY_EMAIL_LIMIT || '20';
     const dailyLimit = parseInt(dailyLimitStr, 10);
     
     // Count emails sent today
@@ -105,7 +105,8 @@ async function handleDispatch(req: NextRequest) {
     // =========================================================================
     // DRIP ENGINE LOGIC: Find a batch of leads eligible for an email
     // =========================================================================
-    let batchLimit = 10; // Límite por defecto de correos a despachar por llamada
+    // Correos por llamada: por defecto igual al límite diario (el cron corre 1 vez al día).
+    let batchLimit = dailyLimit;
     const limitVal = req.nextUrl.searchParams.get('limit');
     if (limitVal) {
       const parsedLimit = parseInt(limitVal, 10);
